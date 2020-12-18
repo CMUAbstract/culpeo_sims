@@ -32,10 +32,14 @@ class cap:
     self.cap = self.cap + cap.cap
     self.r = 1/(1/self.r + 1/cap.r)
 
-efficiency_table = {5.3 : {.1:.8, .5:.94, 1:.92},
-                    4.2 : {.1:.87, .5:.95, 1:.92},
-                    3.6 : {.1:.91, .5:.95, 1:.91},
-                    2.4 : {.1:.82, .5:.87, 1:.78}}
+#efficiency_table = {5.3 : {.1:.8, .5:.94, 1:.92},
+#                    4.2 : {.1:.87, .5:.95, 1:.92},
+#                    3.6 : {.1:.91, .5:.95, 1:.91},
+#                    2.4 : {.1:.82, .5:.87, 1:.78}}
+efficiency_table = {5.3 : {.1:1, .5:1, 1:1},
+                    4.2 : {.1:1, .5:1, 1:1},
+                    3.6 : {.1:1, .5:1, 1:1},
+                    2.4 : {.1:1, .5:1, 1:1}}
 class booster:
   def __init__(self,max_v,min_v,output_v):
     self.max = max_v
@@ -63,7 +67,7 @@ class hardware:
 # The baseline work is set for MobileNet v1, based on the Edge TPU stats
 # available here: https://coral.ai/docs/edgetpu/benchmarks/ , assuming that the
 # tpu was running at 4 TOPS
-def multi_hw_inf(cap, boost, hw_list, work=100):
+def multi_hw_inf(cap, boost, hw_list, work=1000):
   #Order hw by power
   hw_list = sorted(hw_list, key=lambda hw: hw.perf, reverse=True)
   #Start running on first hw
@@ -74,22 +78,14 @@ def multi_hw_inf(cap, boost, hw_list, work=100):
   work_finished = 0
   for counter,hw in enumerate(hw_list):
     hw_used = hw_used + 1
-    #print("hw power is ", hw.power)
     #Get current draw
     i = hw.power/hw.v
-    #print("Current is: ",i)
     #Take ESR hit
     esr_drop = i*cap.r
-    #print("Esr hit is: ",esr_drop)
-    cap.v = cap.v - esr_drop
-    #print("Cap v is : ", cap.v, "Cap.cap is:",cap.cap)
-    #print("Boost min is: ",boost.min," hw power is ", hw.power)
-    #Figure out how long we can run for, is it enough to finish? 
+    #Figure out how long we can run for, is it enough to finish?
     #TODO factor in power burnt over esr
-    rt_left = .5*cap.cap*((cap.v**2-boost.min**2))/hw.power
-    #print("Rt left is: ", rt_left)
+    rt_left = .5*cap.cap*((cap.v**2-(boost.min+esr_drop)**2))/hw.power
     w_left = work/hw.perf
-    #print("Work left is: ", w_left)
     if rt_left > w_left:
       #Done
       fin = 1
@@ -97,30 +93,27 @@ def multi_hw_inf(cap, boost, hw_list, work=100):
       work_finished = work
       if counter == 0:
         tpu_work = work_finished
+        print("Done all!\r\n")
       break
     #If we're about to die,
     else:
       #Turn off hw and turn on next
+      if (rt_left < 0):
+        print("Can't run:",counter)
+        return 1
+        break
       work = work - rt_left *hw.perf
       work_finished = rt_left*hw.perf + work_finished
       if counter == 0:
         tpu_work = work_finished
       run_time = run_time + rt_left
-      # Remove load
-      cap.v = cap.v + esr_drop
       # Apply drop due to energy extracted
       E_delta = hw.power*rt_left
-      cap.v = cap.v - np.sqrt(cap.v**2 - 2*E_delta/cap.cap)
+      cap.v = np.sqrt(cap.v**2 - 2*E_delta/cap.cap)
+      if (cap.v < boost.min+esr_drop):
+        print("Error calculating tpu rt")
   #Repeat until workload is done or cap is exhausted
-  #Report time to finish, final hw in use
-  #print("Runtime is: ",run_time, "finished: ",fin)
-  if binary != '0':
-    if work_finished/tpu_work > 1.1:
-      return 1
-    else:
-      return 0
-  else:
-    return (work_finished/tpu_work)
+  return (work_finished/tpu_work)
 
 def single_cycle(task_list, supercap, boost):
   supercap.v = boost.max
@@ -294,8 +287,8 @@ a53_quad = hardware(.25,1.8,.1)
 restricted_artibeus = booster(5.5,2.5,3.3)
 
 def search_hw(power_start, power_stop, perf_start, perf_stop):
-  powers=np.logspace(power_start, power_stop, num=25)
-  perfs =np.logspace(perf_start, perf_stop, num=25)
+  powers=np.logspace(power_start, power_stop, num=50)
+  perfs =np.logspace(perf_start, perf_stop, num=50)
   works = np.zeros((len(powers),len(perfs)))
   dworks = []
   dgops = []
@@ -308,15 +301,25 @@ def search_hw(power_start, power_stop, perf_start, perf_stop):
       dut = hardware(power,1.8,perf)
       test_board.append(dut)
       works[i,j] = multi_hw_inf(kemet,restricted_artibeus,test_board)
+      if binary == 1:
+        if works[i,j] > 1.5:
+          works[i,j] = 1
+        elif works[i,j] > 1.2:
+          works[i,j] = .75
+        elif works[i,j] > 1.1:
+          works[i,j] = .5
+        else:
+          works[i,j] = 0
+      print("\tchange: ",works[i,j])
       dworks.append(works[i,j])
       dgops.append((perf*10e2)/power)
   x,y = np.meshgrid(powers,perfs)
-  print("here")
+  #print("here")
   plt.pcolormesh(x,y,works.T,cmap='Blues')
-  print("here2")
-  print(powers)
-  print(perfs)
-  print(works)
+  #print("here2")
+  #print(powers)
+  #print(perfs)
+  #print(works)
   plt.xlabel("Backup device power (W)")
   plt.ylabel("Backup device perf (TOPS)")
   plt.colorbar()
@@ -340,12 +343,12 @@ def work_done(hw,supercap,boost,dt=.001):
   # is, then back out work performed
   I = hw.power/hw.v
   E_used = 0
-  V_in = boost.max - supercap.r*hw.power/hw.v
+  V_in = boost.max
   shifted_start = V_in
   #V_in = boost.max
   t = 0
-  print("Starting at ", V_in)
-  while V_in > boost.min:
+  print("Starting at ", V_in," comparing to ",boost.min + supercap.r*I)
+  while V_in > (boost.min + supercap.r*hw.power/hw.v):
     n = boost.get_eff(V_in,I)
     P_inst = hw.power/n
     #P_esr = 0
@@ -361,6 +364,38 @@ def work_done(hw,supercap,boost,dt=.001):
   print("E expected used: ",.5*supercap.cap*(shifted_start**2 - boost.min**2))
   work = t*hw.perf
   return work
+
+def ideal_work(I_start, I_stop):
+  currents = np.logspace(I_start,I_stop,num=25)
+  boost = booster(5.5,2.0,3.3)
+  eff = .5 # as measured in TOPS/W
+  v = 1.8
+  test_cap = cap(5.6,.6)
+  ideal_cap = cap(test_cap.cap,0)
+  power = []
+  work = []
+  ideal_work = []
+  for i,current in enumerate(currents):
+    dut_pow = current*v
+    power.append(dut_pow)
+    perf = eff*dut_pow
+    dut = hardware(dut_pow,v,perf)
+    work.append(work_done(dut,test_cap,boost))
+  for i,current in enumerate(currents):
+    dut_pow = current*v
+    perf = eff*dut_pow
+    dut = hardware(dut_pow,v,perf)
+    ideal_work.append(work_done(dut,ideal_cap,boost))
+  plt.plot(power,work,label='Non-ideal')
+  plt.plot(power,ideal_work, label='ideal')
+  plt.legend()
+  plt.xlabel("Power (W)")
+  plt.ylabel("Work (TOPS)")
+  title_str = "Booster config:"+str(boost.max)+","+str(boost.min)+\
+  "\nCap size:"+str(5.6)+",HW eff:"+str(eff)
+  plt.title(title_str)
+  plt.savefig("ideal_work.png")
+  plt.show()
 
 
 
@@ -399,15 +434,17 @@ if __name__ == "__main__":
   if len(sys.argv) > 1:
     binary = int(sys.argv[1])
   main()
-  search_esr_cap_numeric(-2,1,-2,-1)
-  #compare_compute_numeric(kemet,artibeus_restricted)
-  #make_esr_capacity_shmoo()
-  #coral = []
-  #coral.append(edge_tpu)
-  #coral.append(hardware(.25,1.8,.4))
+  #search_esr_cap_numeric(-2,1,-2,-1)
+  coral = []
+  coral.append(edge_tpu)
+  coral.append(hardware(.01,1.8,.25))
   #work_done(edge_tpu,kemet,restricted_artibeus)
-  #work = multi_hw_inf(kemet,restricted_artibeus,coral)
+  #bank = kemet
+  #bank.parallel(kemet)
+  #work = multi_hw_inf(bank,restricted_artibeus,coral)
+  #print(work)
   #print(work)
   #search_hw(-2,-1,-2,-1)
   #print(binary)
+  ideal_work(-1,.2)
 
