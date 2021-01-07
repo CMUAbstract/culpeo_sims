@@ -6,6 +6,9 @@ import sys
 import math
 import pickle
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid.inset_locator import (inset_axes, InsetPosition,
+                                                  mark_inset)
+
 
 binary = '0'
 
@@ -24,10 +27,11 @@ class task:
 
 
 class cap:
-  def __init__(self,capacity,esr):
+  def __init__(self,capacity,esr,leak=0):
     self.cap = capacity
     self.r = esr
     self.v = 0
+    self.leakage = leak
   def parallel(self,cap):
     self.cap = self.cap + cap.cap
     self.r = 1/(1/self.r + 1/cap.r)
@@ -51,7 +55,7 @@ class booster:
     I = find_nearest([*self.eff[V].keys()],I_out)
     return self.eff[V][I]
 
-    
+
 
 
 #TODO we need a more robust model for efficiency, so far it's pretty stationary
@@ -69,6 +73,7 @@ class hardware:
 # tpu was running at 4 TOPS
 def multi_hw_inf(cap, boost, hw_list, work=1000):
   #Order hw by power
+  work_start = work
   hw_list = sorted(hw_list, key=lambda hw: hw.perf, reverse=True)
   #Start running on first hw
   cap.v = boost.max
@@ -89,11 +94,11 @@ def multi_hw_inf(cap, boost, hw_list, work=1000):
     if rt_left > w_left:
       #Done
       fin = 1
+      print("Done all! ", counter)
       run_time = run_time + w_left
-      work_finished = work
+      work_finished = work_start
       if counter == 0:
         tpu_work = work_finished
-        print("Done all!\r\n")
       break
     #If we're about to die,
     else:
@@ -111,8 +116,10 @@ def multi_hw_inf(cap, boost, hw_list, work=1000):
       E_delta = hw.power*rt_left
       cap.v = np.sqrt(cap.v**2 - 2*E_delta/cap.cap)
       if (cap.v < boost.min+esr_drop):
-        print("Error calculating tpu rt")
+        print("Error calculating tpu rt", counter)
+        print("\t",cap.v," vs ",boost.min + esr_drop)
   #Repeat until workload is done or cap is exhausted
+  print("Work finished: ",work_finished," in time ",run_time ," vs tpu ", tpu_work)
   return (work_finished/tpu_work)
 
 def single_cycle(task_list, supercap, boost):
@@ -283,8 +290,10 @@ def make_esr_capacity_shmoo():
 
 
 edge_tpu = hardware(2,1.8,4)
-a53_quad = hardware(.25,1.8,.1)
+a53_quad = hardware(.75,1.8,.06)
 restricted_artibeus = booster(5.5,2.5,3.3)
+nr_artibeus = booster(5.5,2.0,3.3)
+beefy_capy = booster(3.3,1.8,2.6)
 
 def search_hw(power_start, power_stop, perf_start, perf_stop):
   powers=np.logspace(power_start, power_stop, num=50)
@@ -334,7 +343,92 @@ def search_hw(power_start, power_stop, perf_start, perf_stop):
   plt.show()
 
 
+def search_hw_a53(power_start, power_stop, perf_start, perf_stop):
+  powers=np.logspace(power_start, power_stop, num=50)
+  perfs =np.logspace(perf_start, perf_stop, num=50)
+  works = np.zeros((len(powers),len(perfs)))
+  dworks = []
+  dgops = []
+  for i,power in enumerate(powers):
+    print("Checking power: ",power,i)
+    for j,perf in enumerate(perfs):
+      print("Checking perf:", perf,j)
+      test_board = []
+      test_board.append(a53_quad)
+      dut = hardware(power,1.8,perf)
+      test_board.append(dut)
+      works[i,j] = multi_hw_inf(kemet,restricted_artibeus,test_board, work=1000)
+      if binary == 1:
+        if works[i,j] > 1.5:
+          works[i,j] = 1
+        elif works[i,j] > 1.2:
+          works[i,j] = .75
+        elif works[i,j] > 1.1:
+          works[i,j] = .5
+        else:
+          works[i,j] = 0
+      print("\tchange: ",works[i,j])
+      dworks.append(works[i,j])
+      dgops.append((perf*10e2)/power)
+  x,y = np.meshgrid(powers,perfs)
+  #print("here")
+  plt.pcolormesh(x,y,works.T,cmap='Blues')
+  #print("here2")
+  #print(powers)
+  #print(perfs)
+  #print(works)
+  plt.xlabel("Backup device power (W)")
+  plt.ylabel("Backup device perf (TOPS)")
+  plt.colorbar()
+  plt.savefig("hardware_inf.png")
+  plt.close()
+  plt.scatter(dgops,dworks)
+  plt.ylabel("Normalized work with backup")
+  plt.xlabel("Gops/W")
+  plt.savefig("gop_vals.png")
+  print(len(dgops), len(dworks))
+  print(max(perfs), max(powers))
+  plt.show()
 
+def cap_voltage(tasks,supercap,boost,dt=.001):
+  #Energy that can't be accessed
+  E_og = .5*supercap.cap*(boost.max**2 - boost.min**2)
+  # Need to integrate through cap voltage as it declines, figure out what max t
+  # is, then back out work performed
+  E_used = 0
+  V_in = boost.max
+  shifted_start = V_in
+  #V_in = boost.max
+  t = 0
+  times = []
+  voltages = []
+  times.append(t)
+  voltages.append(V_in)
+  flag = 0
+  for count,task in enumerate(tasks):
+    t_task_start = t
+    I = task.i
+    print("Task #",count)
+    while t - t_task_start < task.t:
+      n = boost.get_eff(V_in,I)
+      P_inst = I*boost.out/n
+      #P_esr = 0
+      P_esr = supercap.r*(boost.out*task.i/(n*V_in))**2
+      E_step = (P_inst + P_esr)*dt
+      E_used = E_used + E_step
+      V_next = np.sqrt(V_in**2 - 2*E_step/supercap.cap)
+      V_in = V_next 
+      #print("V_in: ",V_in,"n is ",n,"E_step: ",E_step, "E_used: ",E_used)
+      t = t + dt
+      times.append(t)
+      voltages.append(V_in - supercap.r*task.i)
+      if (V_in < boost.min + supercap.r*task.i):
+        flag = 1
+        print("Out of energy! leaving!")
+        break
+    if flag != 0:
+      break
+  return [times,voltages]
 
 def work_done(hw,supercap,boost,dt=.001):
   #Energy that can't be accessed
@@ -356,7 +450,7 @@ def work_done(hw,supercap,boost,dt=.001):
     E_step = (P_inst + P_esr)*dt
     E_used = E_used + E_step
     V_next = np.sqrt(V_in**2 - 2*E_step/supercap.cap)
-    V_in = V_next
+    V_in = V_next 
     #print("V_in: ",V_in,"n is ",n,"E_step: ",E_step, "E_used: ",E_used)
     t = t + dt
   print("Ran for: ",t, "Used ",E_used,"final v_in: ",V_in)
@@ -399,7 +493,7 @@ def ideal_work(I_start, I_stop):
 
 
 
-def compare_compute_numeric(supercap,boost, task_radio=task(100e-3,300e-3,0),\
+def compare_compute_numeric(supercap,boost, task_radio=task(110e-3,130e-3,0),\
   task_compute=task(1e-3,10e-3,0)):
   #Figure out how much work we can do if we run the high energy task first
   Eh = task_radio.i*boost.out*task_radio.t
@@ -433,11 +527,97 @@ def compare_compute_numeric(supercap,boost, task_radio=task(100e-3,300e-3,0),\
 if __name__ == "__main__":
   if len(sys.argv) > 1:
     binary = int(sys.argv[1])
-  main()
+  #main()
+  boost = booster(3.3,1.8,2.5)
   #search_esr_cap_numeric(-2,1,-2,-1)
-  coral = []
-  coral.append(edge_tpu)
-  coral.append(hardware(.01,1.8,.25))
+  dut = cap(.021,8.3)
+  [before,after] = compare_compute_numeric(dut,boost)
+  print("Before: ",before," after: ",after)
+  task_list = []
+  #task_list.append(task(110e-3,130e-3,0))
+  task_list.append(task(1e-3,50e-3,0))
+  task_list.append(task(1e-3,.7,0))
+  #task_list.append(task(1e-3,18.1,0))
+  task_list.append(task(110e-3,100e-3,0))
+  #task_list.append(task(1e-3,10e-3,0))
+  [times,voltages]=cap_voltage(task_list,dut,boost,dt=.001)
+  task_list = []
+  task_list.append(task(1e-3,50e-3,0))
+  task_list.append(task(110e-3,100e-3,0))
+  task_list.append(task(1e-3,18,0))
+  [times1,voltages1]=cap_voltage(task_list,dut,boost,dt=.001)
+  fig,ax1=plt.subplots()
+  ax1.set_xlim(left=0,right=1.0)
+  #plt.xlim(left=0,right=2)
+  ax1.plot(times,voltages,'r',label="Expensive task second")
+  ax1.plot(times1,voltages1,'b',label="Expensive task first")
+  ax1.plot(times1,[3.3]*len(times1),'k--',times1,[1.8]*len(times1),'k--')
+  ax1.set_ylabel("Capacitor Output Voltage (V)")
+  ax1.set_xlabel("Time (s)")
+  ax1.legend(bbox_to_anchor=[.1,1],ncol=2)
+  #ax2 = plt.axes([0,0,1,1])
+  #ip = InsetPosition(ax1,[.55,.45,.4,.4])
+  #ax2.set_axes_locator(ip)
+  #mark_inset(ax1, ax2, loc1=2, loc2=4, fc="none", ec='0.5')
+  #ax2.plot(times,voltages,'r',label="Expensive task second")
+  #ax2.plot(times1,voltages1,'b',label="Expensive task first")
+  #ax2.set_xlim(0,1)
+  #ax2.set_xticks(np.arange(0,1,.25))
+  #ax2.set_xticklabels(ax2.get_xticks(), backgroundcolor='w')
+  ax1.annotate('Init. Code', xy=(.02,3.3),  xycoords='data',
+            xytext=(.02,3.6), textcoords='data',
+            arrowprops=dict(facecolor='black', shrink=0.05),
+            horizontalalignment='center', verticalalignment='top',
+            )
+  ax1.annotate('ESR Drop', xy=(.05,3.0),  xycoords='data',
+            xytext=(.2,3.0), textcoords='data',
+            arrowprops=dict(facecolor='black', shrink=0.05),
+            horizontalalignment='center', verticalalignment='center',
+            )
+  ax1.annotate('ESR Drop', xy=(.75,3.0),  xycoords='data',
+            xytext=(.9,3.0), textcoords='data',
+            arrowprops=dict(facecolor='black', shrink=0.05),
+            horizontalalignment='center', verticalalignment='center',
+            )
+  ax1.annotate('LoRa\nPkt.', xy=(.13,2.0),  xycoords='data',
+            xytext=(.04,1.88), textcoords='data',
+            arrowprops=dict(facecolor='black', shrink=0.05),
+            horizontalalignment='center', verticalalignment='center',
+            )
+  ax1.annotate('LoRa\nPkt.', xy=(.82,2.0),  xycoords='data',
+            xytext=(.68,2.0), textcoords='data',
+            arrowprops=dict(facecolor='black', shrink=0.05),
+            horizontalalignment='center', verticalalignment='center',
+            )
+  ax1.annotate('Compute', xy=(.6,3.25),  xycoords='data',
+            xytext=(.6,3.0), textcoords='data',
+            arrowprops=dict(facecolor='black', shrink=0.05),
+            horizontalalignment='center', verticalalignment='top',
+            )
+  ax1.annotate('Compute', xy=(.6,2.75),  xycoords='data',
+            xytext=(.6,2.4), textcoords='data',
+            arrowprops=dict(facecolor='black', shrink=0.05),
+            horizontalalignment='center', verticalalignment='top',
+            )
+  ax1.annotate('Energy\nStill\nAvailable', xy=(1,2.7),  xycoords='data',
+            xytext=(.9,2.55), textcoords='data',color='green',
+            arrowprops=dict(facecolor='green', shrink=0.05),
+            horizontalalignment='center', verticalalignment='top',
+            )
+  ax1.annotate('Energy\nDepleted', xy=(.85,1.8),  xycoords='data',
+            xytext=(.87,2.07), textcoords='data',color='red',
+            arrowprops=dict(facecolor='red', shrink=0.05),
+            horizontalalignment='left', verticalalignment='center',
+            )
+  ratio = 1/2
+  xleft, xright = ax1.get_xlim()
+  ybottom, ytop = ax1.get_ylim()
+  ax1.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
+  plt.savefig("cap_voltage.png",bbox_inches='tight')
+  plt.show()
+  #coral = []
+  #coral.append(edge_tpu)
+  #coral.append(hardware(.01,1.8,.25))
   #work_done(edge_tpu,kemet,restricted_artibeus)
   #bank = kemet
   #bank.parallel(kemet)
@@ -446,5 +626,35 @@ if __name__ == "__main__":
   #print(work)
   #search_hw(-2,-1,-2,-1)
   #print(binary)
-  ideal_work(-1,.2)
+  #ideal_work(-1,.2)
+  #search_hw_a53(-2,0,-3,-2)
+  #~10% improvement for kemet2 + restricted artibeus with divider=4
+  #~28% improvement for kemet2 with beefy_capy
+  cap_bank = cpx
+  cap_bank.parallel(cpx)
+  cap_bank.parallel(cpx)
+  cap_bank.parallel(cpx)
+  #cap_bank.parallel(cpx)
+  #cap_bank.parallel(cpx)
+  #cap_bank.parallel(cpx)
+  divider = 1
+  perf_divider = 1
+  divider2 =4
+  perf_divider2 = 3
+  divider3 = 10
+  perf_divider3 = 12
+  test_board = []
+  dut = hardware(a53_quad.power/divider, 1.8,a53_quad.perf/perf_divider)
+  test_board.append(dut)
+  dut = hardware(a53_quad.power/divider2, 1.8,a53_quad.perf/perf_divider2)
+  test_board.append(dut)
+  # New divider
+  dut = hardware(a53_quad.power/divider3, 1.8,a53_quad.perf/perf_divider3)
+  test_board.append(dut)
+  work1 = multi_hw_inf(murata_small,beefy_capy,test_board,work=.25)
+  print("Work diff is: ",work1, "for power:",divider)
+  work1 = multi_hw_inf(cap_bank,beefy_capy,test_board,work=.25)
+  print("Work diff is: ",work1, "for power:",divider)
+  work1 = multi_hw_inf(kemet,nr_artibeus,test_board,work=10)
+  print("Work diff is: ",work1, "for power:",divider)
 
