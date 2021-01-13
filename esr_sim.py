@@ -521,18 +521,7 @@ def compare_compute_numeric(supercap,boost, task_radio=task(110e-3,130e-3,0),\
   #print("N after is ",n_after)
   return [n_before, n_after]
 
-
-
-
-if __name__ == "__main__":
-  if len(sys.argv) > 1:
-    binary = int(sys.argv[1])
-  #main()
-  boost = booster(3.3,1.8,2.5)
-  #search_esr_cap_numeric(-2,1,-2,-1)
-  dut = cap(.021,8.3)
-  [before,after] = compare_compute_numeric(dut,boost)
-  print("Before: ",before," after: ",after)
+def get_mobile_esr_fig():
   task_list = []
   #task_list.append(task(110e-3,130e-3,0))
   task_list.append(task(1e-3,50e-3,0))
@@ -549,21 +538,12 @@ if __name__ == "__main__":
   fig,ax1=plt.subplots()
   ax1.set_xlim(left=0,right=1.0)
   #plt.xlim(left=0,right=2)
-  ax1.plot(times,voltages,'r',label="Expensive task second")
-  ax1.plot(times1,voltages1,'b',label="Expensive task first")
+  ax1.plot(times,voltages,'r',label="Load-unaware")
+  ax1.plot(times1,voltages1,'b',label="Load-aware")
   ax1.plot(times1,[3.3]*len(times1),'k--',times1,[1.8]*len(times1),'k--')
   ax1.set_ylabel("Capacitor Output Voltage (V)")
   ax1.set_xlabel("Time (s)")
-  ax1.legend(bbox_to_anchor=[.1,1],ncol=2)
-  #ax2 = plt.axes([0,0,1,1])
-  #ip = InsetPosition(ax1,[.55,.45,.4,.4])
-  #ax2.set_axes_locator(ip)
-  #mark_inset(ax1, ax2, loc1=2, loc2=4, fc="none", ec='0.5')
-  #ax2.plot(times,voltages,'r',label="Expensive task second")
-  #ax2.plot(times1,voltages1,'b',label="Expensive task first")
-  #ax2.set_xlim(0,1)
-  #ax2.set_xticks(np.arange(0,1,.25))
-  #ax2.set_xticklabels(ax2.get_xticks(), backgroundcolor='w')
+  ax1.legend(bbox_to_anchor=[.2,1],ncol=2)
   ax1.annotate('Init. Code', xy=(.02,3.3),  xycoords='data',
             xytext=(.02,3.6), textcoords='data',
             arrowprops=dict(facecolor='black', shrink=0.05),
@@ -580,7 +560,7 @@ if __name__ == "__main__":
             horizontalalignment='center', verticalalignment='center',
             )
   ax1.annotate('LoRa\nPkt.', xy=(.13,2.0),  xycoords='data',
-            xytext=(.04,1.88), textcoords='data',
+            xytext=(.04,1.90), textcoords='data',
             arrowprops=dict(facecolor='black', shrink=0.05),
             horizontalalignment='center', verticalalignment='center',
             )
@@ -604,17 +584,33 @@ if __name__ == "__main__":
             arrowprops=dict(facecolor='green', shrink=0.05),
             horizontalalignment='center', verticalalignment='top',
             )
-  ax1.annotate('Energy\nDepleted', xy=(.85,1.8),  xycoords='data',
+  ax1.annotate('Power\nFailure', xy=(.85,1.8),  xycoords='data',
             xytext=(.87,2.07), textcoords='data',color='red',
             arrowprops=dict(facecolor='red', shrink=0.05),
             horizontalalignment='left', verticalalignment='center',
             )
+  #ax1.annotate('Minimum Voltage',
+  #          xytext=(.87,2.07), textcoords='data',color='red',
+  #          horizontalalignment='left', verticalalignment='center',
+  #          )
   ratio = 1/2
   xleft, xright = ax1.get_xlim()
   ybottom, ytop = ax1.get_ylim()
   ax1.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
-  plt.savefig("cap_voltage.png",bbox_inches='tight')
+  plt.savefig("cap_voltage.pdf",bbox_inches='tight')
   plt.show()
+
+
+if __name__ == "__main__":
+  if len(sys.argv) > 1:
+    binary = int(sys.argv[1])
+  #main()
+  boost = booster(3.3,1.8,2.5)
+  #search_esr_cap_numeric(-2,1,-2,-1)
+  dut = cap(.021,8.3)
+  [before,after] = compare_compute_numeric(dut,boost)
+  print("Before: ",before," after: ",after)
+  get_mobile_esr_fig()
   #coral = []
   #coral.append(edge_tpu)
   #coral.append(hardware(.01,1.8,.25))
