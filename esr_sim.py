@@ -89,7 +89,8 @@ def multi_hw_inf(cap, boost, hw_list, work=1000):
     esr_drop = i*cap.r
     #Figure out how long we can run for, is it enough to finish?
     #TODO factor in power burnt over esr
-    rt_left = .5*cap.cap*((cap.v**2-(boost.min+esr_drop)**2))/hw.power
+    rt_left = .5*cap.cap*((cap.v**2-(boost.min+esr_drop)**2))/ \
+      (hw.power+cap.r*i**2)
     w_left = work/hw.perf
     if rt_left > w_left:
       #Done
@@ -113,7 +114,7 @@ def multi_hw_inf(cap, boost, hw_list, work=1000):
         tpu_work = work_finished
       run_time = run_time + rt_left
       # Apply drop due to energy extracted
-      E_delta = hw.power*rt_left
+      E_delta = hw.power*rt_left + rt_left*cap.r*i**2
       cap.v = np.sqrt(cap.v**2 - 2*E_delta/cap.cap)
       if (cap.v < boost.min+esr_drop):
         print("Error calculating tpu rt", counter)
@@ -342,6 +343,58 @@ def search_hw(power_start, power_stop, perf_start, perf_stop):
   print(max(perfs), max(powers))
   plt.show()
 
+def search_hw_arb(dut_in, power_start, power_stop, perf_start, perf_stop):
+  powers=np.logspace(power_start, power_stop, num=50)
+  perfs =np.logspace(perf_start, perf_stop, num=50)
+  works = np.zeros((len(powers),len(perfs)))
+  dworks = []
+  dgops = []
+  for i,power in enumerate(powers):
+    print("Checking power: ",power,i)
+    for j,perf in enumerate(perfs):
+      print("Checking perf:", perf,j)
+      test_board = []
+      test_board.append(dut_in)
+      dut = hardware(power,1.0,perf)
+      test_board.append(dut)
+      works[i,j] = multi_hw_inf(murata_small,bigger_capy_booster,test_board, work=1000)
+      if binary == 1:
+        if works[i,j] > 1.5:
+          works[i,j] = 1
+        elif works[i,j] > 1.2:
+          works[i,j] = .75
+        elif works[i,j] > 1.1:
+          works[i,j] = .5
+        else:
+          works[i,j] = 0
+      print("\tchange: ",works[i,j])
+      dworks.append(works[i,j])
+      dgops.append((perf*10e2)/power)
+  x,y = np.meshgrid(powers,perfs)
+  #print("here")
+  plt.pcolormesh(x,y,works.T,cmap='Blues')
+  #print("here2")
+  #print(powers)
+  #print(perfs)
+  #print(works)
+  plt.xlabel("Backup device power (W)")
+  plt.ylabel("Backup device perf (TOPS)")
+  plt.title(str(dut_in.perf))
+  plt.colorbar()
+  plt.savefig("hardware_inf.png")
+  plt.show()
+  plt.close()
+  plt.scatter(dgops,dworks)
+  plt.ylabel("Normalized work with backup")
+  plt.xlabel("Gops/W")
+  plt.title(str(dut_in.perf))
+  plt.savefig("gop_vals.png")
+  print(len(dgops), len(dworks))
+  print(max(perfs), max(powers))
+  plt.show()
+  #for counter,dgop in enumerate(dgops):
+  #  if dgop < .5 and dgop > .4:
+  #    print("Dgop: ",dgop," work: ", dworks[counter])
 
 def search_hw_a53(power_start, power_stop, perf_start, perf_stop):
   powers=np.logspace(power_start, power_stop, num=50)
@@ -453,18 +506,19 @@ def work_done(hw,supercap,boost,dt=.001):
     V_in = V_next 
     #print("V_in: ",V_in,"n is ",n,"E_step: ",E_step, "E_used: ",E_used)
     t = t + dt
-  print("Ran for: ",t, "Used ",E_used,"final v_in: ",V_in)
+  print("Ran for: ",t, "Used ",E_used,"final v_in: ",V_in, " Perf is: ",hw.perf)
   print("E left: ",E_og-E_used)
   print("E expected used: ",.5*supercap.cap*(shifted_start**2 - boost.min**2))
   work = t*hw.perf
   return work
 
 def ideal_work(I_start, I_stop):
-  currents = np.logspace(I_start,I_stop,num=25)
+  #currents = np.logspace(I_start,I_stop,num=25)
+  currents = np.linspace(.1,1,num=100)
   boost = booster(5.5,2.0,3.3)
   eff = .5 # as measured in TOPS/W
-  v = 1.8
-  test_cap = cap(5.6,.6)
+  v = 1.0
+  test_cap = cap(1, 3.5)
   ideal_cap = cap(test_cap.cap,0)
   power = []
   work = []
@@ -480,20 +534,20 @@ def ideal_work(I_start, I_stop):
     perf = eff*dut_pow
     dut = hardware(dut_pow,v,perf)
     ideal_work.append(work_done(dut,ideal_cap,boost))
-  plt.plot(power,work,label='Non-ideal')
-  plt.plot(power,ideal_work, label='ideal')
+  plt.plot(power,work,label='ESR=0')
+  plt.plot(power,ideal_work, label='ESR=3.5$\Omega$')
   plt.legend()
   plt.xlabel("Power (W)")
   plt.ylabel("Work (TOPS)")
   title_str = "Booster config:"+str(boost.max)+","+str(boost.min)+\
-  "\nCap size:"+str(5.6)+",HW eff:"+str(eff)
+  "\nCap size:"+str(test_cap.cap)
   plt.title(title_str)
   plt.savefig("ideal_work.png")
   plt.show()
 
 
 
-def compare_compute_numeric(supercap,boost, task_radio=task(110e-3,130e-3,0),\
+def compare_compute_numeric(supercap,boost, task_radio=task(110e-3,100e-3,0),\
   task_compute=task(1e-3,10e-3,0)):
   #Figure out how much work we can do if we run the high energy task first
   Eh = task_radio.i*boost.out*task_radio.t
@@ -525,7 +579,7 @@ def get_mobile_esr_fig():
   task_list = []
   #task_list.append(task(110e-3,130e-3,0))
   task_list.append(task(1e-3,50e-3,0))
-  task_list.append(task(1e-3,.7,0))
+  task_list.append(task(1e-3,.5,0))
   #task_list.append(task(1e-3,18.1,0))
   task_list.append(task(110e-3,100e-3,0))
   #task_list.append(task(1e-3,10e-3,0))
@@ -533,7 +587,7 @@ def get_mobile_esr_fig():
   task_list = []
   task_list.append(task(1e-3,50e-3,0))
   task_list.append(task(110e-3,100e-3,0))
-  task_list.append(task(1e-3,18,0))
+  task_list.append(task(1e-3,16,0))
   [times1,voltages1]=cap_voltage(task_list,dut,boost,dt=.001)
   fig,ax1=plt.subplots()
   ax1.set_xlim(left=0,right=1.0)
@@ -601,16 +655,44 @@ def get_mobile_esr_fig():
   plt.show()
 
 
+
+def prospectus_figure():
+  task_list = []
+  task_list.append(task(1e-3,20,0))
+  dut = cap(.021,8.3)
+  boost = booster(2.6,1.8,2.5)
+  [times,voltages] = cap_voltage(task_list, dut, boost,dt=.001)
+  fig, ax1 =plt.subplots()
+  ax1.plot(times,voltages,'r',label='MCU')
+  task_list=[]
+  task_list.append(task(1e-3,25e-3,0))
+  task_list.append(task(60e-3,100e-3,0))
+  [times1,voltages1] = cap_voltage(task_list, dut,boost,dt=.001)
+  ax1.set_ylabel("Capacitor Output Voltage (V)")
+  ax1.set_xlabel("Time (s)")
+  ax1.legend()
+  plt.savefig("compute.png",bbox_inches='tight')
+  fig,ax1 = plt.subplots()
+  ax1.set_ylabel("Capacitor Output Voltage (V)")
+  ax1.set_xlabel("Time (s)")
+  ax1.plot(times1,voltages1,'b',label='Radio')
+  ax1.set_xlim(left=0,right=.1)
+  ax1.legend()
+  plt.savefig("both.png",bbox_inches='tight')
+  plt.show()
+
+
 if __name__ == "__main__":
   if len(sys.argv) > 1:
     binary = int(sys.argv[1])
   #main()
-  boost = booster(3.3,1.8,2.5)
-  #search_esr_cap_numeric(-2,1,-2,-1)
-  dut = cap(.021,8.3)
-  [before,after] = compare_compute_numeric(dut,boost)
-  print("Before: ",before," after: ",after)
-  get_mobile_esr_fig()
+  #boost = booster(2.6,1.8,2.5)
+  ##search_esr_cap_numeric(-2,1,-2,-1)
+  ##dut = cap(.021,8.3)
+  #dut = cap(.042,4.2)
+  #[before,after] = compare_compute_numeric(dut,boost)
+  #print("Before: ",before," after: ",after)
+  #get_mobile_esr_fig()
   #coral = []
   #coral.append(edge_tpu)
   #coral.append(hardware(.01,1.8,.25))
@@ -622,8 +704,15 @@ if __name__ == "__main__":
   #print(work)
   #search_hw(-2,-1,-2,-1)
   #print(binary)
-  #ideal_work(-1,.2)
-  #search_hw_a53(-2,0,-3,-2)
+  ideal_work(-1,.2)
+  #prospectus_figure()
+  sys.exit()
+  tpu_dut = hardware(6.6,3.3,.5)
+  work_done(tpu_dut,kemet2,restricted_artibeus)
+  #sys.exit()
+  dut = hardware(3,1,10.8e-3)
+  search_hw_arb(dut,-1,0,-4,-3)
+  #search_hw_a53(-1,0,-3,-2)
   #~10% improvement for kemet2 + restricted artibeus with divider=4
   #~28% improvement for kemet2 with beefy_capy
   cap_bank = cpx
