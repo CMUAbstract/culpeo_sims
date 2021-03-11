@@ -534,15 +534,20 @@ def ideal_work(I_start, I_stop):
     perf = eff*dut_pow
     dut = hardware(dut_pow,v,perf)
     ideal_work.append(work_done(dut,ideal_cap,boost))
-  plt.plot(power,work,label='ESR=0')
-  plt.plot(power,ideal_work, label='ESR=3.5$\Omega$')
+  fig,ax1=plt.subplots()
+  ax1.plot(power,work,label='ESR=3.5$\Omega$')
+  ax1.plot(power,ideal_work, label='ESR=0')
   plt.legend()
   plt.xlabel("Power (W)")
   plt.ylabel("Work (TOPS)")
-  title_str = "Booster config:"+str(boost.max)+","+str(boost.min)+\
-  "\nCap size:"+str(test_cap.cap)
-  plt.title(title_str)
-  plt.savefig("ideal_work.png")
+  #title_str = "Booster config:"+str(boost.max)+","+str(boost.min)+\
+  #"\nCap size:"+str(test_cap.cap)
+  #plt.title(title_str)
+  ratio = 1/2
+  xleft, xright = ax1.get_xlim()
+  ybottom, ytop = ax1.get_ylim()
+  ax1.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
+  plt.savefig("ideal_work.pdf")
   plt.show()
 
 
@@ -579,7 +584,8 @@ def get_mobile_esr_fig():
   task_list = []
   #task_list.append(task(110e-3,130e-3,0))
   task_list.append(task(1e-3,50e-3,0))
-  task_list.append(task(1e-3,.5,0))
+  task_list.append(task(1e-3,.8,0))
+  #task_list.append(task(1e-3,.5,0))
   #task_list.append(task(1e-3,18.1,0))
   task_list.append(task(110e-3,100e-3,0))
   #task_list.append(task(1e-3,10e-3,0))
@@ -598,51 +604,51 @@ def get_mobile_esr_fig():
   ax1.set_ylabel("Capacitor Output Voltage (V)")
   ax1.set_xlabel("Time (s)")
   ax1.legend(bbox_to_anchor=[.2,1],ncol=2)
-  ax1.annotate('Init. Code', xy=(.02,3.3),  xycoords='data',
-            xytext=(.02,3.6), textcoords='data',
-            arrowprops=dict(facecolor='black', shrink=0.05),
-            horizontalalignment='center', verticalalignment='top',
-            )
-  ax1.annotate('ESR Drop', xy=(.05,3.0),  xycoords='data',
-            xytext=(.2,3.0), textcoords='data',
-            arrowprops=dict(facecolor='black', shrink=0.05),
-            horizontalalignment='center', verticalalignment='center',
-            )
-  ax1.annotate('ESR Drop', xy=(.75,3.0),  xycoords='data',
-            xytext=(.9,3.0), textcoords='data',
-            arrowprops=dict(facecolor='black', shrink=0.05),
-            horizontalalignment='center', verticalalignment='center',
-            )
-  ax1.annotate('LoRa\nPkt.', xy=(.13,2.0),  xycoords='data',
-            xytext=(.04,1.90), textcoords='data',
-            arrowprops=dict(facecolor='black', shrink=0.05),
-            horizontalalignment='center', verticalalignment='center',
-            )
-  ax1.annotate('LoRa\nPkt.', xy=(.82,2.0),  xycoords='data',
-            xytext=(.68,2.0), textcoords='data',
-            arrowprops=dict(facecolor='black', shrink=0.05),
-            horizontalalignment='center', verticalalignment='center',
-            )
-  ax1.annotate('Compute', xy=(.6,3.25),  xycoords='data',
-            xytext=(.6,3.0), textcoords='data',
-            arrowprops=dict(facecolor='black', shrink=0.05),
-            horizontalalignment='center', verticalalignment='top',
-            )
-  ax1.annotate('Compute', xy=(.6,2.75),  xycoords='data',
-            xytext=(.6,2.4), textcoords='data',
-            arrowprops=dict(facecolor='black', shrink=0.05),
-            horizontalalignment='center', verticalalignment='top',
-            )
-  ax1.annotate('Energy\nStill\nAvailable', xy=(1,2.7),  xycoords='data',
-            xytext=(.9,2.55), textcoords='data',color='green',
-            arrowprops=dict(facecolor='green', shrink=0.05),
-            horizontalalignment='center', verticalalignment='top',
-            )
-  ax1.annotate('Power\nFailure', xy=(.85,1.8),  xycoords='data',
-            xytext=(.87,2.07), textcoords='data',color='red',
-            arrowprops=dict(facecolor='red', shrink=0.05),
-            horizontalalignment='left', verticalalignment='center',
-            )
+  #ax1.annotate('Init. Code', xy=(.02,3.3),  xycoords='data',
+  #          xytext=(.02,3.6), textcoords='data',
+  #          arrowprops=dict(facecolor='black', shrink=0.05),
+  #          horizontalalignment='center', verticalalignment='top',
+  #          )
+  #ax1.annotate('ESR Drop', xy=(.05,3.0),  xycoords='data',
+  #          xytext=(.2,3.0), textcoords='data',
+  #          arrowprops=dict(facecolor='black', shrink=0.05),
+  #          horizontalalignment='center', verticalalignment='center',
+  #          )
+  #ax1.annotate('ESR Drop', xy=(.75,3.0),  xycoords='data',
+  #          xytext=(.9,3.0), textcoords='data',
+  #          arrowprops=dict(facecolor='black', shrink=0.05),
+  #          horizontalalignment='center', verticalalignment='center',
+  #          )
+  #ax1.annotate('LoRa\nPkt.', xy=(.13,2.0),  xycoords='data',
+  #          xytext=(.04,1.90), textcoords='data',
+  #          arrowprops=dict(facecolor='black', shrink=0.05),
+  #          horizontalalignment='center', verticalalignment='center',
+  #          )
+  #ax1.annotate('LoRa\nPkt.', xy=(.82,2.0),  xycoords='data',
+  #          xytext=(.68,2.0), textcoords='data',
+  #          arrowprops=dict(facecolor='black', shrink=0.05),
+  #          horizontalalignment='center', verticalalignment='center',
+  #          )
+  #ax1.annotate('Compute', xy=(.6,3.25),  xycoords='data',
+  #          xytext=(.6,3.0), textcoords='data',
+  #          arrowprops=dict(facecolor='black', shrink=0.05),
+  #          horizontalalignment='center', verticalalignment='top',
+  #          )
+  #ax1.annotate('Compute', xy=(.6,2.75),  xycoords='data',
+  #          xytext=(.6,2.4), textcoords='data',
+  #          arrowprops=dict(facecolor='black', shrink=0.05),
+  #          horizontalalignment='center', verticalalignment='top',
+  #          )
+  #ax1.annotate('Energy\nStill\nAvailable', xy=(1,2.7),  xycoords='data',
+  #          xytext=(.9,2.55), textcoords='data',color='green',
+  #          arrowprops=dict(facecolor='green', shrink=0.05),
+  #          horizontalalignment='center', verticalalignment='top',
+  #          )
+  #ax1.annotate('Power\nFailure', xy=(.85,1.8),  xycoords='data',
+  #          xytext=(.87,2.07), textcoords='data',color='red',
+  #          arrowprops=dict(facecolor='red', shrink=0.05),
+  #          horizontalalignment='left', verticalalignment='center',
+  #          )
   #ax1.annotate('Minimum Voltage',
   #          xytext=(.87,2.07), textcoords='data',color='red',
   #          horizontalalignment='left', verticalalignment='center',
@@ -651,9 +657,8 @@ def get_mobile_esr_fig():
   xleft, xright = ax1.get_xlim()
   ybottom, ytop = ax1.get_ylim()
   ax1.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
-  plt.savefig("cap_voltage.pdf",bbox_inches='tight')
+  plt.savefig("cap_voltage.png",bbox_inches='tight')
   plt.show()
-
 
 
 def prospectus_figure():
@@ -662,24 +667,73 @@ def prospectus_figure():
   dut = cap(.021,8.3)
   boost = booster(2.6,1.8,2.5)
   [times,voltages] = cap_voltage(task_list, dut, boost,dt=.001)
-  fig, ax1 =plt.subplots()
-  ax1.plot(times,voltages,'r',label='MCU')
   task_list=[]
-  task_list.append(task(1e-3,25e-3,0))
+  task_list.append(task(1e-3,10e-3,0))
   task_list.append(task(60e-3,100e-3,0))
   [times1,voltages1] = cap_voltage(task_list, dut,boost,dt=.001)
+  task_list = []
+  task_list.append(task(1e-3,20,0))
+  dut = cap(.021,0)
+  boost = booster(2.6,1.8,2.5)
+  [times_ideal,voltages_ideal] = cap_voltage(task_list, dut, boost,dt=.001)
+  task_list=[]
+  task_list.append(task(1e-3,10e-3,0))
+  task_list.append(task(60e-3,500e-3,0))
+  [times1_ideal,voltages1_ideal] = cap_voltage(task_list, dut,boost,dt=.001)
+
+  fig, ax1 =plt.subplots()
+  #ax1.plot(times,voltages,color='#6baed6',label='MCU')
+  ax1.plot(times_ideal,voltages_ideal,color='#6baed6',linestyle='dashed',\
+  label='MCU, ideal cap')
+  ax1.set_xlim(left=0,right=15)
+
   ax1.set_ylabel("Capacitor Output Voltage (V)")
   ax1.set_xlabel("Time (s)")
   ax1.legend()
-  plt.savefig("compute.png",bbox_inches='tight')
+  ratio = 1/2
+  xleft, xright = ax1.get_xlim()
+  ybottom, ytop = ax1.get_ylim()
+  ax1.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
+  plt.savefig("ideal_compute.pdf",bbox_inches='tight')
   fig,ax1 = plt.subplots()
   ax1.set_ylabel("Capacitor Output Voltage (V)")
   ax1.set_xlabel("Time (s)")
-  ax1.plot(times1,voltages1,'b',label='Radio')
-  ax1.set_xlim(left=0,right=.1)
+  #ax1.plot(times1,voltages1,color='#08519c',label='Radio')
+  ax1.plot(times1_ideal,voltages1_ideal,color='#08519c',linestyle='dashed',\
+  label='Radio, ideal cap')
+  ax1.set_xlim(left=0,right=.3)
   ax1.legend()
-  plt.savefig("both.png",bbox_inches='tight')
+  ratio = 1/2
+  xleft, xright = ax1.get_xlim()
+  ybottom, ytop = ax1.get_ylim()
+  ax1.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
+  plt.savefig("ideal_radio.pdf",bbox_inches='tight')
   plt.show()
+
+
+def shmoo_benefit():
+  boost = booster(2.3,1.8,2.5)
+  ratios = []
+  esrs = []
+  lora = task(100e-3,100e-3,0)
+  compute = task(1e-3,10e-3,0)
+  for esr in np.arange(.25,12.5,.25):
+    test_cap = cap(.033,esr)
+    [before,after] = compare_compute_numeric(test_cap, boost,lora,compute)
+    if after == 0:
+      ratios.append(0)
+    else:
+      ratios.append(before/after)
+    esrs.append(esr)
+  fig,ax = plt.subplots()
+  ax.plot(esrs,ratios)
+  ax.set_xlabel("ESR (Ohms)")
+  ax.set_ylabel("Compute completed (Load Aware/Load Unaware)")
+  plt.savefig("extra_work.png",bbox_inches='tight')
+  plt.show()
+
+
+
 
 
 if __name__ == "__main__":
@@ -687,12 +741,14 @@ if __name__ == "__main__":
     binary = int(sys.argv[1])
   #main()
   #boost = booster(2.6,1.8,2.5)
+  #boost = booster(3.3,1.8,2.5)
   ##search_esr_cap_numeric(-2,1,-2,-1)
-  ##dut = cap(.021,8.3)
-  #dut = cap(.042,4.2)
+  #dut = cap(.021,8.3)
+  ##dut = cap(.042,4.2)
   #[before,after] = compare_compute_numeric(dut,boost)
-  #print("Before: ",before," after: ",after)
+  ##print("Before: ",before," after: ",after)
   #get_mobile_esr_fig()
+  #sys.exit()
   #coral = []
   #coral.append(edge_tpu)
   #coral.append(hardware(.01,1.8,.25))
@@ -704,8 +760,10 @@ if __name__ == "__main__":
   #print(work)
   #search_hw(-2,-1,-2,-1)
   #print(binary)
-  ideal_work(-1,.2)
-  #prospectus_figure()
+  #ideal_work(-1,.2)
+  shmoo_benefit()
+  sys.exit()
+  prospectus_figure()
   sys.exit()
   tpu_dut = hardware(6.6,3.3,.5)
   work_done(tpu_dut,kemet2,restricted_artibeus)
