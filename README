@@ -1,1 +1,8 @@
 Repo for simulations for ESR explorations
+
+esr_sim.py has a mismash of simulation scripts and figure generating functions.
+
+device_sim.py tries to move towards a more manageable object-oriented simulation
+strategy
+
+

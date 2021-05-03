@@ -565,7 +565,7 @@ def compare_compute_numeric(supercap,boost, task_radio=task(110e-3,100e-3,0),\
   term0 = boost.max**2 - 2*Eh/C
   Vendh = np.sqrt(term0)
   if (term0 < 0) or (Vendh < boost.min+Ih*R):
-    print("Error! Eh is too big")
+    #print("Error! Eh is too big")
     return [0,0]
   n_before = .5*C*(Vendh**2 - (boost.min+Il*R)**2)/El
   n_before =  np.floor(n_before)
@@ -573,7 +573,7 @@ def compare_compute_numeric(supercap,boost, task_radio=task(110e-3,100e-3,0),\
   #Now do the calc for the low energy task first
   term1 = boost.max**2 - (boost.min+Ih*R)**2 - 2*Eh/C
   if term1 < 0:
-    print("Error! Eh is too big!")
+    #print("Error! Eh is too big!")
     return [0,0]
   n_after = term1*.5*C/El
   n_after = np.floor(n_after)
@@ -713,22 +713,35 @@ def prospectus_figure():
 
 def shmoo_benefit():
   boost = booster(2.3,1.8,2.5)
+  #boost = booster(5.3,1.8,3.3)
   ratios = []
   esrs = []
+  befores=[]
+  afters=[]
   lora = task(100e-3,100e-3,0)
-  compute = task(1e-3,10e-3,0)
-  for esr in np.arange(.25,12.5,.25):
-    test_cap = cap(.033,esr)
+  compute = task(1e-3,1e-3,0)
+  for esr in np.arange(.25,12.5,.05):
+    #test_cap = cap(.033,esr)
+    test_cap = cap(1,esr)
     [before,after] = compare_compute_numeric(test_cap, boost,lora,compute)
+    esrs.append(esr)
     if after == 0:
       ratios.append(0)
+      befores.append(0)
+      afters.append(0)
     else:
       ratios.append(before/after)
-    esrs.append(esr)
+      befores.append(before)
+      afters.append(after)
+      print("Esr: ",esr,"ratio: ",before/after,"before: ",before,"after", after)
   fig,ax = plt.subplots()
-  ax.plot(esrs,ratios)
+  ax.plot(esrs,ratios,'r')
+  #ax.plot(esrs,befores,'r')
+  #ax.plot(esrs,afters,'b-')
   ax.set_xlabel("ESR (Ohms)")
   ax.set_ylabel("Compute completed (Load Aware/Load Unaware)")
+  #ax2.set_xlabel("ESR (Ohms)")
+  #ax2.set_ylabel("Compute completed (Load Aware/Load Unaware)")
   plt.savefig("extra_work.png",bbox_inches='tight')
   plt.show()
 
