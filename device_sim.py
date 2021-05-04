@@ -3,7 +3,7 @@ from enum import Enum
 import sys
 import math
 import matplotlib.pyplot as plt
-
+import json
 
 class Cap:
   '''Supercapacitor representation'''
@@ -62,6 +62,17 @@ class PowerSys:
     self.boost = booster
     self.cap = cap
 
+class OperatingPoint:
+  def __init__(self,v,i,freq):
+    self.v = v
+    self.i = i
+    self.freq = freq
+
+
+slow = OperatingPoint(2.5,.001,8e6)
+medium = OperatingPoint(2.5,.002,12e6)
+fast = OperatingPoint(2.5,.004,16e6)
+
 class Mcu:
   '''Produces current trace that the power system handles by keeping back of
   software tasks to run and possible hardware modes'''
@@ -69,12 +80,17 @@ class Mcu:
     self.uno_tsks = [] #unordered tasks
     self.o_tsks = [] #ordered tasks
     self.evts = [] #preempting events
+    self.eff_point = {slow,medium,fast} #TODO not portable, need freq earlier
   def add_unordered(self,new_tsk):
     self.uno_tsks.append(new_tsk)
   def add_ordered(self,new_tsk):
     self.o_tsks.append(new_tsk)
   def add_event(self,new_evt):
     self.evts.append(new_evt)
+  def load_program(self,prog):
+    #TODO need a way to compose ops into tasks
+    for op in prog.ops:
+      self.add_ordered(op)
 
 
 # Selects the next operation to run based on input from the booster/capacitor
@@ -109,25 +125,31 @@ class Operation:
       self.scalable = True
     else:
       self.scalable = False
-  def set_attribtutes(self):
     self.times = []
     self.i_load = 0
 
 class MemOp(Operation):
   ''' Defines memory bound operations in terms of memory access times '''
-  def set_attributes(self, count,latency,i_load):
+  def __init__(self,tsk_type,count,latency,i_load):
+    super().__init__(tsk_type)
+    self.count = count
+    self.latency = latency
+    self.i_load = i_load
     self.times = [latency] * count
     self.i_load = [i_load] * count
 
 class CompOp(Operation):
   ''' Defines compute bound operation '''
-  def set_atrributes(self,cycle_count, mcu_freq, mcu_i):
-    self.times = [mcu_freq] * cycle_count
-    self.i_load = [mcu_i] * cycle_count
+  def __init__(self,tsk_type,instr_count,mcu_freq,mcu_i):
+    super().__init__(tsk_type)
+    self.instr_count = instr_count
+    self.times = [instr_count/mcu_freq] * 1
+    self.i_load = [mcu_i] * 1
 
 class PeriphOp(Operation):
   ''' Defines peripheral operation '''
-  def set_attributes(self,latencies,i_loads):
+  def __init__(self,tsk_type,latencies,i_loads):
+    super().__init__(tsk_type)
     self.times = latencies
     self.i_load = i_loads
 
@@ -136,6 +158,25 @@ class Program:
     self.ops = []
   def add_ops(self,new_ops):
     self.opps.append(new_ops)
+  def build(self,prog_txt,mcu_freq,mcu_i):
+    prog_file = open(prog_txt)
+    json_prog = json.load(prog_file)
+    # Split json array
+    for op in json_prog:
+    # For each object, check the type
+    #Translate into Operation type
+      if op["type"] == 1:
+        #MemOp
+        new_op = MemOp(op["type"],op["count"],op["latency"],op["i_load"])
+      elif op["type"] == 2:
+        #CompOp
+        new_op = CompOp(op["type"],op["instr_count"],mcu_freq,mcu_i)
+      else:
+        #PeriphOp
+        new_op = PeriphOp(op["type"],op["times"],op["i_loads"])
+      
+      self.ops.append(new_op)
+
 
 class Device:
   ''' Represents entire device '''
@@ -148,6 +189,7 @@ class Device:
     self.voltages = []
   def run_program(self):
     ''' Execute the current program given the device setup '''
+    self.mcu.load_program(self.prog)
     print("Running program")
   def plot_program(self):
     ''' Plot voltage vs time produced while running a program '''
@@ -164,6 +206,7 @@ msp430 = Mcu()
 basic = Program()
 
 if __name__ == "__main__":
+  basic.build("program.json",8e6,1e-3)
   Arty = Device(artyPowerSys,msp430,PolicyTypes.BASIC,basic)
   Arty.run_program()
   Arty.plot_program()
