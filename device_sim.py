@@ -17,12 +17,15 @@ class Cap:
   def parallel(self,cap):
     self.cap = self.cap + cap.cap
     self.r = 1/(1/self.r + 1/cap.r)
-  def update_v(self,p_out,p_in,dt):
-    e_step = (p_in - p_out)*dt
+  def update_v(self,v_in,i_in,v_out,i_out,n,dt):
+    e_step = (v_in*i_in - v_out*i_out/n)*dt
+    #print("E step: ", e_step)
     self.v_internal = np.sqrt(self.v_internal**2 + 2*e_step/self.cap)
-    i_out = (p_in - p_out)/self.v_internal #TODO Double check approximation
-    self.V = self.v_internal - (self.last_i - i_out)*self.r #TODO holds for charging?
-    self.last_i = i_out
+    #print("New internal: ",self.v_internal)
+    #print("I is: ",i_out)
+    i_net = i_in - i_out
+    self.V = self.v_internal - (self.last_i - i_net)*self.r #TODO holds for charging?
+    self.last_i = i_net
     return self.V
 
 
@@ -174,7 +177,7 @@ class Program:
       else:
         #PeriphOp
         new_op = PeriphOp(op["type"],op["times"],op["i_loads"])
-      
+ 
       self.ops.append(new_op)
 
 
@@ -191,6 +194,21 @@ class Device:
     ''' Execute the current program given the device setup '''
     self.mcu.load_program(self.prog)
     print("Running program")
+    # Charge up capacitor,
+    #self.times.append(0)
+    time = 0
+    while (self.power.cap.V < self.power.chrg.max):
+      #TODO get efficiency for real
+      dt = 1e-3
+      V = self.power.cap.update_v(self.power.chrg.max, self.power.chrg.i,0,0,1,dt)
+      time += dt
+      self.times.append(time)
+      self.voltages.append(V)
+    print("charged cap: ",self.power.cap.V)
+      # Use scheduler to pick next task
+        # For each op in each task, extract energy from cap
+        # If the next op will probably kill us, schedule a recharge
+    print("Done program")
   def plot_program(self):
     ''' Plot voltage vs time produced while running a program '''
     fig, ax = plt.subplots()
