@@ -19,13 +19,28 @@ class Cap:
     self.r = 1/(1/self.r + 1/cap.r)
   def update_v(self,v_in,i_in,v_out,i_out,n,dt):
     e_step = (v_in*i_in - v_out*i_out/n)*dt
-    #print("E step: ", e_step)
-    self.v_internal = np.sqrt(self.v_internal**2 + 2*e_step/self.cap)
-    #print("New internal: ",self.v_internal)
-    #print("I is: ",i_out)
+    term1 = self.v_internal**2
+    term2 = 2*e_step/self.cap
+    if term2 > 0 or term1 > abs(term2):
+      self.v_internal = np.sqrt(term1 + term2)
+    else:
+      self.v_internal = 0
+    if (self.v_internal > v_in):
+      self.v_internal = v_in
+    if (self.v_internal <= 0):
+      self.v_internal = 0
     i_net = i_in - i_out
-    self.V = self.v_internal - (self.last_i - i_net)*self.r #TODO holds for charging?
-    self.last_i = i_net
+    self.V = self.v_internal + ( i_net*self.r)
+    #self.V = self.v_internal - (self.last_i - i_net)*self.r #TODO holds for charging?
+    print("Vals after: ", e_step,i_net,self.v_internal,self.V)
+    if (self.V > v_in):
+      self.V = v_in
+      self.last_i = 0
+    elif (self.V <= 0):
+      self.V = 0
+      self.last_i = 0
+    else:
+      self.last_i = i_net
     return self.V
 
 
@@ -94,6 +109,12 @@ class Mcu:
     #TODO need a way to compose ops into tasks
     for op in prog.ops:
       self.add_ordered(op)
+  def prog_complete(self):
+    print("lengths: ", len(self.o_tsks))
+    if self.uno_tsks or self.o_tsks or self.evts:
+      return False
+    else:
+      return True
 
 
 # Selects the next operation to run based on input from the booster/capacitor
@@ -103,15 +124,35 @@ class Scheduler:
       hardware status and the mcu's software status'''
   def __init__(self,policy,power_sys,mcu):
     self.policy = policy #TODO make this an enum
-    self.sys = power_sys
+    self.power = power_sys
     self.mcu = mcu
-  def schedule_op():
-    return mcu.uno_tsks.pop(0) # Scheduling policy for now...
+    self.recharging = False
+  def select_work(self):
+    # Check our voltage
+    if self.power.cap.V < self.power.boost.min:
+      next_tsk = self.schedule_rechrg()
+      self.recharging = True
+      return next_tsk
+    if self.power.cap.V >= self.power.chrg.max or ~self.recharging:
+      next_tsk = self.schedule_op()
+      self.recharging = False
+      return next_tsk
+    else:
+      next_tsk = self.schedule_rechrg
+    return next_tsk
+  def schedule_op(self):
+    return self.mcu.o_tsks.pop(0) # Scheduling policy for now...
+  def schedule_rechrg(self):
+    rechrg = Operation(OpTypes.RECHARGE)
+    rechrg.times = [10] #TODO determine recharge using scheduling policy
+    rechrg.i_load = [0]
+    return rechrg
 
 class OpTypes(Enum):
   MEMORY = 1
   COMPUTE = 2
   PERIPH = 3
+  RECHARGE = 4
 
 class PolicyTypes(Enum):
   BASIC = 1
@@ -197,27 +238,71 @@ class Device:
     # Charge up capacitor,
     #self.times.append(0)
     time = 0
-    while (self.power.cap.V < self.power.chrg.max):
+    while (self.power.cap.V < self.power.chrg.max - .1):
       #TODO get efficiency for real
       dt = 1e-3
       V = self.power.cap.update_v(self.power.chrg.max, self.power.chrg.i,0,0,1,dt)
       time += dt
       self.times.append(time)
       self.voltages.append(V)
-    print("charged cap: ",self.power.cap.V)
+    print("charged cap: ",self.power.cap.V, self.mcu.prog_complete())
+    fails = 0
+    while self.mcu.prog_complete() == False:
       # Use scheduler to pick next task
-        # For each op in each task, extract energy from cap
-        # If the next op will probably kill us, schedule a recharge
+      next_tsk = self.sched.select_work()
+      print("Remove task: ",len(self.mcu.o_tsks))
+      print("Check: ",self.mcu.prog_complete())
+      print(next_tsk)
+      # For each op in each task, extract energy from cap
+      for i,time_step in enumerate(next_tsk.times):
+        print("on time ", i)
+        flag = 0
+        if fails >= 2: #TODO this is still hardcoded assuming full recharge
+          print("Not enough energy! Aborting program")
+          return -1
+        if time_step > 1e-3:
+          print("Time: ", time)
+          for j in np.arange(0,time_step,1e-3):
+            dt = 1e-3
+            V = self.power.cap.update_v(self.power.chrg.max, self.power.chrg.i,
+              self.power.boost.out, next_tsk.i_load[i],1,dt)
+            time += dt
+            self.times.append(time)
+            self.voltages.append(V)
+            if (V <= 0):
+              print("Need recharge!")
+              flag = 1
+              break
+          print("Time after: ", time)
+        else:
+          V = self.power.cap.update_v(self.power.chrg.max, self.power.chrg.i,
+            self.power.boost.out, next_tsk.i_load[i],1,time_step)
+          time += time_step
+          self.times.append(time)
+          self.voltages.append(V)
+          if (V <= 0):
+            print("Else Need recharge!")
+            flag = 1
+        if flag == 1:
+          print("Increment fail count! ", fails)
+          if fails == 0:
+            self.mcu.o_tsks.insert(0,next_tsk) #TODO still hardcoded
+          fails += 1
+
+          print("Insert task: ", len(self.mcu.o_tsks))
+        else:
+          print("Clearing fail!")
+          fails = 0
     print("Done program")
   def plot_program(self):
     ''' Plot voltage vs time produced while running a program '''
     fig, ax = plt.subplots()
     ax.plot(self.times,self.voltages,color='#6baed6')
     plt.show()
-    plt.savefig("program.pdf",bbox_inches='tight')
+    plt.savefig("program.pdf")
 
 artyBoost = Booster(5.5,2.5,3.3)
-artyChrg = Charger(5.5,.1)
+artyChrg = Charger(5.5,.025)
 kemet = Cap(5.6,.6)
 artyPowerSys = PowerSys(artyChrg,kemet,artyBoost)
 msp430 = Mcu()

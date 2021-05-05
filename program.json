@@ -1,12 +1,12 @@
 [
   {
     "type": 3,
-    "times": [10,2,10],
-    "i_loads": [5, 10, 5]
+    "times": [10e-3,50000e-3,10e-3],
+    "i_loads": [0.050, 0.200, 0.050]
   },
   {
     "type": 2,
-    "instr_count": 40e6
+    "instr_count": 10
   }
   ,
   {
