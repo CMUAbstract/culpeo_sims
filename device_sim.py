@@ -4,6 +4,7 @@ import sys
 import math
 import matplotlib.pyplot as plt
 import json
+import argparse
 
 class Cap:
   '''Supercapacitor representation'''
@@ -364,8 +365,61 @@ artyPowerSys = PowerSys(artyChrg,kemet,artyBoost)
 msp430 = Mcu()
 basic = Program()
 
+def handle_args():
+  parser = argparse.ArgumentParser(description="Simulate an intermittent execution")
+  parser.add_argument("-b","--booster", type=float,
+  help="max, min, and output voltages for the output booster",nargs=3)
+  parser.add_argument("-ch","--charger", type=float,
+  help="constant voltage (in V), and current (in A) output by input booster",
+  nargs=2)
+  parser.add_argument("-c","--cap", nargs=2, type=float,
+  help="capacity (in F) and ESR (in Ohms) for storage capacitor")
+  parser.add_argument("-p","--program", nargs=1,
+  help="json file specifying operations to run")
+  parser.add_argument("--mcu",nargs=2, type=float,
+  help="MCU frequency and typical operating current")
+  parser.add_argument("-s","--scheduling",type=float,
+  help="Integer indicating which scheduling policy to use")
+  args = parser.parse_args()
+  return args
+
+def build_system_pieces(args):
+  if args.booster != None and len(args.booster) == 3:
+    newBoost = Booster(args.booster[0],args.booster[1],args.booster[2])
+  else:
+    newBoost = artyBoost
+  if args.charger != None and len(args.charger) == 2:
+    newChrgr = Charger(args.charger[0],args.charger[2])
+  else:
+    newChrgr = artyChrg
+  if args.cap != None and len(args.cap) == 2:
+    newCap = Cap(args.cap[0],args.cap[1])
+  else:
+    newCap = kemet
+  if args.program != None and len(args.program) == 1:
+    progFile = args.program
+  else:
+    progFile = "program.json"
+  if args.mcu != None and len(args.mcu) == 2:
+    freq = args.mcu[0]
+    load = args.mcu[1]
+  else:
+    freq = 8e6
+    load = 1e-3
+  if args.scheduling != None and len(args.scheduling) == 1:
+    newSchedPolicy = args.scheduling
+  else:
+    newSchedPolicy = PolicyTypes.BASIC
+  newProg = Program()
+  newProg.build(progFile,freq,load)
+  newPowerSys = PowerSys(newChrgr,newCap,newBoost)
+  newDev = Device(newPowerSys,msp430,newSchedPolicy,newProg)
+  return newDev
+
 if __name__ == "__main__":
-  basic.build("program.json",8e6,1e-3)
-  Arty = Device(artyPowerSys,msp430,PolicyTypes.BASIC,basic)
+  args = handle_args()
+  Arty = build_system_pieces(args)
+  #basic.build("program.json",8e6,1e-3)
+  #Arty = Device(artyPowerSys,msp430,PolicyTypes.BASIC,basic)
   Arty.run_program()
   Arty.plot_program()
