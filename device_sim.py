@@ -32,7 +32,7 @@ class Cap:
     i_net = i_in - i_out
     self.V = self.v_internal + ( i_net*self.r)
     #self.V = self.v_internal - (self.last_i - i_net)*self.r #TODO holds for charging?
-    print("Vals after: ", e_step,i_net,self.v_internal,self.V)
+    #print("Vals after: ", e_step,i_net,self.v_internal,self.V)
     if (self.V > v_in):
       self.V = v_in
       self.last_i = 0
@@ -79,6 +79,16 @@ class PowerSys:
     self.chrg = charger
     self.boost = booster
     self.cap = cap
+  def update(self,v_in,i_in,v_out,i_out,n,dt):
+    '''Updates the capacitor voltage and confirms that we're still in bounds for
+    the input and output boosters.  Returns the current produced by the
+    output booster, this is subject to change... We may need to work in the
+    input booster too'''
+    V = self.cap.update_v(v_in,i_in,v_out,i_out,n,dt)
+    if (self.cap.V < self.boost.min):
+      return V,0
+    else:
+      return V,i_out
 
 class OperatingPoint:
   def __init__(self,v,i,freq):
@@ -123,30 +133,102 @@ class Scheduler:
   ''' Selects the next operation to run based on input from the booster/capacitor
       hardware status and the mcu's software status'''
   def __init__(self,policy,power_sys,mcu):
-    self.policy = policy #TODO make this an enum
+    self.policy = policy
     self.power = power_sys
     self.mcu = mcu
     self.recharging = False
   def select_work(self):
     # Check our voltage
-    if self.power.cap.V < self.power.boost.min:
+    print("Selecting work! ", self.power.cap.V)
+    # Currently implementing a full recharge policy, change/add extra cases here
+    # if we're not doing a full recharge
+    if self.power.cap.V <= self.power.boost.min or (self.power.cap.V <
+      self.power.chrg.max and self.recharging == True):
       next_tsk = self.schedule_rechrg()
       self.recharging = True
       return next_tsk
-    if self.power.cap.V >= self.power.chrg.max or ~self.recharging:
+    if self.power.cap.V >= self.power.chrg.max or self.recharging == False:
       next_tsk = self.schedule_op()
       self.recharging = False
       return next_tsk
     else:
       next_tsk = self.schedule_rechrg
     return next_tsk
+ 
   def schedule_op(self):
+    '''Selects the next work to do'''
     return self.mcu.o_tsks.pop(0) # Scheduling policy for now...
+
   def schedule_rechrg(self):
+    print("Adding rechg!")
     rechrg = Operation(OpTypes.RECHARGE)
     rechrg.times = [10] #TODO determine recharge using scheduling policy
     rechrg.i_load = [0]
     return rechrg
+ 
+  def reschedule(self,op):
+    '''Controls policy for rescheduling work after a power failure'''
+    # We first check if the work is atomic or not
+    if op.atomic:
+      if op.fails < 2: #TODO this is just the policy for now
+        self.mcu.o_tsks.insert(0,op) # Push back on front of queue
+        return False # Still going
+      else:
+        # If we end up failing even after we start at the beginning, op is too
+        # big
+        return True
+    else: #TODO only the policy for now
+      self.mcu.o_tsks.insert(0,op) # Push back on front of queue
+
+  def run_work(self,times,voltages,op):
+    if op.atomic == True:
+      finished, test_op = self.run_work_atomic(self.power,times,voltages,op)
+    else:
+      finished, test_op = run_work_interruptible(self.power,times,voltages,op)
+    return finished, test_op
+
+  def run_work_atomic(self,power,times,voltages,op):
+    time = times[-1]
+    fail_flag = 0
+    for i, time_step in enumerate(op.times):
+      if time_step > 1e-3:
+        for j in np.arange(0,time_step,1e-3):
+          dt = 1e-3
+          V, i_out = power.update(power.chrg.max, power.chrg.i, power.boost.out,
+            op.i_load[i],1,dt)
+          time += dt
+          times.append(time)
+          voltages.append(V)
+          #if at some point we run out of energy, indicate fail, recharge,
+          #reschedule
+          if V <= power.boost.min:
+            fail_flag = 1
+            break
+      else:
+        V, i_out = power.update(power.chrg.max, power.chrg.i, power.boost.out,
+          op.i_load[i],1,time_step)
+        time += time_step
+        times.append(time)
+        voltages.append(V)
+        #if at some point we run out of energy, indicate fail, recharge,
+        #reschedule
+        if V <= power.boost.min:
+          fail_flag = 1
+      # Check if we made it through or not
+      if fail_flag > 0:
+        print("Fail!")
+        # If we didn't make it, quit early and send back op along with False
+        # completion
+        op.fails += 1
+        return False, op
+    # If we made it here, fail flag shouldn't be on... send back true completion
+    # with op for convenience
+    return True, op
+
+  def run_work_interruptible(power,times,voltages,op):
+    print("Need to implement")
+    return True, op
+
 
 class OpTypes(Enum):
   MEMORY = 1
@@ -158,6 +240,11 @@ class PolicyTypes(Enum):
   BASIC = 1
   LOAD_AWARE = 2
   EVTS_FIRST = 3
+
+class QueueTypes(Enum):
+  ORDERED = 1
+  UNORDERED = 2
+  EVENT = 3
 
 class Operation:
   ''' Software operation that mcu will handle '''
@@ -171,6 +258,10 @@ class Operation:
       self.scalable = False
     self.times = []
     self.i_load = 0
+    self.atomic = True # TODO change for each optype
+    self.fails = 0
+    self.queue = QueueTypes.ORDERED
+    self.progress = 0 # Used differently by the different types
 
 class MemOp(Operation):
   ''' Defines memory bound operations in terms of memory access times '''
@@ -241,7 +332,7 @@ class Device:
     while (self.power.cap.V < self.power.chrg.max - .1):
       #TODO get efficiency for real
       dt = 1e-3
-      V = self.power.cap.update_v(self.power.chrg.max, self.power.chrg.i,0,0,1,dt)
+      V, i_dummy = self.power.update(self.power.chrg.max, self.power.chrg.i,0,0,1,dt)
       time += dt
       self.times.append(time)
       self.voltages.append(V)
@@ -250,49 +341,14 @@ class Device:
     while self.mcu.prog_complete() == False:
       # Use scheduler to pick next task
       next_tsk = self.sched.select_work()
-      print("Remove task: ",len(self.mcu.o_tsks))
-      print("Check: ",self.mcu.prog_complete())
       print(next_tsk)
       # For each op in each task, extract energy from cap
-      for i,time_step in enumerate(next_tsk.times):
-        print("on time ", i)
-        flag = 0
-        if fails >= 2: #TODO this is still hardcoded assuming full recharge
-          print("Not enough energy! Aborting program")
-          return -1
-        if time_step > 1e-3:
-          print("Time: ", time)
-          for j in np.arange(0,time_step,1e-3):
-            dt = 1e-3
-            V = self.power.cap.update_v(self.power.chrg.max, self.power.chrg.i,
-              self.power.boost.out, next_tsk.i_load[i],1,dt)
-            time += dt
-            self.times.append(time)
-            self.voltages.append(V)
-            if (V <= 0):
-              print("Need recharge!")
-              flag = 1
-              break
-          print("Time after: ", time)
-        else:
-          V = self.power.cap.update_v(self.power.chrg.max, self.power.chrg.i,
-            self.power.boost.out, next_tsk.i_load[i],1,time_step)
-          time += time_step
-          self.times.append(time)
-          self.voltages.append(V)
-          if (V <= 0):
-            print("Else Need recharge!")
-            flag = 1
-        if flag == 1:
-          print("Increment fail count! ", fails)
-          if fails == 0:
-            self.mcu.o_tsks.insert(0,next_tsk) #TODO still hardcoded
-          fails += 1
-
-          print("Insert task: ", len(self.mcu.o_tsks))
-        else:
-          print("Clearing fail!")
-          fails = 0
+      finished, op = self.sched.run_work(self.times,self.voltages,next_tsk)
+      if finished == False:
+        halted = self.sched.reschedule(op)
+        if halted:
+          print("No progress!")
+          break;
     print("Done program")
   def plot_program(self):
     ''' Plot voltage vs time produced while running a program '''
