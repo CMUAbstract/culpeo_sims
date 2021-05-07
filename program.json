@@ -1,18 +1,122 @@
-[
-  {
-    "type": 3,
-    "times": [10e-3,15000e-3,10e-3],
-    "i_loads": [0.050, 1.00, 0.050]
-  },
-  {
-    "type": 2,
-    "instr_count": 10e3
+{
+  "tasks": {
+    "ordered": {
+      "inner_tasks":
+      [
+        {
+          "atomic":true,
+          "ops":
+          [
+            {
+              "type": 3,
+              "times": [10e-3,100e-3,10e-3],
+              "i_loads": [0.050, 0.1, 0.050]
+            },
+            {
+              "type": 2,
+              "instr_count": 10e3
+            }
+          ]
+        },
+        {
+          "atomic":false,
+          "ops":
+          [
+            {
+              "type": 1,
+              "count": 10,
+              "latency": 2.5e-7,
+              "i_load": 2e-3
+            },
+            {
+              "type": 2,
+              "instr_count": 100e3
+            },
+            {
+              "type": 2,
+              "instr_count": 100e3
+            }
+          ]
+        },
+        {
+          "atomic":false,
+          "ops":
+          [
+            {
+              "type": 2,
+              "instr_count": 100e6
+            },
+            {
+              "type": 3,
+              "times": [10e-3,100e-3,10e-3],
+              "i_loads": [0.050, 0.1, 0.050]
+            }
+          ]
+        }
+      ]
+    },
+    "unordered": {
+      "inner_tasks":
+      [
+        {
+          "atomic":false,
+          "ops":
+          [
+            {
+              "type": 2,
+              "instr_count": 100e3
+            },
+            {
+              "type": 2,
+              "instr_count": 100e3
+            },
+            {
+              "type": 2,
+              "instr_count": 100e6
+            }
+          ]
+        },
+        {
+            "atomic":false,
+            "ops":
+            [
+              {
+                "type": 2,
+                "instr_count": 100e3
+              },
+              {
+                "type": 1,
+                "count": 1000,
+                "latency": 2.5e-7,
+                "i_load": 2e-3
+              },
+              {
+                "type": 2,
+                "instr_count": 100e6
+              }
+            ]
+        }
+      ]
+    },
+    "event": {
+      "inner_tasks":
+      [
+        {
+          "atomic":false,
+          "ops":
+          [
+            {
+              "type": 3,
+              "times": [10e-3,100e-3,10e-3],
+              "i_loads": [0.050, 0.1, 0.050]
+            },
+            {
+              "type": 2,
+              "instr_count": 100e3
+            }
+          ]
+        }
+      ]
+    }
   }
-  ,
-  {
-    "type": 1,
-    "count": 10,
-    "latency": 2.5e-7,
-    "i_load": 2e-3
-  }
-]
+}
