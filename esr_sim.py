@@ -745,13 +745,57 @@ def shmoo_benefit():
   plt.savefig("extra_work.png",bbox_inches='tight')
   plt.show()
 
+blues = ["#eff3ff","#bdd7e7","#6baed6","#3182bd","#08519c"]
+reds = ["#fee5d9","#fcae91","#fb6a4a","#de2d26","#a50f15"]
 
+def catnap_wrong():
+  cur_cap = 33e-3 #1mF
+  boost = booster(3,1.2,3) # basically camaroptera
+  # For each of a set of event tests
+  #tsk = task(6e-3,.25,1) # bluetooth
+  tasks = []
+  tasks.append(task(6e-3,2,1)) # bluetooth
+  tasks.append(task(50e-3,.25,1)) # Some expensive opp
+  tasks.append( task(125e-3,100e-3,1)) #lora packet
+  tasks.append( task(200e-3,62e-3,1)) #openlst peak
+  labels=['6mA,2s','50mA,250ms','125mA,100ms','200mA,62ms']
+  fig, ax = plt.subplots()
+  for tsk_cnt, tsk in enumerate(tasks):
+    E =  tsk.i*boost.out*tsk.t
+    diffs = []
+    esrs = np.arange(.2,2,.1)
+    v_mins = []
+    v_actuals = []
+    for esr in esrs:
+      V_min_pred = np.sqrt(2*E/cur_cap + boost.min**2)
+      v_mins.append(V_min_pred)
+      V_min_actual = np.sqrt(2*E/cur_cap + (boost.min + tsk.i*esr)**2)
+      v_actuals.append(V_min_actual)
+      diffs.append( (V_min_actual - V_min_pred))
+      if (V_min_actual > boost.max):
+        print("Error! not enough voltage");
+    ax.plot(esrs,diffs,reds[tsk_cnt+1],label=labels[tsk_cnt])
+  #ax2 = ax.twinx()
+  ax.set_ylabel("Actual Min. Voltage vs Predicted (V)")
+  ax.set_xlabel("ESR ($\Omega$)")
+  ax.legend()
+  plt.title(str("{:.3f}".format(E)) + " J Tasks, Running on Camaroptera")
+  #ax2.plot(esrs,v_mins,blues[2])
+  #ax2.plot(esrs,v_actuals,blues[3])
+  plt.savefig("camaroptera_catnap.pdf")
+  plt.show()
+  
+    # For ESR values between 200mOhm and 2Ohm
+      # Calculate diff between predicted and actual min voltage
+  # Plot all
 
 
 
 if __name__ == "__main__":
   if len(sys.argv) > 1:
     binary = int(sys.argv[1])
+  catnap_wrong()
+  sys.exit()
   #main()
   #boost = booster(2.6,1.8,2.5)
   #boost = booster(3.3,1.8,2.5)
