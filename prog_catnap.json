@@ -1,0 +1,78 @@
+{ "_comment": "All tasks have period -1 (unscheduled) and events post tasks",
+  "_comment1": "Just unordered tasks posted by events",
+  "tasks": {
+    "ordered": {
+      "inner_tasks":[]
+    },
+    "unordered": {
+      "inner_tasks":
+      [
+        {
+          "period":-1,
+          "periodic":false,
+          "atomic":false,
+          "ops":
+          [
+            {
+              "type": 2,
+              "instr_count": 100e3
+            },
+            {
+              "type": 2,
+              "instr_count": 100e3
+            },
+            {
+              "type": 2,
+              "instr_count": 100e6
+            }
+          ]
+        },
+        {
+            "period":-1,
+            "periodic":false,
+            "atomic":false,
+            "ops":
+            [
+              {
+                "type": 2,
+                "instr_count": 100e3
+              },
+              {
+                "type": 1,
+                "count": 1000,
+                "latency": 2.5e-7,
+                "i_load": 2e-3
+              },
+              {
+                "type": 2,
+                "instr_count": 100e6
+              }
+            ]
+        }
+      ]
+    },
+    "event": {
+      "inner_tasks":
+      [
+        {
+          "period":10,
+          "periodic":false,
+          "atomic":false,
+          "ops":
+          [
+            {
+              "type": 3,
+              "times": [10e-3,100e-3,10e-3],
+              "i_loads": [0.050, 0.1, 0.050]
+            },
+            {
+              "type": 2,
+              "instr_count": 100e3
+            }
+          ],
+          "schedule": 0
+        }
+      ]
+    }
+  }
+}
