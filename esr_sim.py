@@ -789,7 +789,17 @@ def catnap_wrong():
       # Calculate diff between predicted and actual min voltage
   # Plot all
 
-
+def minimum_start_voltage(filename):
+  cap = 28e-3
+  esr = 25/4
+  try:
+    df = pd.read_csv(filename, mangle_dupe_cols=True,
+         dtype=np.float64, skipinitialspace=True)#skiprows=[0])
+  except:
+    df = pd.read_csv(filename, mangle_dupe_cols=True,
+         dtype=np.float64, skipinitialspace=True,skiprows=[0])
+  vals = df.values
+  
 
 if __name__ == "__main__":
   if len(sys.argv) > 1:

@@ -1,0 +1,33 @@
+{
+  "tasks": {
+    "ordered" : {
+      "inner_tasks":
+      [
+        {
+          "period":-1,
+          "periodic":false,
+          "atomic":true,
+          "ops":
+          [
+            {
+              "type": 3,
+              "times": [.1],
+              "i_loads": [.05]
+            
+            }
+          ]
+        }
+      ]
+    },
+    "unordered": {
+      "inner_tasks":
+      [
+      ]
+    },
+    "events": {
+      "inner_tasks":
+      [
+      ]
+    }
+  }
+}

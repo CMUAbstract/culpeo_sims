@@ -1,9 +1,11 @@
-{
+{ "_comment": "Period of -1 means run task once, events do not schedule tasks in basic program",
   "tasks": {
     "ordered": {
       "inner_tasks":
       [
         {
+          "period":-1,
+          "periodic":false,
           "atomic":true,
           "ops":
           [
@@ -19,6 +21,8 @@
           ]
         },
         {
+          "period":-1,
+          "periodic":false,
           "atomic":false,
           "ops":
           [
@@ -39,6 +43,8 @@
           ]
         },
         {
+          "period":10,
+          "periodic":true,
           "atomic":false,
           "ops":
           [
@@ -59,6 +65,8 @@
       "inner_tasks":
       [
         {
+          "period":5,
+          "periodic":true,
           "atomic":false,
           "ops":
           [
@@ -77,6 +85,8 @@
           ]
         },
         {
+            "period":-1,
+            "periodic":false,
             "atomic":false,
             "ops":
             [
@@ -102,6 +112,8 @@
       "inner_tasks":
       [
         {
+          "period":10,
+          "periodic":false,
           "atomic":false,
           "ops":
           [

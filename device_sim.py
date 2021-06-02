@@ -181,7 +181,7 @@ class Scheduler:
     rechrg.i_load = [0]
     rechrgTask = Task(True,"event",[rechrg] * 1)
     return rechrgTask
- 
+
   def reschedule(self,tsk):
     '''Controls policy for rescheduling work after a power failure'''
     # We first check if the work is atomic or not
@@ -206,14 +206,16 @@ class Scheduler:
         print("Error rescheduling")
         return False
 
-  def run_work(self,times,voltages,tsk):
+  def run_work(self,times,voltages,currents,tsk):
     if tsk.atomic == True:
-      finished, test_tsk = self.run_work_atomic(self.power,times,voltages,tsk)
+      finished, test_tsk = \
+      self.run_work_atomic(self.power,times,voltages,currents,tsk)
     else:
-      finished, test_tsk = self.run_work_interruptible(self.power,times,voltages,tsk)
+      finished, test_tsk = \
+      self.run_work_interruptible(self.power,times,voltages,currents,tsk)
     return finished, test_tsk
 
-  def run_work_atomic(self,power,times,voltages,tsk):
+  def run_work_atomic(self,power,times,voltages,currents,tsk):
     time = times[-1]
     fail_flag = 0
     for op in tsk.ops:
@@ -226,6 +228,7 @@ class Scheduler:
             time += dt
             times.append(time)
             voltages.append(V)
+            currents.append(i_out)
             #if at some point we run out of energy, indicate fail, recharge,
             #reschedule
             if V <= power.boost.min:
@@ -237,6 +240,7 @@ class Scheduler:
           time += time_step
           times.append(time)
           voltages.append(V)
+          currents.append(i_out)
           #if at some point we run out of energy, indicate fail, recharge,
           #reschedule
           if V <= power.boost.min:
@@ -252,6 +256,145 @@ class Scheduler:
     # with op for convenience
     return True, tsk
 
+  def run_work_interruptible(self,power,times,voltages,currents,tsk):
+    time = times[-1]
+    fail_flag = 0
+    # Check if there's any progress in the tsk
+    if tsk.progress == 0:
+      ops = tsk.ops
+    else:
+      ops = tsk.ops[tsk.progress:]
+    for op_index, op in enumerate(ops):
+      if op.progress == 0:
+        cur_times = op.times
+        op_start_time = time
+      else:
+        if op.tsk_type == opTypes.MEMORY:
+          cur_times = op.times[op.progress:]
+        elif op.tsk_type == opTypes.COMPUTE:
+          op.times[0] -= op.progress
+          cur_times = op.times
+        else:
+          print("Error! no handling for progress for opType: ",op.tsk_type)
+          return False
+      for i, time_step in enumerate(cur_times):
+        if time_step > 1e-3:
+          for j in np.arange(0,time_step,1e-3):
+            dt = 1e-3
+            V, i_out = power.update(power.chrg.max, power.chrg.i, power.boost.out,
+              op.i_load[i],1,dt)
+            time += dt
+            times.append(time)
+            voltages.append(V)
+            currents.append(i_out)
+            # If at some point we run out of energy, indicate fail, recharge,
+            # reschedule
+            if V <= power.boost.min:
+              # Record progress if we're gonna fail
+              tsk.update_progress(op_index, i, op_start_time, time)
+              fail_flag = 1
+              break
+        else:
+          V, i_out = power.update(power.chrg.max, power.chrg.i, power.boost.out,
+            op.i_load[i],1,time_step)
+          time += time_step
+          times.append(time)
+          voltages.append(V)
+          currents.append(i_out)
+          #if at some point we run out of energy, indicate fail, recharge,
+          #reschedule
+          if V <= power.boost.min:
+            tsk.update_progress(op_index, i, op_start_time, time)
+            fail_flag = 1
+        # Check if we made it through or not
+        if fail_flag > 0:
+          print("Fail!")
+          # If we didn't make it, quit early and send back op along with False
+          # completion
+          tsk.fails += 1
+          return False, tsk
+    # If we made it here, fail flag shouldn't be on... send back true completion
+    # with op for convenience
+    return True, tsk
+
+class CatNapScheduler(Scheduler):
+  def __init(self,policy,power_sys,mcu):
+    super().__init__(self,policy,power_sys,mcu)
+    # Needs to keep track of energy expenditure from events
+    self.evts_voltage = power_sys.boost.min
+  def select_work(self,time):
+    print("Need to test!")
+    # Look at voltage, schedule recharge if necessary
+    # TODO is this actually catnap semantics?
+    if self.power.cap.V <= self.evts_voltage:
+      next_tsk = self.schedule_rechrg()
+      return next_tsk
+    next_tsk = schedule_op()
+    if next_tsk != None:
+      return next_tsk
+    next_tsk = self.schedule_rechrg()
+    # In the future we can degrade operations
+    return next_tsk
+  def reschedule(self,tsk):
+    print("Need to test!")
+    # Needs to handle rescheduling after a power failure and rescheduling due to
+    # preemption
+    if tsk.queue == "event":
+      self.mcu.evts.insert(0,tsk) # We need to rerun
+      if tsk.fails < 2: #TODO also needs to rework the event voltage
+        return False # Still going
+      else:
+        return True
+    if tsk.queue == "unordered":
+      self.mcu.uno_tsks.insert(0,tsk)
+      if tsk.fails < 2: #TODO: need to add in degrading based on "fail" count
+        return False    # even if fail is from event preempting
+      else:
+        return False
+  def schedule_op(self,cur_time):
+    # Check for events that need to be rerun
+    for tsk in self.mcu.evts:
+      if tsk.fails > 0:
+        return tsk
+    # Return event with cur_time - last_time - period >= 0
+    for tsk in self.mcu.evts:
+      if cur_time - tsk.last_run - tsk.period >= 0:
+        return tsk
+    # Check for tasks that need to be rerun
+    for tsk in self.mcu.uno_tsks:
+      if tsk.fails > 0:
+        return tsk
+    # Check for tasks that were posted to run periodically
+    for tsk in self.mcu.uno_tsks:
+      if cur_time - tsk.last_run - tsk.period >= 0:
+        return tsk
+  def run_work(self,times,voltages,tsk):
+    if tsk.queue == "event":
+      start_v = self.power.cap.V #TODO make sure ESR bounces back up
+      finished, test_tsk = self.run_work_atomic(self.power,times,voltages,tsk)
+      stop_v = self.power.cap.V
+      if finished == True:
+        tsk.last_run = times[-1]
+        tsk.fails = 0
+        tsk.progress = 0
+        if tsk.periodic == True:
+          self.mcu.evts.append(tsk)
+      # If we scheduled another task, build it and add it to the queue... crap
+      if finished == True and tsk.schedule_next >= 0:
+        self.mcu.uno_tsks.append(self.mcu.prog.queues[1][tsk.schedule_next])
+      #update v_min TODO bin by harvestable power
+      e_used = .5*self.power.cap.cap*(start_v**2 - stop_v**2)
+      # TODO track energy for all events
+      v_min = np.sqrt(2*e_used/power.cap.cap + power.boost.min**2)
+      if v_min > self.evts_voltage:
+        self.evts_voltage = v_min
+    elif tsk.queue == "unordered":
+      finised, test_tsk = self.run_work_interruptible(self.power,times,voltages,tsk)
+    else:
+      print("Error! Wrong queue")
+      finished = False
+      test_tsk = None
+    return finished, test_tsk
   def run_work_interruptible(self,power,times,voltages,tsk):
     time = times[-1]
     fail_flag = 0
@@ -284,7 +427,7 @@ class Scheduler:
             voltages.append(V)
             # If at some point we run out of energy, indicate fail, recharge,
             # reschedule
-            if V <= power.boost.min:
+            if V <= power.boost.min or V <=self.evts_voltage or self.event_fired():
               # Record progress if we're gonna fail
               tsk.update_progress(op_index, i, op_start_time, time)
               fail_flag = 1
@@ -297,7 +440,8 @@ class Scheduler:
           voltages.append(V)
           #if at some point we run out of energy, indicate fail, recharge,
           #reschedule
-          if V <= power.boost.min:
+          if V <= power.boost.min or V <=self.evts_voltage or \
+            self.event_fired(time):
             tsk.update_progress(op_index, i, op_start_time, time)
             fail_flag = 1
         # Check if we made it through or not
@@ -310,8 +454,9 @@ class Scheduler:
     # If we made it here, fail flag shouldn't be on... send back true completion
     # with op for convenience
     return True, tsk
-
-
+  #def event_fired(self,cur_time):
+  #  for evt in self.mcu.evts:
+  #    if cur_time - evt.
 class OpTypes(Enum):
   MEMORY = 1
   COMPUTE = 2
@@ -330,16 +475,21 @@ class QueueTypes(Enum):
 
 class Task:
   '''Holds an ordered series of operations'''
-  def __init__(self,atomic,queue,ops):
+  def __init__(self,atomic,queue,ops,period,periodic):
     self.atomic = atomic
     self.ops = ops
     self.fails = 0
     self.progress = 0
     self.queue = queue
+    self.period = period
+    self.periodic = periodic
+    self.last_run = -1
+    self.schedule_next = -1
   def __str__(self):
     return '(Task: atomic['+str(self.atomic)+'] fails['+str(self.fails)+\
     '] progress['+str(self.progress)+'] queue['+str(self.queue)+ \
-    '] ops['+str(len(self.ops))+'] )'
+    '] ops['+str(len(self.ops))+'] period['+ str(self.period)+ \
+    '] periodic['+str(self.periodic)+'] last_run['+str(self.last_run) +'])'
   def update_progress(self,op_index,op_step,op_start_time,cur_time):
     if self.atomic:
       print("Error! can't run atomic task as interruptible")
@@ -407,6 +557,7 @@ class Program:
   def __init__(self):
     self.tsks = [] #tasks are arrays of ops
   def build(self,prog_txt,mcu_freq,mcu_i):
+    print(prog_txt)
     prog_file = open(prog_txt)
     json_prog = json.load(prog_file) 
     for queue in json_prog["tasks"]:
@@ -430,7 +581,7 @@ class Program:
             # PeriphOp
             new_op = PeriphOp(OpTypes(op["type"]),op["times"],op["i_loads"])
           ops.append(new_op)
-        newTsk = Task(tsk["atomic"],queue,ops)
+        newTsk = Task(tsk["atomic"],queue,ops,tsk["period"],tsk["periodic"])
         self.tsks.append(newTsk)
 
 class Device:
@@ -442,6 +593,7 @@ class Device:
     self.prog = program # List of ops
     self.times = []
     self.voltages = []
+    self.currents = []
   def run_program(self):
     ''' Execute the current program given the device setup '''
     self.mcu.load_program(self.prog)
@@ -462,6 +614,7 @@ class Device:
       time += dt
       self.times.append(time)
       self.voltages.append(V)
+      self.currents.append(i_dummy)
     print("charged cap: ",self.power.cap.V, self.mcu.prog_complete())
     fails = 0
     while self.mcu.prog_complete() == False:
@@ -469,7 +622,8 @@ class Device:
       next_tsk = self.sched.select_work()
       print(next_tsk)
       # For each op in each task, extract energy from cap
-      finished, tskOut = self.sched.run_work(self.times,self.voltages,next_tsk)
+      finished, tskOut = \
+      self.sched.run_work(self.times,self.voltages,self.currents,next_tsk)
       if finished == False:
         halted = self.sched.reschedule(tskOut)
         if halted:
@@ -480,8 +634,20 @@ class Device:
     ''' Plot voltage vs time produced while running a program '''
     fig, ax = plt.subplots()
     ax.plot(self.times,self.voltages,color='#6baed6')
-    plt.show()
     plt.savefig("program.pdf")
+    plt.show()
+  def plot_allowed_swing(self):
+    fig, ax = plt.subplots()
+    ax2 = ax.twinx()
+    ax.plot(self.times,self.voltages,color='#6baed6')
+    allowed_drop = np.subtract(self.voltages, self.power.boost.min)
+    allowed_current = np.divide(allowed_drop,self.power.cap.r)
+    change = np.divide(allowed_current, self.currents)
+    change = np.multiply(change,100)
+    ax2.plot(self.times,change,color="#fb6a4a")
+    plt.savefig("frac_diff.pdf")
+    plt.show()
+
 
 artyBoost = Booster(5.5,2.5,3.3)
 artyChrg = Charger(5.5,.025)
@@ -499,7 +665,7 @@ def handle_args():
   nargs=2)
   parser.add_argument("-c","--cap", nargs=2, type=float,
   help="capacity (in F) and ESR (in Ohms) for storage capacitor")
-  parser.add_argument("-p","--program", nargs=1,
+  parser.add_argument("-p","--program", nargs=1, type=str,
   help="json file specifying operations to run")
   parser.add_argument("--mcu",nargs=2, type=float,
   help="MCU frequency and typical operating current")
@@ -522,7 +688,7 @@ def build_system_pieces(args):
   else:
     newCap = kemet
   if args.program != None and len(args.program) == 1:
-    progFile = args.program
+    progFile = args.program[0]
   else:
     progFile = "program.json"
   if args.mcu != None and len(args.mcu) == 2:
@@ -546,3 +712,4 @@ if __name__ == "__main__":
   Arty = build_system_pieces(args)
   Arty.run_program()
   Arty.plot_program()
+  Arty.plot_allowed_swing()
