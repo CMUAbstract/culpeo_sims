@@ -18,7 +18,7 @@ class Cap:
   def parallel(self,cap):
     self.cap = self.cap + cap.cap
     self.r = 1/(1/self.r + 1/cap.r)
-  
+
   def update_v(self,v_in,i_in,v_out,i_out,n,dt):
     e_step = (v_in*i_in - v_out*i_out/n)*dt
     term1 = self.v_internal**2
@@ -31,8 +31,9 @@ class Cap:
       self.v_internal = v_in
     if (self.v_internal <= 0):
       self.v_internal = 0
-    i_net = i_in - i_out
+    i_net = i_in - i_out/n #TODO: make sure this approximates efficiency
     self.V = self.v_internal + ( i_net*self.r)
+    #print("Drop: ",i_net*self.r)
     #self.V = self.v_internal - (self.last_i - i_net)*self.r #TODO holds for charging?
     #print("Vals after: ", e_step,i_net,self.v_internal,self.V)
     if (self.V > v_in):
