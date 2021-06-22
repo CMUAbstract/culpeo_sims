@@ -282,7 +282,7 @@ def calc_min_forward(I,dt):
     if count == 0:
       new_Vs = 2*E/C + (L+Vd)**2
     else:
-      if Vs[count-1] - Vd > L:
+      if np.sqrt(Vs[count-1]) - Vd > L:
         new_Vs = 2*E/C + Vs[count-1]
       else:
         new_Vs = 2*E/C + (L+Vd)**2
