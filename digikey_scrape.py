@@ -66,7 +66,7 @@ def PlotAgainstESR(esr, var, var_name, var_unit):
   ax.set_xlabel('ESR ($\Omega$)')
   ax.set_title('ESR vs ' + var_name)
   ax.axvline(.6,color='k',lw=2,ls='--')
-  plt.savefig(var_name + "_vs_esr.pdf")
+  plt.savefig(var_name + "_vs_esr.png")
   return ax
 
 def PlotMultivariate(x, group_by, group_name, var, var_name, var_unit):
@@ -86,7 +86,7 @@ def PlotMultivariate(x, group_by, group_name, var, var_name, var_unit):
   ax.set_xlabel('ESR ($\Omega$)')
   ax.set_title('ESR vs ' + var_name + " Grouped by " + group_name)
   ax.legend()
-  plt.savefig(var_name + "_vs_esr_multi_.pdf")
+  plt.savefig(var_name + "_vs_esr_multi_.png")
 
 def PlotCorrelation(xs, group_by, group_name, var, var_name):
   uniques = group_by.unique()
@@ -140,7 +140,7 @@ if __name__ == "__main__":
   # Calculate energy density
   df['Energy Density'] = df['Energy']/df['Volume']
   # Next restriction-- Drop caps larger than the Kemet on Arty and > 6V -----
-  df = df[df['Height - Seated (Max)'] < 10 or df['Size / Dimension'] < 100]
+  df = df[df['Height - Seated (Max)'] < 10]
   #df =df[df['Volume'] < 27023] # Only look at caps smaller than the kemet
   df =df[df['Volume'] < MAX_VOLUME] # Only look at caps smaller than a CR2032
   #df = df[df['Voltage - Rated'] < 6]
@@ -155,7 +155,7 @@ if __name__ == "__main__":
   total = df['ESR (Equivalent Series Resistance)'].size
   percent = 100*greater/total
   ax.text(10,.4,"{:.2f}".format(percent)+'% > 600 $m\Omega$')
-  plt.savefig('Capacitance_vs_esr.pdf')
+  plt.savefig('Capacitance_vs_esr.png')
   #PlotAgainstESR(ESRs, df['Price'],"Price","$")
   #PlotAgainstESR(ESRs, df['Voltage - Rated'],"Voltage", "V")
   #PlotAgainstESR(ESRs, df['Volume'],"Volume", "mm^3")

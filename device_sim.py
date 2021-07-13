@@ -23,14 +23,21 @@ class Cap:
     e_step = (v_in*i_in - v_out*i_out/n)*dt
     term1 = self.v_internal**2
     term2 = 2*e_step/self.cap
+    #if (i_out > .01):
+    #  print("v_internal before: ",self.v_internal,"i is: ",i_out/n," E is: ",e_step)
     if term2 > 0 or term1 > abs(term2):
       self.v_internal = np.sqrt(term1 + term2)
     else:
       self.v_internal = 0
+      print("too small!")
     if (self.v_internal > v_in):
       self.v_internal = v_in
+      print("too big!")
     if (self.v_internal <= 0):
       self.v_internal = 0
+      print("v_internal is too small!")
+    #if (i_out > .01):
+    #  print("\tv_internal: ",self.v_internal,"i is: ",i_out/n)
     i_net = i_in - i_out/n #TODO: make sure this approximates efficiency
     self.V = self.v_internal + ( i_net*self.r)
     #print("Drop: ",i_net*self.r)
@@ -44,7 +51,7 @@ class Cap:
       self.last_i = 0
     else:
       self.last_i = i_net
-    return self.V
+    return self.V, self.v_internal #TODO remove this
 
 
 #efficiency_table = {5.3 : {.1:.8, .5:.94, 1:.92},
