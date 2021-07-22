@@ -1,7 +1,10 @@
 INPUTS := loadProfiling.c uart.c
 TARGET := main
 
-EXPT_ID := 2
+EXPT_ID ?= 6
+
+# Conversion: V = 4096*adc_val/3.3
+VHIGH ?= 3228
 
 ifeq ($(EXPT_ID), 1)
 VSAFE := 2381
@@ -13,16 +16,34 @@ else ifeq ($(EXPT_ID), 3)
 VSAFE := 2539
 TLOAD := 61
 else ifeq ($(EXPT_ID), 4)
-VSAFE := 2737
+#VSAFE := 2737
+# Replaced with higher vsafe for now...
+VSAFE := 3160
 TLOAD := 30
 else ifeq ($(EXPT_ID), 5)
 VSAFE := 3129
 TLOAD := 15
+else ifeq ($(EXPT_ID), 6)
+# Re-calc with 28Ohm esr
+#VSAFE := 2483
+# Swapped for testing
+VSAFE := 3129 
+TLOAD := 59
+else ifeq ($(EXPT_ID), 7)
+VSAFE := 2705 
+TLOAD := 30
+else ifeq ($(EXPT_ID), 8)
+VSAFE := 3160
+TLOAD := 15
+else ifeq ($(EXPT_ID), 9)
+# Probably won't work
+VSAFE := 3220
+TLOAD := 12
 endif
 
-MSPGCC_PATH := $(HOME)/opt/ti/mspgcc/bin
-MSP430_INC_PATH := $(HOME)/opt/ti/mspgcc/msp430-elf/include/
-MSP430_LD_PATH := $(HOME)/opt/ti/mspgcc/msp430-elf/lib/
+MSPGCC_PATH := /opt/ti/mspgcc/bin
+MSP430_INC_PATH := /opt/ti/mspgcc/include/
+MSP430_LD_PATH := /opt/ti/mspgcc/include/
 
 CC := $(MSPGCC_PATH)/msp430-elf-gcc
 AR := $(MSPGCC_PATH)/msp430-elf-ar
@@ -34,7 +55,8 @@ ifeq ($(DEVICE), MSP430FR5994)
 MCU := msp430fr5994
 endif
 
-CFLAGS := -D __$(DEVICE)__ -DVSAFE=$(VSAFE) -DTLOAD=$(TLOAD) -mmcu=$(MCU) -O2 -static
+CFLAGS := -D __$(DEVICE)__ -DVSAFE=$(VSAFE) -DTLOAD=$(TLOAD) -DVHIGH=$(VHIGH) -mmcu=$(MCU) \
+-O2 -static -DEXPT_ID=$(EXPT_ID)
 IFLAGS := -I $(MSP430_INC_PATH)
 LFLAGS := -T $(MCU).ld -L $(MSP430_LD_PATH) -mmcu=$(MCU)
 
