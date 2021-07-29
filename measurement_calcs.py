@@ -6,9 +6,10 @@ import matplotlib
 #matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import re
+import glob
 shunt = 4.7
 gain = 88
-REBOUND_SECS = 3
+REBOUND_SECS = 1
 
 eff_table = {2.4 : { .0001: .45, .0002:.60, .0003:.65,.0005:.70,
 .001:.75, .002: .78, .004:.79, .006:.79,.008:.80, .015:.80, .02:.81,
@@ -59,7 +60,26 @@ def get_eff(V_in,I_out,eff):
   return eff[V][I]
 
 
-def find_min(filename,load):
+def extract_first_dip(first_deriv,times_decimated,lim=.025):
+  start = -1
+  stop = -1
+  #lim = .01
+  time_start = -1
+  for i, x in enumerate(first_deriv):
+    if start == -1:
+      if x < -1*lim:
+        start = i
+    else:
+      if x > lim:
+        stop = i
+        time_start = times_decimated[start]
+        start = -1
+        stop = -1
+        break
+  return time_start
+
+
+def plot_two(filename, filename1,spacing=100,lim=.01):
   try:
     df = pd.read_csv(filename, mangle_dupe_cols=True,
          dtype=np.float64, skipinitialspace=True)#skiprows=[0])
@@ -69,22 +89,58 @@ def find_min(filename,load):
   vals = df.values
   vcaps = vals[:,1]
   times = vals[:,0]
-  vcaps_decimated = vcaps[::100]
-  times_decimated = times[::100]
+  vcaps_decimated = vcaps[::spacing]
+  times_decimated = times[::spacing]
+  first_deriv = np.diff(vcaps_decimated)
+  try:
+    df = pd.read_csv(filename1, mangle_dupe_cols=True,
+         dtype=np.float64, skipinitialspace=True)#skiprows=[0])
+  except:
+    df = pd.read_csv(filename1, mangle_dupe_cols=True,
+         dtype=np.float64, skipinitialspace=True,skiprows=[0])
+  vals1 = df.values
+  vcaps1 = vals1[:,1]
+  times1 = vals1[:,0]
+  vcaps_decimated1 = vcaps1[::spacing]
+  times_decimated1 = times1[::spacing]
+  first_deriv1 = np.diff(vcaps_decimated1)
+  # Find first peak in first input
+  time_start = extract_first_dip(first_deriv,times_decimated)
+  # Find first peak in second input
+  time_start1 = extract_first_dip(first_deriv1,times_decimated1)
+
+  fig, ax = plt.subplots()
+  ax.plot(times_decimated, vcaps_decimated,'b',times_decimated1,vcaps_decimated1,'r')
+  #ax.plot(times_decimated1, vcaps_decimated1,'r-')
+  plt.show()
+
+def find_min(filename,load,spacing=100,lim=.01):
+  try:
+    df = pd.read_csv(filename, mangle_dupe_cols=True,
+         dtype=np.float64, skipinitialspace=True)#skiprows=[0])
+  except:
+    df = pd.read_csv(filename, mangle_dupe_cols=True,
+         dtype=np.float64, skipinitialspace=True,skiprows=[0])
+  vals = df.values
+  vcaps = vals[:,1]
+  times = vals[:,0]
+  vcaps_decimated = vcaps[::spacing]
+  times_decimated = times[::spacing]
   first_deriv = np.diff(vcaps_decimated)
   # Find the start/stop points
   time_pairs = []
   index_pairs = []
   start = -1
   stop = -1
+  #lim = .025
+  #lim = .01
+  esrs = []
   for i, x in enumerate(first_deriv):
     if start == -1:
-      #if x < -.1:
-      if x < -.025:
+      if x < -1*lim:
         start = i
     else:
-      #if x > .1:
-      if x > .025:
+      if x > lim:
         stop = i
         time_pairs.append([times_decimated[start],times_decimated[stop]])
         index_pairs.append([start,stop])
@@ -102,13 +158,24 @@ def find_min(filename,load):
     print(pair[1],rebound_index)
     rebound_v = max(vcaps_decimated[pair[1]:rebound_index])
     esr = (rebound_v - min_v)/load
-    print("Esr is: ",esr)
+    esrs.append(esr)
+    print("Esr is: ",esr, "measured for times: ",\
+    times_decimated[pair[0]], \
+    times_decimated[pair[1]], "|")
+    E_used = load*np.multiply(vcaps_decimated[pair[0]:pair[1]],times_decimated[1]
+    -times_decimated[0])
+    print("E_used is ",np.sum(E_used))
   fig, ax = plt.subplots()
-  ax.plot(times_decimated, vcaps_decimated,'b.')
-  print(len(times_decimated),len(first_deriv[::100]))
+  ax.plot(times_decimated, vcaps_decimated,'b-')
+  print(len(times_decimated),len(first_deriv[::spacing]))
   ax2 = ax.twinx()
   ax2.plot(times_decimated[1:],first_deriv,'k.')
   plt.show()
+  return np.average(esrs)
+  #fig, ax = plt.subplots()
+  #cap_current = first_deriv*.045/(times_decimated[1] - times_decimated[0])
+  #ax.plot(times_decimated[1:], cap_current,'r')
+  #plt.show()
 
 # Load levels, in A
 loads = [5.4e-3, 11.5e-3, 48e-3]
@@ -129,6 +196,71 @@ Vstart = 2.8
 
 cont_runtimes = []
 if __name__ == "__main__":
+  num_files = len(sys.argv)
+  print(len (sys.argv))
+  i = 1
+  all_files = []
+  while i < num_files:
+    print(sys.argv[i])
+    all_files.append(sys.argv[i])
+    i += 1
+  #all_files = glob.escape(all_files)
+  esr_vals = []
+  for filename in all_files:
+    #pos = re.search('_10s_',filename).start()
+    pos = re.search('mA_',filename).start()
+    load_str = filename[:pos]
+    pos = re.search('vcap_w_tant_',load_str).end()
+    load_str = load_str[pos:]
+    print(load_str)
+    loads = re.findall(r'[0-9]+',load_str)
+    print(loads)
+    load = float(loads[1])
+    load = load*1e-3
+    print("Running with load ",load)
+    spacing = 100
+    #spacing = 500
+    if (load < .010):
+      spacing = 1000
+    #pos = re.search('_10s_',filename).end()
+    pos = re.search('mA_',filename).end()
+    end_str = filename[pos:]
+    pos = re.search('_duty_cycle',end_str).start()
+    end_str = end_str[:pos]
+    secs = re.findall(r'[0-9]+',end_str)
+    print(end_str)
+    print(secs)
+    base = float(secs[0])
+    print("base is: ",base)
+    if len(secs) > 2:
+      if (float(secs[2]) < 10):
+        sec_dec = float(secs[2])*10
+      else:
+        sec_dec = float(secs[2])
+      sec_dec *= .01
+    else:
+      sec_dec = 0
+    print("Sec dec is: ",sec_dec)
+    print("Sec is",secs[1])
+    duty_cycle = float(secs[1]) + sec_dec
+    print("duty cycle is: ",duty_cycle)
+    on_time = base - .01*duty_cycle*base
+    print("on time is ",on_time)
+    if on_time <= .01:
+      lim = .0075
+      spacing = 10
+    else:
+      lim = .01
+    print("lim is ",lim)
+    avg_esr = find_min(filename,load,spacing,lim)
+    if np.isnan(avg_esr) == False:
+      esr_vals.append(avg_esr)
+    print("Avg esr is: ",avg_esr)
+  print("Done! ESRs are ", esr_vals)
+  print(all_files)
+  #esr_vals = esr_vals[~np.isnan(esr_vals)]
+  print("Final avg is: ", np.average(esr_vals), "for runtime ", on_time)
+  sys.exit()
   # For stable voltages, here's how we calculate runtime:
   for load in loads:
     eff_load = load/get_eff(Vmin,load,eff_table)

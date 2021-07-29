@@ -6,13 +6,17 @@ import matplotlib.pyplot as plt
 import math
 import csv
 
-gain = 88
+#gain = 88
 #gain = 1.375
+#gain = 16
+gain = 16
 shunt = 4.7
 epsilon = 0.001
-cap_count = 5
+cap_count = 6
 CAP = .0075*cap_count
-CAP_ESR = 25/cap_count
+#CAP_ESR = 25/cap_count
+CAP_ESR = 22
+MIN_VOLTAGE = 1.81
 # Power save disabled, TPS 61200
 # For VOut = 5V
 #3.6 : {.0002:.02, .0003:.03,.0005:.05, .001:.10, .002: .20, .004:.30, .006:.40,
@@ -23,6 +27,12 @@ efficiency_table_ones = {5.3 : {.1:1, .5:1, 1:1},
                     4.2 : {.1:1, .5:1, 1:1},
                     3.6 : {.1:1, .5:1, 1:1},
                     2.4 : {.1:1, .5:1, 1:1}}
+
+efficiency_table_half = {5.3 : {.1:.6, .5:.6, 1:.6},
+                    4.2 : {.1:.6, .5:.6, 1:.6},
+                    3.6 : {.1:.6, .5:.6, 1:.6},
+                    2.4 : {.1:.6, .5:.6, 1:.6},
+                    1.8 : {.1:.5, .5:.5, 1:.5}}
 
 # For VOut = 3.3V
 efficiency_table = {2.4 : { .0001: .02, .0002:.04, .0003:.05,.0005:.07, .001:.15, .002: .25, .004:.40,
@@ -42,7 +52,7 @@ efficiency_table_ps_actual = {2.4 : { .0001: .45, .0002:.60, .0003:.65,.0005:.70
 .006:.55,.008:.57, .015:.57, .02:.58, .03:.6,.1:.75,.15:.70,.2:.6}
 }
 
-efficiency_table_ps = efficiency_table_ps_actual
+efficiency_table_ps = efficiency_table_half
 
 def find_nearest(array,value):
   new_array = np.asarray(array)
@@ -67,8 +77,8 @@ def calc_sim_starting_point(I, time_step,Vstart):
   #cap = Cap(15e-3,25/2)
   #cap = Cap(7e-3,25/1)
   cap = Cap(CAP,CAP_ESR)
-  Vmin = 1.81
-  Vmax = 2.3
+  Vmin = MIN_VOLTAGE
+  Vmax = 2.42
   Vop = 2.56
   # Reset cap values
   flag = 0
@@ -122,7 +132,7 @@ def calc_sim_starting_point(I, time_step,Vstart):
   if ( Vsmin <  np.sqrt(2*Efin/cap.cap + Vmin**2)):
     print("Error! too small")
   print("Vmin is: ", min(Vs), " index is ", min_index, " out of: ",len(Vs))
-  print("Safe from Vsmin is : ",Vsmin, "current at max: ",I[min_index])
+  print("Safe from Vsmin is : ",Vsmin, "current at max: ",I[min_index-1])
   ax2 = ax.twinx()
   ax.plot(times,Vs,'b-',label='Cap. Voltage')
   ax.plot(times,V_internals,'r.',label='Internal cap voltage')
@@ -147,13 +157,13 @@ def calc_sim(I,time_step,vcap=[]):
   #cap = Cap(28e-3,25/4)
   #cap = Cap(22.5e-3,25/3)
   print("Running calc sim!")
-  cap = Cap(15e-3,25/2)
+  cap = Cap(CAP,CAP_ESR)
   #cap = Cap(7e-3,25/1)
   Vmin = 1.81
   Vobj = VstartMin()
   Vobj.Vstart = vcap[0,1]
   print("Starting at: ",vcap[0,1])
-  Vmax = 2.3
+  Vmax = 2.42
   Vop = 2.56
   # Reset cap values
   flag = 0
@@ -168,9 +178,10 @@ def calc_sim(I,time_step,vcap=[]):
   times.append(cur_time)
   for i in I:
     cur_time = cur_time + time_step
-    new_V = cap.update_v(Vmax,0,Vop,i,get_eff(cap.V,i,efficiency_table_ps),time_step)
+    new_V,v_internal = cap.update_v(Vmax,0,Vop,i,get_eff(cap.V,i,efficiency_table_ps),time_step)
     #new_V = cap.update_v(Vmax,0,Vop,i,1,time_step)
     #print("New V is: ",new_V)
+    #print(new_V)
     Vs.append(new_V)
     #print(Vs)
     #print(times)
@@ -185,6 +196,8 @@ def calc_sim(I,time_step,vcap=[]):
   fig, ax = plt.subplots()
   #print("Scattering ", len(times), len(Vs), len(I))
   #ax2 = ax.twinx()
+  #print(times)
+  #print(Vs)
   ax.plot(times,Vs,'b-',label='Cap. Voltage')
   #ax2.plot(times,I,'r-',label='Current')
   #ax.set_ylabel('Voltage (V)')
@@ -305,12 +318,14 @@ def calc_min(I,time_step,vcap=[]):
   plt.show()
 
 
-def calc_min_forward(I,dt):
-  L = 1.81
+def calc_min_forward(I,dt,plot=True):
+  L = MIN_VOLTAGE
+  L *= 1.05
   #C = .015
   C = CAP
   #R = 12.5
   R = CAP_ESR
+  print("Using esr, cap:",CAP_ESR,CAP)
   V = 2.56
   I = np.flip(I) # Reverse and start calculating from the back
   Vs = [] # Safe Vstarts squared
@@ -342,16 +357,17 @@ def calc_min_forward(I,dt):
     if (new_Vs < L**2):
       print("Error! value too low: ",new_Vs, count, i)
     Vs.append(new_Vs)
-  fig, ax = plt.subplots()
-  times = np.arange(0,len(I)*dt,dt)
-  Vtrace = np.sqrt(Vs)
-  Vtrace = np.flip(Vtrace)
-  ax.plot(times,Vtrace)
-  Vdrops = np.flip(Vdrops)
-  ax2 = ax.twinx()
-  ax2.plot(times,Vdrops,'-r')
-  plt.title("calc min forward")
-  plt.show()
+  if plot == True:
+    fig, ax = plt.subplots()
+    times = np.arange(0,len(I)*dt,dt)
+    Vtrace = np.sqrt(Vs)
+    Vtrace = np.flip(Vtrace)
+    ax.plot(times,Vtrace)
+    Vdrops = np.flip(Vdrops)
+    ax2 = ax.twinx()
+    ax2.plot(times,Vdrops,'-r')
+    plt.title("calc min forward")
+    plt.show()
   print("Vmin forward: ",np.sqrt(Vs[-1]))
   # Comparison to other estimates
   E = 0
@@ -362,6 +378,7 @@ def calc_min_forward(I,dt):
   naive_min = np.sqrt(2*E/CAP + L**2) 
   naive_better_min = np.sqrt(2*E/CAP + (L + avg_i*CAP_ESR)**2)
   conservative_estimate = np.sqrt(2*E/CAP + (L + max_i*CAP_ESR)**2)
+  print("E_used is: ",E,)
   print("Naive estimate: ",naive_min)
   print("ESR with avg: ",naive_better_min)
   print("Conservative: ",conservative_estimate)
@@ -389,7 +406,8 @@ if __name__ == "__main__":
     I = vals
     dt = 3.2e-5
   else:
-    diffs = np.subtract(vals[:,1],vals[:,2])
+    #diffs = np.subtract(vals[:,1],vals[:,2])
+    diffs = np.subtract(vals[:,3],vals[:,2])
     I = np.divide(diffs,gain*shunt)
     dt = vals[1,0] - vals[0,0] 
     print("Dt is : ",dt)
@@ -406,8 +424,8 @@ if __name__ == "__main__":
   #I = np.flip(I) # Reverse to double check alg.
   new_Vmin = calc_min_forward(I,dt)
   calc_sim_starting_point(I,dt,new_Vmin)
-  print("Second starting point:")
-  calc_sim_starting_point(I,dt,new_Vmin + 2)
+  #print("Second starting point:")
+  #calc_sim_starting_point(I,dt,new_Vmin + 2)
   E = 0
   for i in I:
     #E += i*dt
@@ -416,10 +434,11 @@ if __name__ == "__main__":
   #Vest = 1.81 + max(I)*CAP_ESR + E/CAP
   print("Estimate is: ",Vest)
   #calc_sim_starting_point(I,dt,new_Vmin+.1)
-  sys.exit()
+  #sys.exit()
   if vals.shape[1] > 3:
-    vals2 = np.column_stack((vals[:,0],vals[:,3]))
-    print("Times2: ",len(vals2)) 
+    vals2 = np.column_stack((vals[:,0],vals[:,1]))
+    print("in if, Times2: ",len(vals2),vals2) 
+    #sys.exit()
     calc_sim(I,dt,vals2)
   elif (len(sys.argv)>2):
     try:

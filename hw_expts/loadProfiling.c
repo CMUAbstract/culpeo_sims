@@ -8,10 +8,11 @@
 //#define VSAFE 2381
 //#define TLOAD 296
 
-
+/* Not true anymore
 #if VSAFE > VHIGH
 #error "Vsafe must be less than Vhigh"
 #endif
+*/
 
 void clockSetup();
 void chargingRoutine();
@@ -23,11 +24,6 @@ void activateLoad( size_t level, uint16_t ms);
 
 uint16_t adc_reading = 0;	
 
-// Map indicating which mosfets are connect to which GPIO pins
-// Note, we assume these are all coming off of port 3
-uint16_t pinMap[NUM_SIGS] = {BIT3, BIT4, BIT5, BIT6};
-// Connected to res:        1000   470,  220,   47  Ohm
-// Actual current:                5.4  11.5    48   mA
 int main(void)
 {
     WDTCTL = WDTPW | WDTHOLD;               // Stop WDT
@@ -36,6 +32,9 @@ int main(void)
 	// Configure GPIO
     P1OUT |= BIT0;                         // Clear P1.0 output latch for a defined power-on state
     P1DIR |= BIT0;                          // Set P1.0 to output direction
+
+    P2OUT &= ~BIT6;
+    P2DIR |= BIT6;
 	
 	// Control pin for Input Power -- connected to relay
 	P4OUT &= ~BIT1;
@@ -56,8 +55,8 @@ int main(void)
 	P3DIR |= BIT4;
   */
   
-  // P3.7 is connected to discharging circuit
-  // P3.6-3 is connected to specific load currents
+  // P3.7-3 is connected to specific load currents
+  // P3.3 will be used for discharging
   P3OUT &= ~(BIT3 + BIT4 + BIT5 + BIT6 + BIT7);
   P3DIR |= (BIT3 + BIT4 + BIT5 + BIT6 + BIT7);
 
@@ -75,13 +74,16 @@ int main(void)
 	clockSetup();
 	
 	uart_init();
+  int repeat_flag = 0;
     while(1)
     {
 		// Initially, all pins are set to LOW
-		P5IFG &= ~BIT6;
-		
+		  P5IFG &= ~BIT6;
+      if (repeat_flag < REPEAT_COUNT) {
+        repeat_flag++;
+        P5IFG |= BIT6;
+      }
 		// Wait for Button Press on P5.6
-    //while(1) {
       __bis_SR_register(LPM3_bits+GIE);
       uart_write("Start!\r\n");	
       
@@ -91,27 +93,23 @@ int main(void)
       
       // Disable Charging and enable OP Booster
       P4OUT &= ~BIT1;
-    //}
-		P7OUT |= BIT0;
+		  P7OUT |= BIT0;
 
-		mcu_delayms( 100 );
-    //while(1);
+		mcu_delayms( 300 );
     // Discharge down to Vsafe
-    // TODO need to figure out if this discharges
-    dischargingRoutine();
-		// Enable Load and run for tLOAD	
-		//P8OUT |= BIT1; // --> don't need anymore
-
+#ifdef USE_VSAFE
+    dischargingRoutine(); // Only removed for now
+#endif
+    P2OUT |= BIT6;
+    P2OUT &= ~BIT6;
     // Tap out load profile here
     for (int i = 0; i < LOAD_SIZE; i++) {
       activateLoad(loads[i],times[i]); // turns on and then off a given load 
     }
-    //mcu_delayms(0xffff);
-    //mcu_delayms(0xffff);
+		mcu_delayms( 500 );
 		// Disable Load and OP Booster
-		P7OUT &= ~BIT0;
-		//P8OUT &= ~BIT1;
-    uart_write("Done tload!");
+		P7OUT &= ~BIT0; 
+    uart_write("Done");
 	}
 }
 
@@ -177,8 +175,8 @@ void chargingRoutine(){
 	ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
 	ADC12CTL0 = ADC12SHT0_2 | ADC12ON;      // Sampling time, S&H=16, ADC12 on
 	ADC12CTL1 = ADC12SHP;                   // Use sampling timer
-	ADC12CTL2 |= ADC12RES_2;                // 12-bit conversion results
-	ADC12MCTL0 |= ADC12INCH_2;              // A2 ADC input select; Vref=AVCC
+	ADC12CTL2 = ADC12RES_2;                // 12-bit conversion results
+	ADC12MCTL0 = ADC12INCH_2;              // A2 ADC input select; Vref=AVCC
 	ADC12IER0 &= ~ADC12IE0;                  // Disable ADC conv complete interrupt
 
 	__delay_cycles(10000);
@@ -220,9 +218,14 @@ void dischargingRoutine(){
   ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
   ADC12CTL0 = ADC12SHT0_2 | ADC12ON;      // Sampling time, S&H=16, ADC12 on
   ADC12CTL1 = ADC12SHP;                   // Use sampling timer
-  ADC12CTL2 |= ADC12RES_2;                // 12-bit conversion results
-  ADC12MCTL0 |= ADC12INCH_2;              // A2 ADC input select; Vref=AVCC
+  ADC12CTL2 = ADC12RES_2;                // 12-bit conversion results
+  //ADC12MCTL0 = ADC12VRSEL_1 | ADC12INCH_2; // A2 ADC input select; VR=Vref
+  ADC12MCTL0 = ADC12INCH_2; // A2 ADC input select; VR=Vref
   ADC12IER0 &= ~ADC12IE0;                  // Disable ADC conv complete interrupt
+	
+  //while( REFCTL0 & REFGENBUSY );
+
+	//REFCTL0 = REFVSEL_3 | REFON;            //Set reference voltage(VR+) to 1.2
 
   __delay_cycles(10000);
   adc_reading = 0xfff;
@@ -243,12 +246,15 @@ void dischargingRoutine(){
 		 sprintf( str, "%d V\r\n", adc_reading );
 		 uart_write( str );
     // Now drain:
-    P3OUT |= BIT7;
-    P3DIR |= BIT7;
+    P3OUT |= BIT3;
+    P3DIR |= BIT3;
 		mcu_delayms(10);	
-    P3OUT &= ~BIT7;
+    P3OUT &= ~BIT3;
+		mcu_delayms(100);	
 
 	}
+  ADC12CTL0 &= ~(ADC12ON);
+	//REFCTL0 &= ~REFON;
   uart_write("Exit discharge");
 	adc_reading = 0;
 }

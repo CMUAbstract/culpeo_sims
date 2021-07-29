@@ -1,0 +1,88 @@
+
+Without tantalum:
+ESR for 90% duty cycle is between 36-40
+
+ESR for 97.5% duty cycle is 25-30
+
+ESR for 99% duty cycle is stable at 25-26
+
+With 2 330uF tantalum:
+ESR for 90% duty cycle is between 33-36
+ESR for 99% duty cycle is between 20-23
+
+With tantalum and ceramic decoupling
+ESR for 90% duty cycle is between 33-36
+ESR for 99% duty cycle is 22.1-22.7
+ESR for 99.9% duty cycle is 8.3-9
+ESR for 99.99% duty cycle is 3-3.5
+
+Tomorrow:
+-check behavior with 100ms pulse
+-check behavior with tantalum back in 
+-check behavior with ceramics again
+
+We should be able to pin a max frequency for each load level, i.e. the cap can
+only run at so many seconds for a given load anyway
+
+7/25
+-Now: rerun with output booster and see what the rebound looks like-- does the
+same difference with frequency hold?
+
+-Briefly: re-evaluate outline. What story do we need? What feedback could we
+grab?
+-Could we just take the current trace and dump it across a fft to get the
+frequency information? Then we should have a component at each
+frequency/amplitude. What the hell do we do with the amplitude information?
+
+-How does spice model esr at different frequencies? Does it?  How does SPICE
+model anything that is frequency dependent?
+
+-First: make sure we really do rebound with booster enabled. --> it does
+-Second: hook in diff amp and see what's happening --> we're getting bigger
+spikes than expected --> nope, I just forgot how to calculate current
+-Double check that the system freaks out below .9V-- increase 46mA runtime just
+a smidge -- yep, the booster freaks out
+
+
+-Need to take 2.5mA draw into account when considering bounce back. Maybe we
+should do this with less current?
+
+
+-See if we can predict the easy data without the booster
+-See if we can do rough predictions with the booster
+-What's a solution that uses a feedback loop?
+
+What do you need to profile ahead of time?
+
+Were we getting bounce from below 1.8 to above 1.8?
+
+What do hardware system developers gain from an understanding of supercapacitor behavior?
+  -limit(?) incoming power, o/w the voltage doesn't indicate available energy, and
+  all the nice guarantees for testing your atomic blocks don't hold
+  -Lower hard cutoff thresholds, or find a way to make cutoff thresholds
+  dependent on load current
+
+What do software system developers gain from an understanding of supercapacitor behavior?
+  -Opportunity to increase energy available atomically-- turn off high current
+  peripherals and continue computing with additional energy
+  -Opportunity to support higher current peripherals on the same device. --> how
+  many more ms of operation do we get by assuming we'll bounce back?
+What do app developers gain from an understanding of supercapacitor behavior?
+  -Higher likelihood that atomic operation completes
+  -Write code that is re-orderable or that can tolerate a delay and get
+  additional energy in a charge cycle
+
+vmin calc (with 1.81 as min), filename, comments
+2.39, full_sys_0-5mA_1s_pulse_2.csvpruned
+2.39, full_sys_0-5mA_1s_pulse_1.csvpruned
+2.39, full_sys_0-5mA_1s_pulse_0.csvpruned 
+2.7, full_sys_0-25mA_10ms_pulse_0.csvpruned --> no good, esr is too high
+2.1, full_sys_0-2-5mA_1s_pulse_0.csvpruned --> much higher sim. esr drop
+2.1 , full_sys_0-2-5mA_1s_pulse_1.csvpruned-->
+2.29, full_sys_2-11mA_100ms_pulse_0.csvpruned
+2.29, full_sys_2-11mA_100ms_pulse_1.csvpruned
+3.58, full_sys_2--46mA_10ms_pulse.csvpruned
+
+
+There is a measurable difference between the 1s wait between pulses and the 10s
+wait-- the esr goes from ~9 to 7.57

@@ -4,42 +4,20 @@ TARGET := main
 EXPT_ID ?= 6
 
 # Conversion: V = 4096*adc_val/3.3
+# Converted down to V = 4096*adc_val/2.5
 VHIGH ?= 3228
 
-ifeq ($(EXPT_ID), 1)
-VSAFE := 2381
-TLOAD := 296
-else ifeq ($(EXPT_ID), 2)
-VSAFE := 2420
-TLOAD := 152
-else ifeq ($(EXPT_ID), 3)
-VSAFE := 2539
-TLOAD := 61
-else ifeq ($(EXPT_ID), 4)
-#VSAFE := 2737
-# Replaced with higher vsafe for now...
-VSAFE := 3160
-TLOAD := 30
-else ifeq ($(EXPT_ID), 5)
-VSAFE := 3129
-TLOAD := 15
-else ifeq ($(EXPT_ID), 6)
-# Re-calc with 28Ohm esr
-#VSAFE := 2483
-# Swapped for testing
-VSAFE := 3129 
-TLOAD := 59
-else ifeq ($(EXPT_ID), 7)
-VSAFE := 2705 
-TLOAD := 30
-else ifeq ($(EXPT_ID), 8)
-VSAFE := 3160
-TLOAD := 15
-else ifeq ($(EXPT_ID), 9)
-# Probably won't work
-VSAFE := 3220
-TLOAD := 12
+# All Vsafe numbers are in loadProfiling.h now
+
+USE_VSAFE ?= 0
+
+REPEATS ?= 0
+
+ifeq ($(USE_VSAFE),1)
+CFLAGS += -DUSE_VSAFE
 endif
+
+CONFIG ?= 0
 
 MSPGCC_PATH := /opt/ti/mspgcc/bin
 MSP430_INC_PATH := /opt/ti/mspgcc/include/
@@ -55,8 +33,8 @@ ifeq ($(DEVICE), MSP430FR5994)
 MCU := msp430fr5994
 endif
 
-CFLAGS := -D __$(DEVICE)__ -DVSAFE=$(VSAFE) -DTLOAD=$(TLOAD) -DVHIGH=$(VHIGH) -mmcu=$(MCU) \
--O2 -static -DEXPT_ID=$(EXPT_ID)
+CFLAGS += -D __$(DEVICE)__ -DTLOAD=$(TLOAD) -DVHIGH=$(VHIGH) -mmcu=$(MCU) \
+-O2 -static -DEXPT_ID=$(EXPT_ID) -DREPEAT_COUNT=$(REPEATS) -DCONFIG=$(CONFIG)
 IFLAGS := -I $(MSP430_INC_PATH)
 LFLAGS := -T $(MCU).ld -L $(MSP430_LD_PATH) -mmcu=$(MCU)
 
