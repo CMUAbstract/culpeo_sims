@@ -320,7 +320,7 @@ def calc_min(I,time_step,vcap=[]):
 
 def calc_min_forward(I,dt,plot=True):
   L = MIN_VOLTAGE
-  L *= 1.05
+  #L *= 1.05
   #C = .015
   C = CAP
   #R = 12.5
@@ -333,8 +333,21 @@ def calc_min_forward(I,dt,plot=True):
   for count, i in enumerate(I):
     # TODO this cheats-- uses worst case eff all the time
     n = get_eff(L,i,efficiency_table_ps) 
-    E = i*V*dt/n
-    Vd = i*R/n
+    E = i*V*dt/n # Still true
+    # Estimate cap voltage at end of this segment using either the next vsafe or
+    # an estimated minimum value, just to handle really high current
+    if  count == 0:
+      Vcap_est = L
+    else:
+      Vcap_est = np.sqrt(Vs[count -1])
+    i_est = i*V/(n*Vcap_est)
+    Vd_est = i_est*R
+    if count > 0 and np.sqrt(Vs[count - 1]) > L + Vd_est:
+      Vcap = np.sqrt(Vs[count-1])
+    else:
+      Vcap = L
+    i_in = i*V/(n*Vcap)
+    Vd = i_in*R
     #print("n is: ",n, "E is ", E)
     Vdrops.append(Vd)
     if count == 0:

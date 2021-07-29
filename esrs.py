@@ -12,7 +12,7 @@ import glob
 DO_PLOT = False
 V_RANGE = 3.17
 V_MIN = 1.6
-CAP_VAL = 23e-3
+CAP_VAL = 45e-3
 
 esrs = {
 1000: 34.13,
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     if len(re.findall('fail',filename)) > 0:
       continue
     expt_id = int(re.findall(r'[0-9]+',filename)[0])
-    minV.CAP_ESR=esrs_by_id[expt_id]*1.1;
+    minV.CAP_ESR=esrs_by_id[expt_id];
     # Set conditions
     #minV.CAP = 23e-3
     #minV.CAP = 64e-3
