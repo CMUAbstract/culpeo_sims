@@ -14,6 +14,8 @@ V_RANGE = 3.17
 V_MIN = 1.6
 CAP_VAL = 45e-3
 
+#CAP_VAL = 63e-3
+
 esrs = {
 1000: 34.13,
 100: 21.59,
@@ -55,7 +57,7 @@ if __name__ == "__main__":
   num_files = len(sys.argv)
   i = 1
   all_files = []
-  file_str = "vsafe_" + str(V_MIN)
+  file_str = "vsafe_" + str(V_MIN) + "_" + str(CAP_VAL)
   esr_file = open(file_str,"w")
   while i < num_files:
     print(sys.argv[i])
@@ -91,6 +93,7 @@ if __name__ == "__main__":
     if DO_PLOT == True:
       fig, ax = plt.subplots()
       ax.plot(vals[:,0],vals[:,1])
+      plt.title("plot current")
       plt.show()
     #I = np.add(I,500e-6)
     print("max I is:", max(I))

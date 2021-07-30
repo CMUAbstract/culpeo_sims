@@ -88,6 +88,7 @@ def calc_sim_starting_point(I, time_step,Vstart):
   times = []
   cap.v_internal = Vstart
   cap.V=Vstart
+  print("Vstart: ",Vstart)
   cap.last_i = 0
   Vs.append(cap.V)
   V_internals.append(cap.v_internal)
@@ -129,7 +130,7 @@ def calc_sim_starting_point(I, time_step,Vstart):
   E_at_min = .5*cap.cap*(Vstart**2 - Vint_at_min**2) # Ass backwards when it
                                                      # comes to efficiency
   Vsmin = np.sqrt(2*E_at_min/cap.cap + (Vmin+(Vint_at_min - min(Vs)))**2)
-  if ( Vsmin <  np.sqrt(2*Efin/cap.cap + Vmin**2)):
+  if (Vsmin <  np.sqrt(2*Efin/cap.cap + Vmin**2)):
     print("Error! too small")
   print("Vmin is: ", min(Vs), " index is ", min_index, " out of: ",len(Vs))
   print("Safe from Vsmin is : ",Vsmin, "current at max: ",I[min_index-1])
@@ -148,6 +149,7 @@ def calc_sim_starting_point(I, time_step,Vstart):
   print("Max time is: ",max(times))
   print("Max current is: ", max_i)
   print("Average current is: ", avg_i)
+  plt.title("current & vcap numbers")
   plt.show()
 
 

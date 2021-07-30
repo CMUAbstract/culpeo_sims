@@ -7,7 +7,7 @@ EXPT_ID ?= 6
 # Converted down to V = 4096*adc_val/2.5
 VHIGH ?= 3228
 
-# All Vsafe numbers are in loadProfiling.h now
+VSAFE_PATH ?= ./Vsafe_culpeo/
 
 USE_VSAFE ?= 0
 
@@ -35,7 +35,7 @@ endif
 
 CFLAGS += -D __$(DEVICE)__ -DTLOAD=$(TLOAD) -DVHIGH=$(VHIGH) -mmcu=$(MCU) \
 -O2 -static -DEXPT_ID=$(EXPT_ID) -DREPEAT_COUNT=$(REPEATS) -DCONFIG=$(CONFIG)
-IFLAGS := -I $(MSP430_INC_PATH)
+IFLAGS := -I $(MSP430_INC_PATH) -I $(VSAFE_PATH)
 LFLAGS := -T $(MCU).ld -L $(MSP430_LD_PATH) -mmcu=$(MCU)
 
 COMPILE := $(patsubst %.c, %.o, $(INPUTS))

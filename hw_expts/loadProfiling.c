@@ -36,9 +36,11 @@ int main(void)
     P2OUT &= ~BIT6;
     P2DIR |= BIT6;
 	
-	// Control pin for Input Power -- connected to relay
-	P4OUT &= ~BIT1;
-	P4DIR |= BIT1;
+	// Bit1 Control pin for Input Power -- connected to relay
+  // Bit2 = start atomic block
+  // Bit3 = stop atomic block
+	P4OUT &= ~(BIT1 + BIT2 + BIT3);
+	P4DIR |= (BIT1 + BIT2 + BIT3);
 	
 	// Control pin for Output Booster
 	P7OUT &= ~BIT0;
@@ -103,12 +105,17 @@ int main(void)
     P2OUT |= BIT6;
     P2OUT &= ~BIT6;
     // Tap out load profile here
+    P4OUT |= BIT2;
+    P4OUT &= ~BIT2;
     for (int i = 0; i < LOAD_SIZE; i++) {
       activateLoad(loads[i],times[i]); // turns on and then off a given load 
     }
+    P4OUT |= BIT3;
+    P4OUT &= ~BIT3;
 		mcu_delayms( 500 );
 		// Disable Load and OP Booster
 		P7OUT &= ~BIT0; 
+		mcu_delayms( 3000 ); // Delay so we always catch the start with the saleae
     uart_write("Done");
 	}
 }
