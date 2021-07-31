@@ -27,7 +27,8 @@ vmin_levels = [0,1] # Correspond to 1.8 and 1.6
 #vmin_levels = [1] # Correspond to 1.8 and 1.6
 #Vstart_names = ["Vsafe_culpeo", "Vsafe_catnatp", "Vsafe_conservative",\
 #Vsafe_naive","Vsafe_naive_better"]
-Vstart_names = ["Vsafe_catnatp", "Vsafe_conservative","Vsafe_naive","Vsafe_naive_better"]
+Vstart_names = ["Vsafe_catnap", \
+"Vsafe_conservative/","Vsafe_naive/","Vsafe_naive_better/"]
 
 # Scalar macros
 REPEATS = 11

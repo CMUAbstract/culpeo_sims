@@ -30,5 +30,6 @@
 #else
 
 #error "Config not defined"
+#endif //CONFIG
 
 #endif // Vsafe

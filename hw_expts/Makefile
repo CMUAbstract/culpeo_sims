@@ -35,13 +35,15 @@ endif
 
 CFLAGS += -D __$(DEVICE)__ -DTLOAD=$(TLOAD) -DVHIGH=$(VHIGH) -mmcu=$(MCU) \
 -O2 -static -DEXPT_ID=$(EXPT_ID) -DREPEAT_COUNT=$(REPEATS) -DCONFIG=$(CONFIG)
-IFLAGS := -I $(MSP430_INC_PATH) -I $(VSAFE_PATH)
+IFLAGS := -I $(MSP430_INC_PATH) -I$(VSAFE_PATH)
 LFLAGS := -T $(MCU).ld -L $(MSP430_LD_PATH) -mmcu=$(MCU)
 
 COMPILE := $(patsubst %.c, %.o, $(INPUTS))
 LINK := $(TARGET).out
+ECHO := $(info $$VSAFE_PATH is [${VSAFE_PATH}])
 
-all: $(COMPILE) $(LINK) $(BINARY)
+
+all: $(ECHO) $(COMPILE) $(LINK) $(BINARY)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
