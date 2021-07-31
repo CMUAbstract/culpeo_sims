@@ -21,13 +21,16 @@ import cmd_maker as cmds
 
 # Arrays
 expt_ids = [1,3,4,6,7,8,9,10,11,12]
+#expt_ids = [6,7,8,9,10,11,12]
+#expt_ids = [8]
 vmin_levels = [0,1] # Correspond to 1.8 and 1.6
-#TODO add more levels
-#Vstart_names = ["Vsafe_culpeo","Vsafe_no_esr","Vsafe_naive_esr","Vsafe_minV"]
-Vstart_names = ["Vsafe_culpeo"]
+#vmin_levels = [1] # Correspond to 1.8 and 1.6
+#Vstart_names = ["Vsafe_culpeo", "Vsafe_catnatp", "Vsafe_conservative",\
+#Vsafe_naive","Vsafe_naive_better"]
+Vstart_names = ["Vsafe_catnatp", "Vsafe_conservative","Vsafe_naive","Vsafe_naive_better"]
 
 # Scalar macros
-REPEATS = 10
+REPEATS = 11
 
 def saleae_capture(host='localhost', port=10429, \
 output_dir='./expt_output_traces/', output='outputs', ID='1234', \
@@ -72,9 +75,9 @@ capture_time=1,analogRate=125e3):
     cap_count = 0
     while not s.is_processing_complete():
         #print("capturing")
-        time.sleep(capture_time/.9)
-        cap_count = cap_count + 1
-        if cap_count > 500:
+        time.sleep(capture_time)
+        cap_count = cap_count + capture_time
+        if cap_count > 300:
             s.capture_stop()
             print("Error getting data!")
             return -1
@@ -108,11 +111,14 @@ def run_vsafe_tests():
         full_cmd = env.clean_cmd() + env.bld_all_cmd() + env.prog_cmd()
         print(full_cmd)
         os.system(full_cmd)
-        for i in range(REPEATS):
+        for i in range(REPEATS-1):
+          print("Testing  # ",i)
           # Start saleae, add time to name
           time_ID = time.strftime('%m-%d--%H-%M-%S')
-          saleae_capture(output=cur_test_str,ID=time_ID,capture_time=3)
+          result = saleae_capture(output=cur_test_str,ID=time_ID,capture_time=3)
           # repeat
+          if result == -1:
+            continue
 
 
 

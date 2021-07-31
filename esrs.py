@@ -1,3 +1,6 @@
+# This script outputs safe voltages, it analyzes current traces to do it
+# it actually has nothing to do with esr calculations... like at all
+
 import min_voltage_notes as minV
 import pandas as pd
 import numpy as np
@@ -11,7 +14,7 @@ import glob
 
 DO_PLOT = False
 V_RANGE = 3.17
-V_MIN = 1.6
+V_MIN = 1.8
 CAP_VAL = 45e-3
 
 #CAP_VAL = 63e-3
@@ -53,12 +56,31 @@ esrs_by_id = {
 12: 3.226
 };
 
+def make_adc_file_str(expt_id, val):
+  adc = np.ceil(4096*val/V_RANGE)
+  adc_val = int(adc)
+  file_str = "#define VSAFE_ID" + str(expt_id) + " " + str(adc_val) + "\n"
+  return file_str
+
+
 if __name__ == "__main__":
   num_files = len(sys.argv)
   i = 1
   all_files = []
   file_str = "vsafe_" + str(V_MIN) + "_" + str(CAP_VAL)
   esr_file = open(file_str,"w")
+
+  file_str = "catnap_" + str(V_MIN) + "_" + str(CAP_VAL)
+  catnap_file = open(file_str,"w")
+
+  file_str = "naive_" + str(V_MIN) + "_" + str(CAP_VAL)
+  naive_file = open(file_str,"w")
+
+  file_str = "naive_better_" + str(V_MIN) + "_" + str(CAP_VAL)
+  naive_better_file = open(file_str,"w")
+
+  file_str = "conservative_" + str(V_MIN) + "_" + str(CAP_VAL)
+  conservative_file = open(file_str,"w")
   while i < num_files:
     print(sys.argv[i])
     all_files.append(sys.argv[i])
@@ -96,15 +118,50 @@ if __name__ == "__main__":
       plt.title("plot current")
       plt.show()
     #I = np.add(I,500e-6)
+    # Various Vsafe calcs
     print("max I is:", max(I))
     dt = vals[1,0] - vals[0,0] 
+    # Catnap
+    catnap_E = .5*CAP_VAL*(start_avg**2 - stop_avg**2)
+    catnap_Vsafe = np.sqrt(2*catnap_E/CAP_VAL + V_MIN**2)
+    catnap_file_str = make_adc_file_str(expt_id,catnap_Vsafe)
+    ##----------------------------------------------------------
+    # Estimate E with some understanding of the power system
+    E = 0
+    #TODO n shouldn't be hardcoded
+    n = .5
+    for i in I:
+      E = E + i*dt*2.56/n
+    avg_i = np.average(I)/n
+    Vcaps = vals[:,1]
+    Vcap_min = min(vals[:,1])
+    Vcap_min_index = np.argmin(Vcaps)
+    print("Min at index ",Vcap_min_index," out of ",len(Vcaps))
+    max_i = np.amax(I)*2.56/(n*Vcap_min)
+
+    naive_min = np.sqrt(2*E/CAP_VAL + V_MIN**2)
+    naive_min_str = make_adc_file_str(expt_id,naive_min)
+
+    naive_better_min = np.sqrt(2*E/CAP_VAL + (V_MIN + avg_i*minV.CAP_ESR)**2)
+    naive_better_min_str = make_adc_file_str(expt_id,naive_better_min)
+
+    conservative_estimate = np.sqrt(2*E/CAP_VAL + (V_MIN + max_i*minV.CAP_ESR)**2)
+    conservative_str = make_adc_file_str(expt_id,conservative_estimate)
+
     Vsafe = minV.calc_min_forward(I,dt,DO_PLOT)
-    adc =  np.ceil(4096*Vsafe/V_RANGE)
-    adc = int(adc)
-    print("Expt ",expt_id," Vsafe is ",Vsafe, " in adc: ",adc)
-    adc_str = "#define VSAFE_ID" + str(expt_id) + " " + str(adc) + "\n"
+    Vsafe_culpeo_str = make_adc_file_str(expt_id,Vsafe)
+    print("Expt ",expt_id," Vsafe is ",Vsafe)
     if DO_PLOT == True:
       minV.calc_sim_starting_point(I,dt,Vsafe)
-    esr_file.write(adc_str)
+
+    esr_file.write(Vsafe_culpeo_str)
+    catnap_file.write(catnap_file_str)
+    naive_file.write(naive_min_str)
+    naive_better_file.write(naive_better_min_str)
+    conservative_file.write(conservative_str)
   esr_file.close()
+  catnap_file.close()
+  naive_file.close()
+  naive_better_file.close()
+  conservative_file.close()
 

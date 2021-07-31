@@ -1,4 +1,4 @@
-# Python script for generating Vsafes
+# Python script for calculating esr automatically from traces
 import pandas as pd
 import numpy as np
 import sys
