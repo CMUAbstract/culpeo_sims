@@ -1,0 +1,77 @@
+# Testing Methodology for Culpeo #
+
+
+# Basic Setup #
+
+* Use "synthetic harvested energy circuit"-- a buck regulator on a PCB powered
+by 3.3V from the control MCU launchpad to output ~2.1V across a 1k resistor
+for a trickle charge effect.
+
+* Put a relay between between the charging circuit and the P_in pin on the power
+system.
+
+* Re-route V_out from the output booster to the scary PCB with all of the
+Resistor-Transistor circuits.
+
+* TODO: thorough description of the Frankenstein-ing that happened
+
+# Test Capacitor Bank ESR #
+
+These tests are run by hand using the electronic load (BK Precision 9600
+electronic load) and they determine the capacitor bank's ESR over a range of
+frequencies.  You use the BK to generate a [load] pulse train that the capacitor
+bank will handle.
+
+* Turn on the saleae, drop the config down so only the analog V_cap line is
+being measured using 125e3 samples/sec. Set it up to measure for 35 seconds, no
+Trigger
+
+* Disconnect the control MCU from the enable pin on the power system
+
+* Connect the +/- leads from the BK to V_cap and ground.
+
+* Compile the control MCU code with the no flags. This will ensure that
+the control MCU will only charge up when you press the button.
+
+`make clean; make all `
+
+* Configure in the BK external trigger source. Page 44 of the
+ [manual](https://bkpmedia.s3.amazonaws.com/downloads/manuals/en-us/8600_Series_manual.pdf)
+
+* Set up the BK for Transient operation. Follow the manual's instructions
+starting on page 51 (65 of the pdf) of the manual, and hit the trigger so it's
+just ticking in the backgroun.  We're going for continuous mode on the following
+load settings:
+
+Level A (mA), Level B (mA), frequency (Hz), duty cycle (%), [seconds on]
+1, 5, 0.1, 90, [1]
+1, 10, 0.1, 90, [1]
+1, 25, 0.1, 90, [1]
+1, 5, 0.1, 99, [.1]
+1, 10, 0.1, 99, [.1]
+1, 25, 0.1, 99, [.1]
+1, 50, 0.1, 99, [.1]
+1, 5, 0.1, 99.9, [.01]
+1, 10, 0.1, 99.9, [.01]
+1, 25, 0.1, 99.9, [.01]
+1, 50, 0.1, 99.9, [.01]
+1, 10, 0.1, 99.99, [.001]
+1, 25, 0.1, 99.99, [.001]
+1, 50, 0.1, 99.99, [.001]
+
+* For each pulse setting, let the control MCU charge up the capacitor bank, then
+start the saleae and hit "On/Off" to get the load started.  Once the saleae is
+finished measuring (or the capacitor voltage is clearly too low and it's
+bottoming out), hit "On/Off" again to turn off the load. Export the whole saleae
+trace as a csv with the following naming convention:
+
+`vcap_<level A>--<level B>mA_10s_<duty cycle*>_duty_cycle_<repeat>.csv`
+
+For example: `vcap_1--25mA_10s_99-9_duty_cycle_0.csv`
+
+*use - instead of . to get to decimal places
+
+* Each run will grab 3 or 4 discharges, so you only need to run each test once
+
+
+

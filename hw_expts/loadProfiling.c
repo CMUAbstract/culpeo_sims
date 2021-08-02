@@ -117,7 +117,9 @@ int main(void)
 		mcu_delayms( 500 );
 		// Disable Load and OP Booster
 		P7OUT &= ~BIT0; 
+#ifdef USE_VSAFE
 		mcu_delayms( 3000 ); // Delay so we always catch the start with the saleae
+#endif
     uart_write("Done");
 	}
 }

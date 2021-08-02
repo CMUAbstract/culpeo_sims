@@ -1,7 +1,7 @@
 INPUTS := loadProfiling.c uart.c
 TARGET := main
 
-EXPT_ID ?= 6
+EXPT_ID ?= 1
 
 # Conversion: V = 4096*adc_val/3.3
 # Converted down to V = 4096*adc_val/2.5
