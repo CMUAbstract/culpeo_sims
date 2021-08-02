@@ -73,5 +73,25 @@ For example: `vcap_1--25mA_10s_99-9_duty_cycle_0.csv`
 
 * Each run will grab 3 or 4 discharges, so you only need to run each test once
 
+# Analyze capacitor bank ESR *
 
+This part just rusn the files generated from the last phase through a script to
+pick out the voltage rebound, and uses the known load to calculate esr. Quick
+note- the naming convention from above is important!
 
+* Run the measurement_calcs.py script for a blob of files:
+
+`python3 measurement_calcs.py vcap_*10s_90_* `
+
+* For each trace, this script outputs a couple of plots.  The plots show v_cap
+over time as well as the first derivative of vcap that will be used to find
+the dips in Vcap.
+
+* Tweak the REBOUND_SECS, SPACING, and LOW_LIM parameters if it doesn't seem
+like the right ESR is being reported.
+
+* If V_cap bottoms out (goes to approximately zero and is flat for a while), you
+need to toss that datapoint-- you won't get an actual ESR from that.
+
+* Run measurement calcs for each of the duty cycle values, and use the average
+ESR for the next step [that really needs to get automated]

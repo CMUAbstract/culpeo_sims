@@ -10,6 +10,8 @@ import glob
 shunt = 4.7
 gain = 88
 REBOUND_SECS = 1
+SPACING = 100
+LOW_LIM = 0.0075
 
 eff_table = {2.4 : { .0001: .45, .0002:.60, .0003:.65,.0005:.70,
 .001:.75, .002: .78, .004:.79, .006:.79,.008:.80, .015:.80, .02:.81,
@@ -210,7 +212,7 @@ if __name__ == "__main__":
     #pos = re.search('_10s_',filename).start()
     pos = re.search('mA_',filename).start()
     load_str = filename[:pos]
-    pos = re.search('vcap_w_tant_',load_str).end()
+    pos = re.search('vcap_',load_str).end()
     load_str = load_str[pos:]
     print(load_str)
     loads = re.findall(r'[0-9]+',load_str)
@@ -218,7 +220,7 @@ if __name__ == "__main__":
     load = float(loads[1])
     load = load*1e-3
     print("Running with load ",load)
-    spacing = 100
+    spacing = SPACING
     #spacing = 500
     if (load < .010):
       spacing = 1000
@@ -247,7 +249,7 @@ if __name__ == "__main__":
     on_time = base - .01*duty_cycle*base
     print("on time is ",on_time)
     if on_time <= .01:
-      lim = .0075
+      lim = LOW_LIM
       spacing = 10
     else:
       lim = .01
