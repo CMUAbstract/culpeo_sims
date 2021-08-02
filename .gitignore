@@ -4,4 +4,4 @@
 *.o
 *.out
 *.0
-hw_expts/*/.csv
+expt_baseline_traces/*.csv
