@@ -2,7 +2,7 @@
 #define _VSAFE_H_
 
 #if CONFIG == 0
-
+/*
 #define VSAFE_ID10 2360
 #define VSAFE_ID11 2361
 #define VSAFE_ID12 2363
@@ -13,9 +13,45 @@
 #define VSAFE_ID7 2369
 #define VSAFE_ID8 2379
 #define VSAFE_ID9 2394
+*/
+#define VSAFE_ID13 2602
+#define VSAFE_ID14 2628
+#define VSAFE_ID15 2442
+#define VSAFE_ID16 2487
+#define VSAFE_ID17 2491
+#define VSAFE_ID18 2405
+#define VSAFE_ID19 2408
+#define VSAFE_ID20 2417
+#define VSAFE_ID21 2430
+#define VSAFE_ID22 2401
+#define VSAFE_ID23 2402
+#define VSAFE_ID24 2403
+#define VSAFE_ID25 2603
+#define VSAFE_ID26 2631
+#define VSAFE_ID27 2442
+#define VSAFE_ID28 2486
+#define VSAFE_ID29 2490
+#define VSAFE_ID30 2404
+#define VSAFE_ID31 2408
+#define VSAFE_ID32 2417
+#define VSAFE_ID33 2430
+#define VSAFE_ID34 2401
+#define VSAFE_ID35 2401
+#define VSAFE_ID36 2402
+#define VSAFE_ID10 2360
+#define VSAFE_ID11 2361
+#define VSAFE_ID12 2363
+#define VSAFE_ID1 2762
+#define VSAFE_ID1 2568
+#define VSAFE_ID3 2403
+#define VSAFE_ID4 2450
+#define VSAFE_ID6 2364
+#define VSAFE_ID7 2369
+#define VSAFE_ID8 2379
+#define VSAFE_ID9 2394
 
 #elif CONFIG == 1
-
+/*
 #define VSAFE_ID10 2106
 #define VSAFE_ID11 2107
 #define VSAFE_ID12 2109
@@ -26,6 +62,44 @@
 #define VSAFE_ID7 2115
 #define VSAFE_ID8 2127
 #define VSAFE_ID9 2143
+*/
+
+#define VSAFE_ID13 2374
+#define VSAFE_ID14 2403
+#define VSAFE_ID15 2197
+#define VSAFE_ID16 2247
+#define VSAFE_ID17 2252
+#define VSAFE_ID18 2155
+#define VSAFE_ID19 2160
+#define VSAFE_ID20 2169
+#define VSAFE_ID21 2184
+#define VSAFE_ID22 2151
+#define VSAFE_ID23 2152
+#define VSAFE_ID24 2154
+#define VSAFE_ID25 2374
+#define VSAFE_ID26 2406
+#define VSAFE_ID27 2198
+#define VSAFE_ID28 2247
+#define VSAFE_ID29 2250
+#define VSAFE_ID30 2155
+#define VSAFE_ID31 2160
+#define VSAFE_ID32 2169
+#define VSAFE_ID33 2184
+#define VSAFE_ID34 2152
+#define VSAFE_ID35 2151
+#define VSAFE_ID36 2153
+#define VSAFE_ID10 2106
+#define VSAFE_ID11 2107
+#define VSAFE_ID12 2109
+#define VSAFE_ID1 2548
+#define VSAFE_ID1 2337
+#define VSAFE_ID3 2153
+#define VSAFE_ID4 2206
+#define VSAFE_ID6 2110
+#define VSAFE_ID7 2115
+#define VSAFE_ID8 2127
+#define VSAFE_ID9 2143
+
 #else
 
 #error "Config not defined"

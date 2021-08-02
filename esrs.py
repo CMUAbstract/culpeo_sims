@@ -14,7 +14,7 @@ import glob
 
 DO_PLOT = False
 V_RANGE = 3.17
-V_MIN = 1.8
+V_MIN = 1.6
 CAP_VAL = 45e-3
 
 #CAP_VAL = 63e-3
@@ -53,7 +53,31 @@ esrs_by_id = {
 9: 8.689,
 10: 3.226,
 11: 3.226,
-12: 3.226
+12: 3.226,
+13: 34.13,
+14: 34.13,
+15: 21.59,
+16: 21.59,
+17: 21.59,
+18: 8.689,
+19: 8.689,
+20: 8.689,
+21: 8.689,
+22: 3.226,
+23: 3.226,
+24: 3.226,
+25: 34.13,
+26: 34.13,
+27: 21.59,
+28: 21.59,
+29: 21.59,
+30: 8.689,
+31: 8.689,
+32: 8.689,
+33: 8.689,
+34: 3.226,
+35: 3.226,
+36: 3.226,
 };
 
 def make_adc_file_str(expt_id, val):
@@ -64,9 +88,6 @@ def make_adc_file_str(expt_id, val):
 
 
 if __name__ == "__main__":
-  num_files = len(sys.argv)
-  i = 1
-  all_files = []
   file_str = "vsafe_" + str(V_MIN) + "_" + str(CAP_VAL)
   esr_file = open(file_str,"w")
 
@@ -81,6 +102,10 @@ if __name__ == "__main__":
 
   file_str = "conservative_" + str(V_MIN) + "_" + str(CAP_VAL)
   conservative_file = open(file_str,"w")
+
+  num_files = len(sys.argv)
+  i = 1
+  all_files = []
   while i < num_files:
     print(sys.argv[i])
     all_files.append(sys.argv[i])
@@ -89,6 +114,7 @@ if __name__ == "__main__":
     if len(re.findall('fail',filename)) > 0:
       continue
     expt_id = int(re.findall(r'[0-9]+',filename)[0])
+    print("Expt id is ",expt_id)
     minV.CAP_ESR=esrs_by_id[expt_id];
     # Set conditions
     #minV.CAP = 23e-3
@@ -105,8 +131,10 @@ if __name__ == "__main__":
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals = df.values
     # Drop time before 1s
-    vals = vals[vals[:,0]>1]
-    vals = vals[vals[:,0]<2.5]
+    # Not needed for new version
+    if (expt_id < 13):
+      vals = vals[vals[:,0]>1]
+      vals = vals[vals[:,0]<2.5]
     diffs = np.subtract(vals[:,3],vals[:,2])
     I = np.divide(diffs,minV.gain*minV.shunt)
     start_avg = np.average(vals[0:100,1])

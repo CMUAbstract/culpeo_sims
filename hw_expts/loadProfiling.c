@@ -77,6 +77,8 @@ int main(void)
 	
 	uart_init();
   int repeat_flag = 0;
+		
+  mcu_delayms(5000);
     while(1)
     {
 		// Initially, all pins are set to LOW

@@ -30,7 +30,7 @@
 #define VSAFE_ID8 2803
 #define VSAFE_ID9 3260
 */
-
+/*
 #define VSAFE_ID10 2472
 #define VSAFE_ID11 2613
 #define VSAFE_ID12 2836
@@ -42,9 +42,94 @@
 #define VSAFE_ID8 3054
 #define VSAFE_ID9 3369
 
+#define VSAFE_ID13 1000 
+#define VSAFE_ID14 1000 
+#define VSAFE_ID15 1000 
+#define VSAFE_ID16 1000 
+#define VSAFE_ID17 1000 
+#define VSAFE_ID18 1000 
+#define VSAFE_ID19 1000 
+#define VSAFE_ID20 1000 
+#define VSAFE_ID21 1000 
+#define VSAFE_ID22 1000 
+
+#define VSAFE_ID23 1000 
+#define VSAFE_ID24 1000 
+#define VSAFE_ID25 1000 
+#define VSAFE_ID26 1000 
+#define VSAFE_ID27 1000 
+#define VSAFE_ID28 1000 
+#define VSAFE_ID29 1000 
+#define VSAFE_ID30 1000 
+#define VSAFE_ID31 1000 
+#define VSAFE_ID32 1000 
+#define VSAFE_ID33 1000 
+#define VSAFE_ID34 1000 
+#define VSAFE_ID35 1000 
+#define VSAFE_ID36 1000 
+*/
+#define VSAFE_ID13 3207
+#define VSAFE_ID14 3666
+#define VSAFE_ID15 2819
+#define VSAFE_ID16 3225
+#define VSAFE_ID17 3728
+#define VSAFE_ID18 2518
+#define VSAFE_ID19 2710
+#define VSAFE_ID20 3069
+#define VSAFE_ID21 3512
+#define VSAFE_ID22 2474
+#define VSAFE_ID23 2604
+#define VSAFE_ID24 2786
+#define VSAFE_ID25 3197
+#define VSAFE_ID26 3666
+#define VSAFE_ID27 2795
+#define VSAFE_ID28 3298
+#define VSAFE_ID29 4128
+#define VSAFE_ID30 2510
+#define VSAFE_ID31 2657
+#define VSAFE_ID32 3006
+#define VSAFE_ID33 3518
+#define VSAFE_ID34 2463
+#define VSAFE_ID35 2593
+#define VSAFE_ID36 2779
+#define VSAFE_ID10 2472
+#define VSAFE_ID11 2613
+#define VSAFE_ID12 2836
+#define VSAFE_ID1 3289
+#define VSAFE_ID1 3216
+#define VSAFE_ID3 2784
+#define VSAFE_ID4 3279
+#define VSAFE_ID6 2518
+#define VSAFE_ID7 2716
+#define VSAFE_ID8 3054
+#define VSAFE_ID9 3369
+
 #elif CONFIG == 1
 // Min voltage 1.6
-// Less aggressive, nominal cap
+#define VSAFE_ID13 3047
+#define VSAFE_ID14 3524
+#define VSAFE_ID15 2547
+#define VSAFE_ID16 3073
+#define VSAFE_ID17 3580
+#define VSAFE_ID18 2283
+#define VSAFE_ID19 2498
+#define VSAFE_ID20 2901
+#define VSAFE_ID21 3399
+#define VSAFE_ID22 2234
+#define VSAFE_ID23 2379
+#define VSAFE_ID24 2585
+#define VSAFE_ID25 3035
+#define VSAFE_ID26 3949
+#define VSAFE_ID27 2594
+#define VSAFE_ID28 3156
+#define VSAFE_ID29 3867
+#define VSAFE_ID30 2274
+#define VSAFE_ID31 2440
+#define VSAFE_ID32 2831
+#define VSAFE_ID33 3406
+#define VSAFE_ID34 2222
+#define VSAFE_ID35 2367
+#define VSAFE_ID36 2577
 #define VSAFE_ID10 2224
 #define VSAFE_ID11 2390
 #define VSAFE_ID12 2641
@@ -56,7 +141,19 @@
 #define VSAFE_ID7 2505
 #define VSAFE_ID8 2885
 #define VSAFE_ID9 3239
-
+// Less aggressive, nominal cap
+/*#define VSAFE_ID10 2224
+#define VSAFE_ID11 2390
+#define VSAFE_ID12 2641
+#define VSAFE_ID1 3127
+#define VSAFE_ID1 3056
+#define VSAFE_ID3 2581
+#define VSAFE_ID4 3134
+#define VSAFE_ID6 2283
+#define VSAFE_ID7 2505
+#define VSAFE_ID8 2885
+#define VSAFE_ID9 3239
+*/
 /*
 #define VSAFE_ID10 2295
 #define VSAFE_ID11 2383
@@ -188,6 +285,32 @@
 #define VSAFE_ID8 2407
 #define VSAFE_ID9 3406
 */
+
+#define VSAFE_ID13 1000 
+#define VSAFE_ID14 1000 
+#define VSAFE_ID15 1000 
+#define VSAFE_ID16 1000 
+#define VSAFE_ID17 1000 
+#define VSAFE_ID18 1000 
+#define VSAFE_ID19 1000 
+#define VSAFE_ID20 1000 
+#define VSAFE_ID21 1000 
+#define VSAFE_ID22 1000 
+
+#define VSAFE_ID23 1000 
+#define VSAFE_ID24 1000 
+#define VSAFE_ID25 1000 
+#define VSAFE_ID26 1000 
+#define VSAFE_ID27 1000 
+#define VSAFE_ID28 1000 
+#define VSAFE_ID29 1000 
+#define VSAFE_ID30 1000 
+#define VSAFE_ID31 1000 
+#define VSAFE_ID32 1000 
+#define VSAFE_ID33 1000 
+#define VSAFE_ID34 1000 
+#define VSAFE_ID35 1000 
+#define VSAFE_ID36 1000 
 #else
 
 #error "No vsafes defined for config"
