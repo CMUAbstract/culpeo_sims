@@ -20,18 +20,13 @@ import platform
 import cmd_maker as cmds
 
 # Arrays
-expt_ids = [1,3,4,6,7,8,9,10,11,12]
-#expt_ids = [6,7,8,9,10,11,12]
-#expt_ids = [8]
+expt_ids = range(1,37)
 vmin_levels = [0,1] # Correspond to 1.8 and 1.6
-#vmin_levels = [1] # Correspond to 1.8 and 1.6
-#Vstart_names = ["Vsafe_culpeo", "Vsafe_catnatp", "Vsafe_conservative",\
-#Vsafe_naive","Vsafe_naive_better"]
-Vstart_names = ["Vsafe_catnap", \
-"Vsafe_conservative/","Vsafe_naive/","Vsafe_naive_better/"]
+Vstart_names = ["Vsafe_culpeo","Vsafe_conservative","Vsafe_catnap"]#"Vsafe_naive","Vsafe_naive_better"]
 
 # Scalar macros
-REPEATS = 11
+# Actual repeats + 1 (for all but catnap)
+REPEATS = 6
 
 def saleae_capture(host='localhost', port=10429, \
 output_dir='./expt_output_traces/', output='outputs', ID='1234', \
@@ -101,18 +96,21 @@ def run_vsafe_tests():
   full_cmd = env.cd_cmd() + env.clean_cmd()
   print(full_cmd)
   os.system(full_cmd)
+  repeats = REPEATS
   for Vstart_name in Vstart_names:
     for Vmin in vmin_levels:
       for expt_id in expt_ids:
+        if Vstart_name == "Vsafe_catnap":
+          repeats = 4
         # Set output file name
         cur_test_str = "EXPT_" + str(expt_id) + "_"+str(Vmin) + "_" + Vstart_name + "_"
         # program ctrl mcu
-        env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
+        env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(repeats),\
         "CONFIG=",str(Vmin),"EXPT_ID=",str(expt_id),"VSAFE_PATH=./",Vstart_name)
         full_cmd = env.clean_cmd() + env.bld_all_cmd() + env.prog_cmd()
         print(full_cmd)
         os.system(full_cmd)
-        for i in range(REPEATS-1):
+        for i in range(repeats-1):
           print("Testing  # ",i)
           # Start saleae, add time to name
           time_ID = time.strftime('%m-%d--%H-%M-%S')

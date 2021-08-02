@@ -95,3 +95,57 @@ need to toss that datapoint-- you won't get an actual ESR from that.
 
 * Run measurement calcs for each of the duty cycle values, and use the average
 ESR for the next step [that really needs to get automated]
+
+# Run V_safe_calculations #
+* Note: this step only works without re-capturing the current traces if the
+output is 2.56!
+
+* Replace the esr values in esrs.py (it's the esrs dictionary right near the top
+of the file) with the esrs calculated in the last step.
+
+* Run the script twice, once with VMIN=1.6 and once with VMIN=1.8, on the
+expt_<id>.csv files
+
+`python3 esrs.py expt_*`
+
+* This will output a bunch of files with different \#define V_safe adc values
+for each experiment. At the moment, those have to be copy-pasted by hand into a
+vsafe.h file and placed in the Vsafe_<system name> directories in hw_expts;
+that process could totally be improved.  Main thing to remember is that
+V_min=1.8V corresponds to CONFIG=0 in the hw_expts directory, and 1.6 is
+CONFIG=1
+
+* TODO: make the esrs.py run both Vmin levels and directly place the output in
+the correct directory. Also add Makefile flags to switch between power systems
+
+# Run Culpeo Experiments #
+
+* Re-attach the booster enable from the control MCU to the DUT
+
+* Make sure the output of the booster is going from the DUT to the V_in+ of the
+diff amp setup. (This connection is kinda loose on Capybara)
+
+* Make sure the power supply for the diff amp is turned on
+
+* Make sure the electronic load is disconnected from Vcap
+
+* Hypothetically you should just be able to run from the hw_expts directory at
+this point:
+
+`cd hw_expts; python3 vsafe_test.py`
+
+* You should probably edit the expt_ids list to drop 1) the experiments that
+require a V_safe higher than V_HIGH, and 2) catnap experiments that start
+below V_min. 
+
+* This writes files to ./expt_output_traces
+
+# Analyze Culpeo Experiments #
+
+* Pass blobs of files to expt_process.py to report the failures under different
+conditions. For instance: 
+
+`python3 expt_process.py hw_expts/expt_output_traces/EXPT*_1_*culpeo* `
+
+
+
