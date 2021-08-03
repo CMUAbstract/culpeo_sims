@@ -5,3 +5,6 @@
 *.out
 *.0
 expt_baseline_traces/*.csv
+*.csv
+__pycache__
+*/__pycache__
