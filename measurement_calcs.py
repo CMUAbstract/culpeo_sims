@@ -3,15 +3,31 @@ import pandas as pd
 import numpy as np
 import sys
 import matplotlib
-#matplotlib.use("Agg")
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import re
 import glob
 shunt = 4.7
 gain = 88
-REBOUND_SECS = 1
-SPACING = 100
-LOW_LIM = 0.0075
+REBOUND_SECS = 0.5
+SPACING = 10
+LOW_LIM = 0.006
+RISE_LIM = 0.02
+FALL_LIM = 0.02
+HIGH_LIM = 10
+
+limTable = {
+	'5':  [0.031, 0.031],
+	'10': [0.015, 0.015],
+	'25': [0.023, 0.025],
+	'50': [0.05, 0.05]
+
+}
+
+
+timeScaling = 125e3
+startTime = 0  
+endTime = -1
 
 eff_table = {2.4 : { .0001: .45, .0002:.60, .0003:.65,.0005:.70,
 .001:.75, .002: .78, .004:.79, .006:.79,.008:.80, .015:.80, .02:.81,
@@ -21,6 +37,14 @@ eff_table = {2.4 : { .0001: .45, .0002:.60, .0003:.65,.0005:.70,
 .9: { .0001: .35, .0002:.42, .0003:.46,.0005:.5, .001:.52, .002: .53, .004:.54,
 .006:.55,.008:.57, .015:.57, .02:.58, .03:.6,.1:.75,.15:.70,.2:.6}
 }
+
+voltsPerLSB = 4.88
+
+def convertToV( adcReading ):
+  adc_max = 4095
+  v_max = 5.2394959999999999 
+  v_min = -0.34275899999999998  
+  return np.add( np.multiply( np.true_divide( adcReading, adc_max ), v_max - v_min ), v_min )
 
 def calc_esr(load,start_V,min_V,stop_V):
   esr = (stop_V - min_V)/load
@@ -116,7 +140,7 @@ def plot_two(filename, filename1,spacing=100,lim=.01):
   #ax.plot(times_decimated1, vcaps_decimated1,'r-')
   plt.show()
 
-def find_min(filename,load,spacing=100,lim=.01):
+def find_min(filename,load,spacing=100,limFall=.01,limRise=.02):
   try:
     df = pd.read_csv(filename, mangle_dupe_cols=True,
          dtype=np.float64, skipinitialspace=True)#skiprows=[0])
@@ -124,8 +148,13 @@ def find_min(filename,load,spacing=100,lim=.01):
     df = pd.read_csv(filename, mangle_dupe_cols=True,
          dtype=np.float64, skipinitialspace=True,skiprows=[0])
   vals = df.values
-  vcaps = vals[:,1]
-  times = vals[:,0]
+  
+  vcaps = vals[startTime:endTime,1]
+  times = vals[startTime:endTime,0]
+  
+  if vcaps[0] > 5:
+  	vcaps = convertToV( vcaps )
+  
   vcaps_decimated = vcaps[::spacing]
   times_decimated = times[::spacing]
   first_deriv = np.diff(vcaps_decimated)
@@ -139,10 +168,10 @@ def find_min(filename,load,spacing=100,lim=.01):
   esrs = []
   for i, x in enumerate(first_deriv):
     if start == -1:
-      if x < -1*lim:
+      if x < -1*limFall:
         start = i
     else:
-      if x > lim:
+      if x > limRise:
         stop = i
         time_pairs.append([times_decimated[start],times_decimated[stop]])
         index_pairs.append([start,stop])
@@ -157,7 +186,7 @@ def find_min(filename,load,spacing=100,lim=.01):
     if (rebound_time > max(times_decimated)):
       continue
     rebound_index = find_nearest_idx(times_decimated,rebound_time)
-    print(pair[1],rebound_index)
+    #print(pair[1],rebound_index)
     rebound_v = max(vcaps_decimated[pair[1]:rebound_index])
     esr = (rebound_v - min_v)/load
     esrs.append(esr)
@@ -166,12 +195,14 @@ def find_min(filename,load,spacing=100,lim=.01):
     times_decimated[pair[1]], "|")
     E_used = load*np.multiply(vcaps_decimated[pair[0]:pair[1]],times_decimated[1]
     -times_decimated[0])
-    print("E_used is ",np.sum(E_used))
+    #print("E_used is ",np.sum(E_used))
+  print(esrs)
   fig, ax = plt.subplots()
   ax.plot(times_decimated, vcaps_decimated,'b-')
-  print(len(times_decimated),len(first_deriv[::spacing]))
+  #print(len(times_decimated),len(first_deriv[::spacing]))
   ax2 = ax.twinx()
   ax2.plot(times_decimated[1:],first_deriv,'k.')
+  ax2.hlines( [-1*limFall, limRise], times_decimated[0], times_decimated[-1], colors=['red', 'red'] )
   plt.show()
   return np.average(esrs)
   #fig, ax = plt.subplots()
@@ -199,11 +230,11 @@ Vstart = 2.8
 cont_runtimes = []
 if __name__ == "__main__":
   num_files = len(sys.argv)
-  print(len (sys.argv))
+  #print(len (sys.argv))
   i = 1
   all_files = []
   while i < num_files:
-    print(sys.argv[i])
+    #print(sys.argv[i])
     all_files.append(sys.argv[i])
     i += 1
   #all_files = glob.escape(all_files)
@@ -214,12 +245,12 @@ if __name__ == "__main__":
     load_str = filename[:pos]
     pos = re.search('vcap_',load_str).end()
     load_str = load_str[pos:]
-    print(load_str)
+    #print(load_str)
     loads = re.findall(r'[0-9]+',load_str)
-    print(loads)
+    #print(loads)
     load = float(loads[1])
     load = load*1e-3
-    print("Running with load ",load)
+    print("Running with load %s mA" % (1000*load))
     spacing = SPACING
     #spacing = 500
     if (load < .010):
@@ -230,10 +261,10 @@ if __name__ == "__main__":
     pos = re.search('_duty_cycle',end_str).start()
     end_str = end_str[:pos]
     secs = re.findall(r'[0-9]+',end_str)
-    print(end_str)
-    print(secs)
+    #print('Filename end: %s' % end_str)
+    #print(secs)
     base = float(secs[0])
-    print("base is: ",base)
+    #print("Base is: ",base)
     if len(secs) > 2:
       if (float(secs[2]) < 10):
         sec_dec = float(secs[2])*10
@@ -242,19 +273,21 @@ if __name__ == "__main__":
       sec_dec *= .01
     else:
       sec_dec = 0
-    print("Sec dec is: ",sec_dec)
-    print("Sec is",secs[1])
+    #print("Sec dec is: ",sec_dec)
+    #print("Sec is",secs[1])
     duty_cycle = float(secs[1]) + sec_dec
     print("duty cycle is: ",duty_cycle)
     on_time = base - .01*duty_cycle*base
     print("on time is ",on_time)
     if on_time <= .01:
-      lim = LOW_LIM
+      limRise = limTable[str(int(1000*load))][0]
+      limFall = limTable[str(int(1000*load))][1]
       spacing = 10
     else:
-      lim = .01
-    print("lim is ",lim)
-    avg_esr = find_min(filename,load,spacing,lim)
+      limRise = limTable[str(int(1000*load))][0]
+      limFall = limTable[str(int(1000*load))][1]
+    print("lims are: %s[Rise], %s[Fall]" % (limRise, limFall))
+    avg_esr = find_min(filename,load,spacing,limRise, limFall)
     if np.isnan(avg_esr) == False:
       esr_vals.append(avg_esr)
     print("Avg esr is: ",avg_esr)
