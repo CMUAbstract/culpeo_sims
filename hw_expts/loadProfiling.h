@@ -28,8 +28,16 @@ Experiment list:
 #11 25mA for 1ms
 #12 50mA for 1ms
 */
+#if EXPT_ID == 0 // Dummy experiment to just chill
+// We default to VHIGH so we start immediately
+#define VSAFE  VHIGH
 
-#if EXPT_ID == 1
+#define LOAD_SIZE 1
+size_t loads[LOAD_SIZE] = {0}; // Load levels
+uint16_t times[LOAD_SIZE] = {1000}; // Runtimes in ms
+
+
+#elif EXPT_ID == 1
 
 #define VSAFE VSAFE_ID1
 
