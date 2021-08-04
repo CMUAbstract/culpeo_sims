@@ -1,7 +1,7 @@
 INPUTS := loadProfiling.c uart.c
 TARGET := main
 
-EXPT_ID ?= 1
+EXPT_ID ?= 0
 
 # Conversion: V = 4096*adc_val/3.3
 # Converted down to V = 4096*adc_val/2.5
@@ -12,6 +12,12 @@ VSAFE_PATH ?= ./Vsafe_culpeo/
 USE_VSAFE ?= 0
 
 REPEATS ?= 0
+
+TEST_EXTERNAL ?= 0
+
+ifeq ($(TEST_EXTERNAL),1)
+CFLAGS += -DTEST_EXTERNAL
+endif
 
 ifeq ($(USE_VSAFE),1)
 CFLAGS += -DUSE_VSAFE

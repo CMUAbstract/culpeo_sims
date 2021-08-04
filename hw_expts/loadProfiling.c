@@ -33,8 +33,8 @@ int main(void)
     P1OUT |= BIT0;                         // Clear P1.0 output latch for a defined power-on state
     P1DIR |= BIT0;                          // Set P1.0 to output direction
 
-    P2OUT &= ~BIT6;
-    P2DIR |= BIT6;
+    P2OUT &= ~(BIT5 + BIT6);
+    P2DIR |= (BIT5 + BIT6);
 	
 	// Bit1 Control pin for Input Power -- connected to relay
   // Bit2 = start atomic block
@@ -106,6 +106,12 @@ int main(void)
 #endif
     P2OUT |= BIT6;
     P2OUT &= ~BIT6;
+    // P2.5 is for enabling the sip switch, this lets the booster rebound
+    // before we turn on power to anything external
+#ifdef TEST_EXTERNAL
+    P2OUT |= BIT5;
+    mcu_delayms(10000);
+#endif
     // Tap out load profile here
     P4OUT |= BIT2;
     P4OUT &= ~BIT2;
@@ -121,6 +127,10 @@ int main(void)
 		mcu_delayms( 3000 ); // Delay so we always catch the start with the saleae
 #endif
     uart_write("Done");
+#ifdef TEST_EXTERNAL
+    // Disable sip switch
+    P2OUT &= ~BIT5;
+#endif
 	}
 }
 
