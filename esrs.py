@@ -138,7 +138,7 @@ if __name__ == "__main__":
   file_str = "naive_better_" + str(V_MIN) + "_" + str(CAP_VAL)
   naive_better_file = open(file_str,"w")
 
-  file_str = "conservative_" + str(V_MIN) + "_" + str(CAP_VAL)
+  file_str = "grey_hat_culpeo_" + str(V_MIN) + "_" + str(CAP_VAL)
   conservative_file = open(file_str,"w")
 
   num_files = len(sys.argv)
@@ -202,7 +202,9 @@ if __name__ == "__main__":
     Vcap_min = min(vals[:,1])
     Vcap_min_index = np.argmin(Vcaps)
     print("Min at index ",Vcap_min_index," out of ",len(Vcaps))
-    max_i = np.amax(I)*2.56/(n*Vcap_min)
+    print("Min is",Vcap_min)
+    max_i = np.amax(I)*2.56/(n*V_MIN)
+
 
     naive_min = np.sqrt(2*E/CAP_VAL + V_MIN**2)
     naive_min_str = make_adc_file_str(expt_id,naive_min)
@@ -210,7 +212,10 @@ if __name__ == "__main__":
     naive_better_min = np.sqrt(2*E/CAP_VAL + (V_MIN + avg_i*minV.CAP_ESR)**2)
     naive_better_min_str = make_adc_file_str(expt_id,naive_better_min)
 
-    conservative_estimate = np.sqrt(2*E/CAP_VAL + (V_MIN + max_i*minV.CAP_ESR)**2)
+    # Use E from Catnap!!
+    # Use Vmin of the system
+    conservative_estimate = np.sqrt(2*catnap_E/CAP_VAL + (V_MIN + max_i*minV.CAP_ESR)**2)
+    print("Conservative2: ",conservative_estimate)
     conservative_str = make_adc_file_str(expt_id,conservative_estimate)
 
     Vsafe = minV.calc_min_forward(I,dt,DO_PLOT)

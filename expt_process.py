@@ -28,7 +28,7 @@ file_dict = {}
 #for expt_id in file_dict:
   
   
-
+Vhigh = 2.47
 
 if __name__ == "__main__":
   num_files = len(sys.argv)
@@ -44,6 +44,7 @@ if __name__ == "__main__":
       file_dict[expt_id] = []
       file_dict[expt_id].append(sys.argv[i])
     i += 1
+  total_fails = 0
   for expt_id in file_dict:
     mins = []
     fail_count = 0
@@ -69,5 +70,9 @@ if __name__ == "__main__":
     print("Expt: ",expt_id," Config: ",config)
     print("\tFailures: ",fail_count,"Average min: ",np.average(mins)," Std dev:",\
     np.std(mins))
+    if (start_vcap < 2.42):
+      total_fails += fail_count
+  print("Total failures is: ",total_fails)
+
 
 
