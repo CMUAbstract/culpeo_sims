@@ -1,0 +1,3111 @@
+ARM GAS  /tmp/ccmYJ82r.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.eabi_attribute 27, 1
+   3              		.eabi_attribute 28, 1
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"network.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.text.ai_network_get_info,"ax",%progbits
+  18              		.align	1
+  19              		.global	ai_network_get_info
+  20              		.syntax unified
+  21              		.thumb
+  22              		.thumb_func
+  23              		.fpu fpv4-sp-d16
+  25              	ai_network_get_info:
+  26              	.LFB5:
+  27              		.file 1 "X-CUBE-AI/App/network.c"
+   1:X-CUBE-AI/App/network.c **** /**
+   2:X-CUBE-AI/App/network.c ****   ******************************************************************************
+   3:X-CUBE-AI/App/network.c ****   * @file    network.c
+   4:X-CUBE-AI/App/network.c ****   * @author  AST Embedded Analytics Research Platform
+   5:X-CUBE-AI/App/network.c ****   * @date    Wed Aug  4 16:00:07 2021
+   6:X-CUBE-AI/App/network.c ****   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
+   7:X-CUBE-AI/App/network.c ****   ******************************************************************************
+   8:X-CUBE-AI/App/network.c ****   * @attention
+   9:X-CUBE-AI/App/network.c ****   *
+  10:X-CUBE-AI/App/network.c ****   * Copyright (c) 2021 STMicroelectronics.
+  11:X-CUBE-AI/App/network.c ****   * All rights reserved.
+  12:X-CUBE-AI/App/network.c ****   *
+  13:X-CUBE-AI/App/network.c ****   * This software component is licensed by ST under Ultimate Liberty license
+  14:X-CUBE-AI/App/network.c ****   * SLA0044, the "License"; You may not use this file except in compliance with
+  15:X-CUBE-AI/App/network.c ****   * the License. You may obtain a copy of the License at:
+  16:X-CUBE-AI/App/network.c ****   *                             www.st.com/SLA0044
+  17:X-CUBE-AI/App/network.c ****   *
+  18:X-CUBE-AI/App/network.c ****   ******************************************************************************
+  19:X-CUBE-AI/App/network.c ****   */
+  20:X-CUBE-AI/App/network.c **** 
+  21:X-CUBE-AI/App/network.c **** 
+  22:X-CUBE-AI/App/network.c **** #include "network.h"
+  23:X-CUBE-AI/App/network.c **** 
+  24:X-CUBE-AI/App/network.c **** #include "ai_platform_interface.h"
+  25:X-CUBE-AI/App/network.c **** #include "ai_math_helpers.h"
+  26:X-CUBE-AI/App/network.c **** 
+  27:X-CUBE-AI/App/network.c **** #include "core_common.h"
+  28:X-CUBE-AI/App/network.c **** #include "core_convert.h"
+  29:X-CUBE-AI/App/network.c **** 
+  30:X-CUBE-AI/App/network.c **** #include "layers.h"
+  31:X-CUBE-AI/App/network.c **** 
+ARM GAS  /tmp/ccmYJ82r.s 			page 2
+
+
+  32:X-CUBE-AI/App/network.c **** 
+  33:X-CUBE-AI/App/network.c **** 
+  34:X-CUBE-AI/App/network.c **** 
+  35:X-CUBE-AI/App/network.c **** #undef AI_NET_OBJ_INSTANCE
+  36:X-CUBE-AI/App/network.c **** #define AI_NET_OBJ_INSTANCE g_network
+  37:X-CUBE-AI/App/network.c ****  
+  38:X-CUBE-AI/App/network.c **** #undef AI_NETWORK_MODEL_SIGNATURE
+  39:X-CUBE-AI/App/network.c **** #define AI_NETWORK_MODEL_SIGNATURE     "7d9a2645209e2d7d7448b22377688aaf"
+  40:X-CUBE-AI/App/network.c **** 
+  41:X-CUBE-AI/App/network.c **** #ifndef AI_TOOLS_REVISION_ID
+  42:X-CUBE-AI/App/network.c **** #define AI_TOOLS_REVISION_ID     ""
+  43:X-CUBE-AI/App/network.c **** #endif
+  44:X-CUBE-AI/App/network.c **** 
+  45:X-CUBE-AI/App/network.c **** #undef AI_TOOLS_DATE_TIME
+  46:X-CUBE-AI/App/network.c **** #define AI_TOOLS_DATE_TIME   "Wed Aug  4 16:00:07 2021"
+  47:X-CUBE-AI/App/network.c **** 
+  48:X-CUBE-AI/App/network.c **** #undef AI_TOOLS_COMPILE_TIME
+  49:X-CUBE-AI/App/network.c **** #define AI_TOOLS_COMPILE_TIME    __DATE__ " " __TIME__
+  50:X-CUBE-AI/App/network.c **** 
+  51:X-CUBE-AI/App/network.c **** #undef AI_NETWORK_N_BATCHES
+  52:X-CUBE-AI/App/network.c **** #define AI_NETWORK_N_BATCHES         (1)
+  53:X-CUBE-AI/App/network.c **** 
+  54:X-CUBE-AI/App/network.c **** 
+  55:X-CUBE-AI/App/network.c **** 
+  56:X-CUBE-AI/App/network.c **** 
+  57:X-CUBE-AI/App/network.c **** /**  Array declarations section  **********************************************/
+  58:X-CUBE-AI/App/network.c **** /* Array#0 */
+  59:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+  60:X-CUBE-AI/App/network.c ****   input_0_output_array, AI_ARRAY_FORMAT_FLOAT|AI_FMT_FLAG_IS_IO,
+  61:X-CUBE-AI/App/network.c ****   NULL, NULL, 784, AI_STATIC)
+  62:X-CUBE-AI/App/network.c **** 
+  63:X-CUBE-AI/App/network.c **** /* Array#1 */
+  64:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+  65:X-CUBE-AI/App/network.c ****   conv2d_output_array, AI_ARRAY_FORMAT_FLOAT,
+  66:X-CUBE-AI/App/network.c ****   NULL, NULL, 5408, AI_STATIC)
+  67:X-CUBE-AI/App/network.c **** 
+  68:X-CUBE-AI/App/network.c **** /* Array#2 */
+  69:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+  70:X-CUBE-AI/App/network.c ****   conv2d_1_output_array, AI_ARRAY_FORMAT_FLOAT,
+  71:X-CUBE-AI/App/network.c ****   NULL, NULL, 1600, AI_STATIC)
+  72:X-CUBE-AI/App/network.c **** 
+  73:X-CUBE-AI/App/network.c **** /* Array#3 */
+  74:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+  75:X-CUBE-AI/App/network.c ****   dense_output_array, AI_ARRAY_FORMAT_FLOAT,
+  76:X-CUBE-AI/App/network.c ****   NULL, NULL, 128, AI_STATIC)
+  77:X-CUBE-AI/App/network.c **** 
+  78:X-CUBE-AI/App/network.c **** /* Array#4 */
+  79:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+  80:X-CUBE-AI/App/network.c ****   dense_nl_output_array, AI_ARRAY_FORMAT_FLOAT,
+  81:X-CUBE-AI/App/network.c ****   NULL, NULL, 128, AI_STATIC)
+  82:X-CUBE-AI/App/network.c **** 
+  83:X-CUBE-AI/App/network.c **** /* Array#5 */
+  84:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+  85:X-CUBE-AI/App/network.c ****   dense_1_output_array, AI_ARRAY_FORMAT_FLOAT,
+  86:X-CUBE-AI/App/network.c ****   NULL, NULL, 10, AI_STATIC)
+  87:X-CUBE-AI/App/network.c **** 
+  88:X-CUBE-AI/App/network.c **** /* Array#6 */
+ARM GAS  /tmp/ccmYJ82r.s 			page 3
+
+
+  89:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+  90:X-CUBE-AI/App/network.c ****   dense_1_nl_output_array, AI_ARRAY_FORMAT_FLOAT|AI_FMT_FLAG_IS_IO,
+  91:X-CUBE-AI/App/network.c ****   NULL, NULL, 10, AI_STATIC)
+  92:X-CUBE-AI/App/network.c **** 
+  93:X-CUBE-AI/App/network.c **** /* Array#7 */
+  94:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+  95:X-CUBE-AI/App/network.c ****   conv2d_weights_array, AI_ARRAY_FORMAT_FLOAT,
+  96:X-CUBE-AI/App/network.c ****   NULL, NULL, 288, AI_STATIC)
+  97:X-CUBE-AI/App/network.c **** 
+  98:X-CUBE-AI/App/network.c **** /* Array#8 */
+  99:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+ 100:X-CUBE-AI/App/network.c ****   conv2d_bias_array, AI_ARRAY_FORMAT_FLOAT,
+ 101:X-CUBE-AI/App/network.c ****   NULL, NULL, 32, AI_STATIC)
+ 102:X-CUBE-AI/App/network.c **** 
+ 103:X-CUBE-AI/App/network.c **** /* Array#9 */
+ 104:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+ 105:X-CUBE-AI/App/network.c ****   conv2d_1_weights_array, AI_ARRAY_FORMAT_FLOAT,
+ 106:X-CUBE-AI/App/network.c ****   NULL, NULL, 18432, AI_STATIC)
+ 107:X-CUBE-AI/App/network.c **** 
+ 108:X-CUBE-AI/App/network.c **** /* Array#10 */
+ 109:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+ 110:X-CUBE-AI/App/network.c ****   conv2d_1_bias_array, AI_ARRAY_FORMAT_FLOAT,
+ 111:X-CUBE-AI/App/network.c ****   NULL, NULL, 64, AI_STATIC)
+ 112:X-CUBE-AI/App/network.c **** 
+ 113:X-CUBE-AI/App/network.c **** /* Array#11 */
+ 114:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+ 115:X-CUBE-AI/App/network.c ****   dense_weights_array, AI_ARRAY_FORMAT_LUT4_FLOAT,
+ 116:X-CUBE-AI/App/network.c ****   NULL, NULL, 204800, AI_STATIC)
+ 117:X-CUBE-AI/App/network.c **** 
+ 118:X-CUBE-AI/App/network.c **** /* Array#12 */
+ 119:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+ 120:X-CUBE-AI/App/network.c ****   dense_bias_array, AI_ARRAY_FORMAT_FLOAT,
+ 121:X-CUBE-AI/App/network.c ****   NULL, NULL, 128, AI_STATIC)
+ 122:X-CUBE-AI/App/network.c **** 
+ 123:X-CUBE-AI/App/network.c **** /* Array#13 */
+ 124:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+ 125:X-CUBE-AI/App/network.c ****   dense_1_weights_array, AI_ARRAY_FORMAT_FLOAT,
+ 126:X-CUBE-AI/App/network.c ****   NULL, NULL, 1280, AI_STATIC)
+ 127:X-CUBE-AI/App/network.c **** 
+ 128:X-CUBE-AI/App/network.c **** /* Array#14 */
+ 129:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+ 130:X-CUBE-AI/App/network.c ****   dense_1_bias_array, AI_ARRAY_FORMAT_FLOAT,
+ 131:X-CUBE-AI/App/network.c ****   NULL, NULL, 10, AI_STATIC)
+ 132:X-CUBE-AI/App/network.c **** 
+ 133:X-CUBE-AI/App/network.c **** /* Array#15 */
+ 134:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+ 135:X-CUBE-AI/App/network.c ****   conv2d_scratch0_array, AI_ARRAY_FORMAT_FLOAT,
+ 136:X-CUBE-AI/App/network.c ****   NULL, NULL, 1664, AI_STATIC)
+ 137:X-CUBE-AI/App/network.c **** 
+ 138:X-CUBE-AI/App/network.c **** /* Array#16 */
+ 139:X-CUBE-AI/App/network.c **** AI_ARRAY_OBJ_DECLARE(
+ 140:X-CUBE-AI/App/network.c ****   conv2d_1_scratch0_array, AI_ARRAY_FORMAT_FLOAT,
+ 141:X-CUBE-AI/App/network.c ****   NULL, NULL, 1408, AI_STATIC)
+ 142:X-CUBE-AI/App/network.c **** 
+ 143:X-CUBE-AI/App/network.c **** /**  Tensor declarations section  *********************************************/
+ 144:X-CUBE-AI/App/network.c **** /* Tensor #0 */
+ 145:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ARM GAS  /tmp/ccmYJ82r.s 			page 4
+
+
+ 146:X-CUBE-AI/App/network.c ****   input_0_output, AI_STATIC,
+ 147:X-CUBE-AI/App/network.c ****   0, 0x0,
+ 148:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 1, 28, 28), AI_STRIDE_INIT(4, 4, 4, 4, 112),
+ 149:X-CUBE-AI/App/network.c ****   1, &input_0_output_array, NULL)
+ 150:X-CUBE-AI/App/network.c **** 
+ 151:X-CUBE-AI/App/network.c **** /* Tensor #1 */
+ 152:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 153:X-CUBE-AI/App/network.c ****   conv2d_output, AI_STATIC,
+ 154:X-CUBE-AI/App/network.c ****   1, 0x0,
+ 155:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 32, 13, 13), AI_STRIDE_INIT(4, 4, 4, 128, 1664),
+ 156:X-CUBE-AI/App/network.c ****   1, &conv2d_output_array, NULL)
+ 157:X-CUBE-AI/App/network.c **** 
+ 158:X-CUBE-AI/App/network.c **** /* Tensor #2 */
+ 159:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 160:X-CUBE-AI/App/network.c ****   conv2d_1_output, AI_STATIC,
+ 161:X-CUBE-AI/App/network.c ****   2, 0x0,
+ 162:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 64, 5, 5), AI_STRIDE_INIT(4, 4, 4, 256, 1280),
+ 163:X-CUBE-AI/App/network.c ****   1, &conv2d_1_output_array, NULL)
+ 164:X-CUBE-AI/App/network.c **** 
+ 165:X-CUBE-AI/App/network.c **** /* Tensor #3 */
+ 166:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 167:X-CUBE-AI/App/network.c ****   conv2d_1_output0, AI_STATIC,
+ 168:X-CUBE-AI/App/network.c ****   3, 0x0,
+ 169:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 1600, 1, 1), AI_STRIDE_INIT(4, 4, 4, 6400, 6400),
+ 170:X-CUBE-AI/App/network.c ****   1, &conv2d_1_output_array, NULL)
+ 171:X-CUBE-AI/App/network.c **** 
+ 172:X-CUBE-AI/App/network.c **** /* Tensor #4 */
+ 173:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 174:X-CUBE-AI/App/network.c ****   dense_output, AI_STATIC,
+ 175:X-CUBE-AI/App/network.c ****   4, 0x0,
+ 176:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 128, 1, 1), AI_STRIDE_INIT(4, 4, 4, 512, 512),
+ 177:X-CUBE-AI/App/network.c ****   1, &dense_output_array, NULL)
+ 178:X-CUBE-AI/App/network.c **** 
+ 179:X-CUBE-AI/App/network.c **** /* Tensor #5 */
+ 180:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 181:X-CUBE-AI/App/network.c ****   dense_nl_output, AI_STATIC,
+ 182:X-CUBE-AI/App/network.c ****   5, 0x0,
+ 183:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 128, 1, 1), AI_STRIDE_INIT(4, 4, 4, 512, 512),
+ 184:X-CUBE-AI/App/network.c ****   1, &dense_nl_output_array, NULL)
+ 185:X-CUBE-AI/App/network.c **** 
+ 186:X-CUBE-AI/App/network.c **** /* Tensor #6 */
+ 187:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 188:X-CUBE-AI/App/network.c ****   dense_1_output, AI_STATIC,
+ 189:X-CUBE-AI/App/network.c ****   6, 0x0,
+ 190:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 10, 1, 1), AI_STRIDE_INIT(4, 4, 4, 40, 40),
+ 191:X-CUBE-AI/App/network.c ****   1, &dense_1_output_array, NULL)
+ 192:X-CUBE-AI/App/network.c **** 
+ 193:X-CUBE-AI/App/network.c **** /* Tensor #7 */
+ 194:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 195:X-CUBE-AI/App/network.c ****   dense_1_nl_output, AI_STATIC,
+ 196:X-CUBE-AI/App/network.c ****   7, 0x0,
+ 197:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 10, 1, 1), AI_STRIDE_INIT(4, 4, 4, 40, 40),
+ 198:X-CUBE-AI/App/network.c ****   1, &dense_1_nl_output_array, NULL)
+ 199:X-CUBE-AI/App/network.c **** 
+ 200:X-CUBE-AI/App/network.c **** /* Tensor #8 */
+ 201:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 202:X-CUBE-AI/App/network.c ****   conv2d_weights, AI_STATIC,
+ARM GAS  /tmp/ccmYJ82r.s 			page 5
+
+
+ 203:X-CUBE-AI/App/network.c ****   8, 0x0,
+ 204:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 3, 3, 32), AI_STRIDE_INIT(4, 4, 4, 12, 36),
+ 205:X-CUBE-AI/App/network.c ****   1, &conv2d_weights_array, NULL)
+ 206:X-CUBE-AI/App/network.c **** 
+ 207:X-CUBE-AI/App/network.c **** /* Tensor #9 */
+ 208:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 209:X-CUBE-AI/App/network.c ****   conv2d_bias, AI_STATIC,
+ 210:X-CUBE-AI/App/network.c ****   9, 0x0,
+ 211:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 32, 1, 1), AI_STRIDE_INIT(4, 4, 4, 128, 128),
+ 212:X-CUBE-AI/App/network.c ****   1, &conv2d_bias_array, NULL)
+ 213:X-CUBE-AI/App/network.c **** 
+ 214:X-CUBE-AI/App/network.c **** /* Tensor #10 */
+ 215:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 216:X-CUBE-AI/App/network.c ****   conv2d_1_weights, AI_STATIC,
+ 217:X-CUBE-AI/App/network.c ****   10, 0x0,
+ 218:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 32, 3, 3, 64), AI_STRIDE_INIT(4, 4, 128, 384, 1152),
+ 219:X-CUBE-AI/App/network.c ****   1, &conv2d_1_weights_array, NULL)
+ 220:X-CUBE-AI/App/network.c **** 
+ 221:X-CUBE-AI/App/network.c **** /* Tensor #11 */
+ 222:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 223:X-CUBE-AI/App/network.c ****   conv2d_1_bias, AI_STATIC,
+ 224:X-CUBE-AI/App/network.c ****   11, 0x0,
+ 225:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 64, 1, 1), AI_STRIDE_INIT(4, 4, 4, 256, 256),
+ 226:X-CUBE-AI/App/network.c ****   1, &conv2d_1_bias_array, NULL)
+ 227:X-CUBE-AI/App/network.c **** 
+ 228:X-CUBE-AI/App/network.c **** /* Tensor #12 */
+ 229:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 230:X-CUBE-AI/App/network.c ****   dense_weights, AI_STATIC,
+ 231:X-CUBE-AI/App/network.c ****   12, 0x0,
+ 232:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1600, 128, 1, 1), AI_STRIDE_INIT(4, 1, 800, 102400, 102400),
+ 233:X-CUBE-AI/App/network.c ****   1, &dense_weights_array, NULL)
+ 234:X-CUBE-AI/App/network.c **** 
+ 235:X-CUBE-AI/App/network.c **** /* Tensor #13 */
+ 236:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 237:X-CUBE-AI/App/network.c ****   dense_bias, AI_STATIC,
+ 238:X-CUBE-AI/App/network.c ****   13, 0x0,
+ 239:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 128, 1, 1), AI_STRIDE_INIT(4, 4, 4, 512, 512),
+ 240:X-CUBE-AI/App/network.c ****   1, &dense_bias_array, NULL)
+ 241:X-CUBE-AI/App/network.c **** 
+ 242:X-CUBE-AI/App/network.c **** /* Tensor #14 */
+ 243:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 244:X-CUBE-AI/App/network.c ****   dense_1_weights, AI_STATIC,
+ 245:X-CUBE-AI/App/network.c ****   14, 0x0,
+ 246:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 128, 10, 1, 1), AI_STRIDE_INIT(4, 4, 512, 5120, 5120),
+ 247:X-CUBE-AI/App/network.c ****   1, &dense_1_weights_array, NULL)
+ 248:X-CUBE-AI/App/network.c **** 
+ 249:X-CUBE-AI/App/network.c **** /* Tensor #15 */
+ 250:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 251:X-CUBE-AI/App/network.c ****   dense_1_bias, AI_STATIC,
+ 252:X-CUBE-AI/App/network.c ****   15, 0x0,
+ 253:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 10, 1, 1), AI_STRIDE_INIT(4, 4, 4, 40, 40),
+ 254:X-CUBE-AI/App/network.c ****   1, &dense_1_bias_array, NULL)
+ 255:X-CUBE-AI/App/network.c **** 
+ 256:X-CUBE-AI/App/network.c **** /* Tensor #16 */
+ 257:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 258:X-CUBE-AI/App/network.c ****   conv2d_scratch0, AI_STATIC,
+ 259:X-CUBE-AI/App/network.c ****   16, 0x0,
+ARM GAS  /tmp/ccmYJ82r.s 			page 6
+
+
+ 260:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 32, 26, 2), AI_STRIDE_INIT(4, 4, 4, 128, 3328),
+ 261:X-CUBE-AI/App/network.c ****   1, &conv2d_scratch0_array, NULL)
+ 262:X-CUBE-AI/App/network.c **** 
+ 263:X-CUBE-AI/App/network.c **** /* Tensor #17 */
+ 264:X-CUBE-AI/App/network.c **** AI_TENSOR_OBJ_DECLARE(
+ 265:X-CUBE-AI/App/network.c ****   conv2d_1_scratch0, AI_STATIC,
+ 266:X-CUBE-AI/App/network.c ****   17, 0x0,
+ 267:X-CUBE-AI/App/network.c ****   AI_SHAPE_INIT(4, 1, 64, 11, 2), AI_STRIDE_INIT(4, 4, 4, 256, 2816),
+ 268:X-CUBE-AI/App/network.c ****   1, &conv2d_1_scratch0_array, NULL)
+ 269:X-CUBE-AI/App/network.c **** 
+ 270:X-CUBE-AI/App/network.c **** 
+ 271:X-CUBE-AI/App/network.c **** 
+ 272:X-CUBE-AI/App/network.c **** /**  Layer declarations section  **********************************************/
+ 273:X-CUBE-AI/App/network.c **** 
+ 274:X-CUBE-AI/App/network.c **** 
+ 275:X-CUBE-AI/App/network.c **** AI_TENSOR_CHAIN_OBJ_DECLARE(
+ 276:X-CUBE-AI/App/network.c ****   dense_1_nl_chain, AI_STATIC_CONST, 4,
+ 277:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &dense_1_output),
+ 278:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &dense_1_nl_output),
+ 279:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_EMPTY,
+ 280:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_EMPTY
+ 281:X-CUBE-AI/App/network.c **** )
+ 282:X-CUBE-AI/App/network.c **** 
+ 283:X-CUBE-AI/App/network.c **** AI_LAYER_OBJ_DECLARE(
+ 284:X-CUBE-AI/App/network.c ****   dense_1_nl_layer, 8,
+ 285:X-CUBE-AI/App/network.c ****   NL_TYPE, 0x0, NULL,
+ 286:X-CUBE-AI/App/network.c ****   nl, forward_sm,
+ 287:X-CUBE-AI/App/network.c ****   &dense_1_nl_chain,
+ 288:X-CUBE-AI/App/network.c ****   NULL, &dense_1_nl_layer, AI_STATIC, 
+ 289:X-CUBE-AI/App/network.c ****   .nl_params = NULL, 
+ 290:X-CUBE-AI/App/network.c **** )
+ 291:X-CUBE-AI/App/network.c **** 
+ 292:X-CUBE-AI/App/network.c **** AI_TENSOR_CHAIN_OBJ_DECLARE(
+ 293:X-CUBE-AI/App/network.c ****   dense_1_chain, AI_STATIC_CONST, 4,
+ 294:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &dense_nl_output),
+ 295:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &dense_1_output),
+ 296:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 2, &dense_1_weights, &dense_1_bias),
+ 297:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_EMPTY
+ 298:X-CUBE-AI/App/network.c **** )
+ 299:X-CUBE-AI/App/network.c **** 
+ 300:X-CUBE-AI/App/network.c **** AI_LAYER_OBJ_DECLARE(
+ 301:X-CUBE-AI/App/network.c ****   dense_1_layer, 8,
+ 302:X-CUBE-AI/App/network.c ****   DENSE_TYPE, 0x0, NULL,
+ 303:X-CUBE-AI/App/network.c ****   dense, forward_dense,
+ 304:X-CUBE-AI/App/network.c ****   &dense_1_chain,
+ 305:X-CUBE-AI/App/network.c ****   NULL, &dense_1_nl_layer, AI_STATIC, 
+ 306:X-CUBE-AI/App/network.c **** )
+ 307:X-CUBE-AI/App/network.c **** 
+ 308:X-CUBE-AI/App/network.c **** AI_TENSOR_CHAIN_OBJ_DECLARE(
+ 309:X-CUBE-AI/App/network.c ****   dense_nl_chain, AI_STATIC_CONST, 4,
+ 310:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &dense_output),
+ 311:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &dense_nl_output),
+ 312:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_EMPTY,
+ 313:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_EMPTY
+ 314:X-CUBE-AI/App/network.c **** )
+ 315:X-CUBE-AI/App/network.c **** 
+ 316:X-CUBE-AI/App/network.c **** AI_LAYER_OBJ_DECLARE(
+ARM GAS  /tmp/ccmYJ82r.s 			page 7
+
+
+ 317:X-CUBE-AI/App/network.c ****   dense_nl_layer, 6,
+ 318:X-CUBE-AI/App/network.c ****   NL_TYPE, 0x0, NULL,
+ 319:X-CUBE-AI/App/network.c ****   nl, forward_relu,
+ 320:X-CUBE-AI/App/network.c ****   &dense_nl_chain,
+ 321:X-CUBE-AI/App/network.c ****   NULL, &dense_1_layer, AI_STATIC, 
+ 322:X-CUBE-AI/App/network.c ****   .nl_params = NULL, 
+ 323:X-CUBE-AI/App/network.c **** )
+ 324:X-CUBE-AI/App/network.c **** 
+ 325:X-CUBE-AI/App/network.c **** AI_TENSOR_CHAIN_OBJ_DECLARE(
+ 326:X-CUBE-AI/App/network.c ****   dense_chain, AI_STATIC_CONST, 4,
+ 327:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &conv2d_1_output0),
+ 328:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &dense_output),
+ 329:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 2, &dense_weights, &dense_bias),
+ 330:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_EMPTY
+ 331:X-CUBE-AI/App/network.c **** )
+ 332:X-CUBE-AI/App/network.c **** 
+ 333:X-CUBE-AI/App/network.c **** AI_LAYER_OBJ_DECLARE(
+ 334:X-CUBE-AI/App/network.c ****   dense_layer, 6,
+ 335:X-CUBE-AI/App/network.c ****   DENSE_TYPE, 0x0, NULL,
+ 336:X-CUBE-AI/App/network.c ****   dense, forward_dense,
+ 337:X-CUBE-AI/App/network.c ****   &dense_chain,
+ 338:X-CUBE-AI/App/network.c ****   NULL, &dense_nl_layer, AI_STATIC, 
+ 339:X-CUBE-AI/App/network.c **** )
+ 340:X-CUBE-AI/App/network.c **** 
+ 341:X-CUBE-AI/App/network.c **** AI_TENSOR_CHAIN_OBJ_DECLARE(
+ 342:X-CUBE-AI/App/network.c ****   conv2d_1_chain, AI_STATIC_CONST, 4,
+ 343:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &conv2d_output),
+ 344:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &conv2d_1_output),
+ 345:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 3, &conv2d_1_weights, &conv2d_1_bias, NULL),
+ 346:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &conv2d_1_scratch0)
+ 347:X-CUBE-AI/App/network.c **** )
+ 348:X-CUBE-AI/App/network.c **** 
+ 349:X-CUBE-AI/App/network.c **** AI_LAYER_OBJ_DECLARE(
+ 350:X-CUBE-AI/App/network.c ****   conv2d_1_layer, 3,
+ 351:X-CUBE-AI/App/network.c ****   OPTIMIZED_CONV2D_TYPE, 0x0, NULL,
+ 352:X-CUBE-AI/App/network.c ****   conv2d_nl_pool, forward_conv2d_nl_pool,
+ 353:X-CUBE-AI/App/network.c ****   &conv2d_1_chain,
+ 354:X-CUBE-AI/App/network.c ****   NULL, &dense_layer, AI_STATIC, 
+ 355:X-CUBE-AI/App/network.c ****   .groups = 1, 
+ 356:X-CUBE-AI/App/network.c ****   .nl_params = NULL, 
+ 357:X-CUBE-AI/App/network.c ****   .nl_func = nl_func_relu_array_f32, 
+ 358:X-CUBE-AI/App/network.c ****   .filter_stride = AI_SHAPE_2D_INIT(1, 1), 
+ 359:X-CUBE-AI/App/network.c ****   .dilation = AI_SHAPE_2D_INIT(1, 1), 
+ 360:X-CUBE-AI/App/network.c ****   .filter_pad = AI_SHAPE_INIT(4, 0, 0, 0, 0), 
+ 361:X-CUBE-AI/App/network.c ****   .pool_size = AI_SHAPE_2D_INIT(2, 2), 
+ 362:X-CUBE-AI/App/network.c ****   .pool_stride = AI_SHAPE_2D_INIT(2, 2), 
+ 363:X-CUBE-AI/App/network.c ****   .pool_pad = AI_SHAPE_INIT(4, 0, 0, 0, 0), 
+ 364:X-CUBE-AI/App/network.c ****   .pool_func = pool_func_mp_array_f32, 
+ 365:X-CUBE-AI/App/network.c **** )
+ 366:X-CUBE-AI/App/network.c **** 
+ 367:X-CUBE-AI/App/network.c **** AI_TENSOR_CHAIN_OBJ_DECLARE(
+ 368:X-CUBE-AI/App/network.c ****   conv2d_chain, AI_STATIC_CONST, 4,
+ 369:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &input_0_output),
+ 370:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &conv2d_output),
+ 371:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 3, &conv2d_weights, &conv2d_bias, NULL),
+ 372:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_OBJ_INIT(AI_FLAG_NONE, 1, &conv2d_scratch0)
+ 373:X-CUBE-AI/App/network.c **** )
+ARM GAS  /tmp/ccmYJ82r.s 			page 8
+
+
+ 374:X-CUBE-AI/App/network.c **** 
+ 375:X-CUBE-AI/App/network.c **** AI_LAYER_OBJ_DECLARE(
+ 376:X-CUBE-AI/App/network.c ****   conv2d_layer, 1,
+ 377:X-CUBE-AI/App/network.c ****   OPTIMIZED_CONV2D_TYPE, 0x0, NULL,
+ 378:X-CUBE-AI/App/network.c ****   conv2d_nl_pool, forward_conv2d_nl_pool,
+ 379:X-CUBE-AI/App/network.c ****   &conv2d_chain,
+ 380:X-CUBE-AI/App/network.c ****   NULL, &conv2d_1_layer, AI_STATIC, 
+ 381:X-CUBE-AI/App/network.c ****   .groups = 1, 
+ 382:X-CUBE-AI/App/network.c ****   .nl_params = NULL, 
+ 383:X-CUBE-AI/App/network.c ****   .nl_func = nl_func_relu_array_f32, 
+ 384:X-CUBE-AI/App/network.c ****   .filter_stride = AI_SHAPE_2D_INIT(1, 1), 
+ 385:X-CUBE-AI/App/network.c ****   .dilation = AI_SHAPE_2D_INIT(1, 1), 
+ 386:X-CUBE-AI/App/network.c ****   .filter_pad = AI_SHAPE_INIT(4, 0, 0, 0, 0), 
+ 387:X-CUBE-AI/App/network.c ****   .pool_size = AI_SHAPE_2D_INIT(2, 2), 
+ 388:X-CUBE-AI/App/network.c ****   .pool_stride = AI_SHAPE_2D_INIT(2, 2), 
+ 389:X-CUBE-AI/App/network.c ****   .pool_pad = AI_SHAPE_INIT(4, 0, 0, 0, 0), 
+ 390:X-CUBE-AI/App/network.c ****   .pool_func = pool_func_mp_array_f32, 
+ 391:X-CUBE-AI/App/network.c **** )
+ 392:X-CUBE-AI/App/network.c **** 
+ 393:X-CUBE-AI/App/network.c **** 
+ 394:X-CUBE-AI/App/network.c **** AI_NETWORK_OBJ_DECLARE(
+ 395:X-CUBE-AI/App/network.c ****   AI_NET_OBJ_INSTANCE, AI_STATIC,
+ 396:X-CUBE-AI/App/network.c ****   AI_BUFFER_OBJ_INIT(AI_BUFFER_FORMAT_U8,
+ 397:X-CUBE-AI/App/network.c ****                      1, 1, 183400, 1,
+ 398:X-CUBE-AI/App/network.c ****                      NULL),
+ 399:X-CUBE-AI/App/network.c ****   AI_BUFFER_OBJ_INIT(AI_BUFFER_FORMAT_U8,
+ 400:X-CUBE-AI/App/network.c ****                      1, 1, 29824, 1,
+ 401:X-CUBE-AI/App/network.c ****                      NULL),
+ 402:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_NETWORK_IN_NUM, &input_0_output),
+ 403:X-CUBE-AI/App/network.c ****   AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_NETWORK_OUT_NUM, &dense_1_nl_output),
+ 404:X-CUBE-AI/App/network.c ****   &conv2d_layer, 0, NULL)
+ 405:X-CUBE-AI/App/network.c **** 
+ 406:X-CUBE-AI/App/network.c **** 
+ 407:X-CUBE-AI/App/network.c **** 
+ 408:X-CUBE-AI/App/network.c **** AI_DECLARE_STATIC
+ 409:X-CUBE-AI/App/network.c **** ai_bool network_configure_activations(
+ 410:X-CUBE-AI/App/network.c ****   ai_network* net_ctx, const ai_network_params* params)
+ 411:X-CUBE-AI/App/network.c **** {
+ 412:X-CUBE-AI/App/network.c ****   AI_ASSERT(net_ctx)
+ 413:X-CUBE-AI/App/network.c ****   AI_UNUSED(net_ctx)
+ 414:X-CUBE-AI/App/network.c **** 
+ 415:X-CUBE-AI/App/network.c ****   ai_ptr activations_map[1] = AI_C_ARRAY_INIT;
+ 416:X-CUBE-AI/App/network.c **** 
+ 417:X-CUBE-AI/App/network.c ****   if (ai_platform_get_activations_map(activations_map, 1, params)) {
+ 418:X-CUBE-AI/App/network.c ****     /* Updating activations (byte) offsets */
+ 419:X-CUBE-AI/App/network.c ****     input_0_output_array.data = AI_PTR(NULL);
+ 420:X-CUBE-AI/App/network.c ****     input_0_output_array.data_start = AI_PTR(NULL);
+ 421:X-CUBE-AI/App/network.c ****     conv2d_output_array.data = AI_PTR(activations_map[0] + 1536);
+ 422:X-CUBE-AI/App/network.c ****     conv2d_output_array.data_start = AI_PTR(activations_map[0] + 1536);
+ 423:X-CUBE-AI/App/network.c ****     conv2d_1_output_array.data = AI_PTR(activations_map[0] + 0);
+ 424:X-CUBE-AI/App/network.c ****     conv2d_1_output_array.data_start = AI_PTR(activations_map[0] + 0);
+ 425:X-CUBE-AI/App/network.c ****     dense_output_array.data = AI_PTR(activations_map[0] + 6400);
+ 426:X-CUBE-AI/App/network.c ****     dense_output_array.data_start = AI_PTR(activations_map[0] + 6400);
+ 427:X-CUBE-AI/App/network.c ****     dense_nl_output_array.data = AI_PTR(activations_map[0] + 0);
+ 428:X-CUBE-AI/App/network.c ****     dense_nl_output_array.data_start = AI_PTR(activations_map[0] + 0);
+ 429:X-CUBE-AI/App/network.c ****     dense_1_output_array.data = AI_PTR(activations_map[0] + 512);
+ 430:X-CUBE-AI/App/network.c ****     dense_1_output_array.data_start = AI_PTR(activations_map[0] + 512);
+ARM GAS  /tmp/ccmYJ82r.s 			page 9
+
+
+ 431:X-CUBE-AI/App/network.c ****     dense_1_nl_output_array.data = AI_PTR(NULL);
+ 432:X-CUBE-AI/App/network.c ****     dense_1_nl_output_array.data_start = AI_PTR(NULL);
+ 433:X-CUBE-AI/App/network.c ****     conv2d_scratch0_array.data = AI_PTR(activations_map[0] + 23168);
+ 434:X-CUBE-AI/App/network.c ****     conv2d_scratch0_array.data_start = AI_PTR(activations_map[0] + 23168);
+ 435:X-CUBE-AI/App/network.c ****     conv2d_1_scratch0_array.data = AI_PTR(activations_map[0] + 23168);
+ 436:X-CUBE-AI/App/network.c ****     conv2d_1_scratch0_array.data_start = AI_PTR(activations_map[0] + 23168);
+ 437:X-CUBE-AI/App/network.c ****     
+ 438:X-CUBE-AI/App/network.c ****     return true;
+ 439:X-CUBE-AI/App/network.c ****   }
+ 440:X-CUBE-AI/App/network.c ****   return false;
+ 441:X-CUBE-AI/App/network.c **** }
+ 442:X-CUBE-AI/App/network.c **** 
+ 443:X-CUBE-AI/App/network.c **** 
+ 444:X-CUBE-AI/App/network.c **** 
+ 445:X-CUBE-AI/App/network.c **** AI_DECLARE_STATIC
+ 446:X-CUBE-AI/App/network.c **** ai_bool network_configure_weights(
+ 447:X-CUBE-AI/App/network.c ****   ai_network* net_ctx, const ai_network_params* params)
+ 448:X-CUBE-AI/App/network.c **** {
+ 449:X-CUBE-AI/App/network.c ****   AI_ASSERT(net_ctx)
+ 450:X-CUBE-AI/App/network.c ****   AI_UNUSED(net_ctx)
+ 451:X-CUBE-AI/App/network.c **** 
+ 452:X-CUBE-AI/App/network.c ****   ai_ptr weights_map[1] = AI_C_ARRAY_INIT;
+ 453:X-CUBE-AI/App/network.c **** 
+ 454:X-CUBE-AI/App/network.c ****   if (ai_platform_get_weights_map(weights_map, 1, params)) {
+ 455:X-CUBE-AI/App/network.c ****     /* Updating weights with array addresses */
+ 456:X-CUBE-AI/App/network.c ****     
+ 457:X-CUBE-AI/App/network.c ****     conv2d_weights_array.format |= AI_FMT_FLAG_CONST;
+ 458:X-CUBE-AI/App/network.c ****     conv2d_weights_array.data = AI_PTR(weights_map[0] + 0);
+ 459:X-CUBE-AI/App/network.c ****     conv2d_weights_array.data_start = AI_PTR(weights_map[0] + 0);
+ 460:X-CUBE-AI/App/network.c ****     conv2d_bias_array.format |= AI_FMT_FLAG_CONST;
+ 461:X-CUBE-AI/App/network.c ****     conv2d_bias_array.data = AI_PTR(weights_map[0] + 1152);
+ 462:X-CUBE-AI/App/network.c ****     conv2d_bias_array.data_start = AI_PTR(weights_map[0] + 1152);
+ 463:X-CUBE-AI/App/network.c ****     conv2d_1_weights_array.format |= AI_FMT_FLAG_CONST;
+ 464:X-CUBE-AI/App/network.c ****     conv2d_1_weights_array.data = AI_PTR(weights_map[0] + 1280);
+ 465:X-CUBE-AI/App/network.c ****     conv2d_1_weights_array.data_start = AI_PTR(weights_map[0] + 1280);
+ 466:X-CUBE-AI/App/network.c ****     conv2d_1_bias_array.format |= AI_FMT_FLAG_CONST;
+ 467:X-CUBE-AI/App/network.c ****     conv2d_1_bias_array.data = AI_PTR(weights_map[0] + 75008);
+ 468:X-CUBE-AI/App/network.c ****     conv2d_1_bias_array.data_start = AI_PTR(weights_map[0] + 75008);
+ 469:X-CUBE-AI/App/network.c ****     dense_weights_array.format |= AI_FMT_FLAG_CONST;
+ 470:X-CUBE-AI/App/network.c ****     dense_weights_array.data = AI_PTR(weights_map[0] + 75328);
+ 471:X-CUBE-AI/App/network.c ****     dense_weights_array.data_start = AI_PTR(weights_map[0] + 75264);
+ 472:X-CUBE-AI/App/network.c ****     dense_bias_array.format |= AI_FMT_FLAG_CONST;
+ 473:X-CUBE-AI/App/network.c ****     dense_bias_array.data = AI_PTR(weights_map[0] + 177728);
+ 474:X-CUBE-AI/App/network.c ****     dense_bias_array.data_start = AI_PTR(weights_map[0] + 177728);
+ 475:X-CUBE-AI/App/network.c ****     dense_1_weights_array.format |= AI_FMT_FLAG_CONST;
+ 476:X-CUBE-AI/App/network.c ****     dense_1_weights_array.data = AI_PTR(weights_map[0] + 178240);
+ 477:X-CUBE-AI/App/network.c ****     dense_1_weights_array.data_start = AI_PTR(weights_map[0] + 178240);
+ 478:X-CUBE-AI/App/network.c ****     dense_1_bias_array.format |= AI_FMT_FLAG_CONST;
+ 479:X-CUBE-AI/App/network.c ****     dense_1_bias_array.data = AI_PTR(weights_map[0] + 183360);
+ 480:X-CUBE-AI/App/network.c ****     dense_1_bias_array.data_start = AI_PTR(weights_map[0] + 183360);
+ 481:X-CUBE-AI/App/network.c ****     return true;
+ 482:X-CUBE-AI/App/network.c ****   }
+ 483:X-CUBE-AI/App/network.c ****   return false;
+ 484:X-CUBE-AI/App/network.c **** }
+ 485:X-CUBE-AI/App/network.c **** 
+ 486:X-CUBE-AI/App/network.c **** 
+ 487:X-CUBE-AI/App/network.c **** /**  PUBLIC APIs SECTION  *****************************************************/
+ARM GAS  /tmp/ccmYJ82r.s 			page 10
+
+
+ 488:X-CUBE-AI/App/network.c **** AI_DEPRECATED
+ 489:X-CUBE-AI/App/network.c **** AI_API_ENTRY
+ 490:X-CUBE-AI/App/network.c **** ai_bool ai_network_get_info(
+ 491:X-CUBE-AI/App/network.c ****   ai_handle network, ai_network_report* report)
+ 492:X-CUBE-AI/App/network.c **** {
+  28              		.loc 1 492 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 120
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              	.LVL0:
+  33 0000 30B5     		push	{r4, r5, lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 12
+  36              		.cfi_offset 4, -12
+  37              		.cfi_offset 5, -8
+  38              		.cfi_offset 14, -4
+  39 0002 9FB0     		sub	sp, sp, #124
+  40              	.LCFI1:
+  41              		.cfi_def_cfa_offset 136
+  42 0004 0546     		mov	r5, r0
+  43 0006 0C46     		mov	r4, r1
+ 493:X-CUBE-AI/App/network.c ****   ai_network* net_ctx = AI_NETWORK_ACQUIRE_CTX(network);
+  44              		.loc 1 493 0
+  45 0008 FFF7FEFF 		bl	ai_platform_context_acquire
+  46              	.LVL1:
+ 494:X-CUBE-AI/App/network.c **** 
+ 495:X-CUBE-AI/App/network.c ****   if (report && net_ctx)
+  47              		.loc 1 495 0
+  48 000c 002C     		cmp	r4, #0
+  49 000e 30D0     		beq	.L4
+  50              		.loc 1 495 0 is_stmt 0 discriminator 1
+  51 0010 0028     		cmp	r0, #0
+  52 0012 30D0     		beq	.L5
+  53              	.LBB2:
+ 496:X-CUBE-AI/App/network.c ****   {
+ 497:X-CUBE-AI/App/network.c ****     ai_network_report r = {
+  54              		.loc 1 497 0 is_stmt 1
+  55 0014 7422     		movs	r2, #116
+  56 0016 0021     		movs	r1, #0
+  57 0018 01A8     		add	r0, sp, #4
+  58              	.LVL2:
+  59 001a FFF7FEFF 		bl	memset
+  60              	.LVL3:
+  61 001e 174B     		ldr	r3, .L8
+  62 0020 0193     		str	r3, [sp, #4]
+  63 0022 174B     		ldr	r3, .L8+4
+  64 0024 0293     		str	r3, [sp, #8]
+  65 0026 174B     		ldr	r3, .L8+8
+  66 0028 0393     		str	r3, [sp, #12]
+  67 002a 174B     		ldr	r3, .L8+12
+  68 002c 0493     		str	r3, [sp, #16]
+ 498:X-CUBE-AI/App/network.c ****       .model_name        = AI_NETWORK_MODEL_NAME,
+ 499:X-CUBE-AI/App/network.c ****       .model_signature   = AI_NETWORK_MODEL_SIGNATURE,
+ 500:X-CUBE-AI/App/network.c ****       .model_datetime    = AI_TOOLS_DATE_TIME,
+ 501:X-CUBE-AI/App/network.c ****       
+ 502:X-CUBE-AI/App/network.c ****       .compile_datetime  = AI_TOOLS_COMPILE_TIME,
+ 503:X-CUBE-AI/App/network.c ****       
+ARM GAS  /tmp/ccmYJ82r.s 			page 11
+
+
+ 504:X-CUBE-AI/App/network.c ****       .runtime_revision  = ai_platform_runtime_get_revision(),
+  69              		.loc 1 504 0
+  70 002e FFF7FEFF 		bl	ai_platform_runtime_get_revision
+  71              	.LVL4:
+ 497:X-CUBE-AI/App/network.c ****       .model_name        = AI_NETWORK_MODEL_NAME,
+  72              		.loc 1 497 0
+  73 0032 0590     		str	r0, [sp, #20]
+  74 0034 FFF7FEFF 		bl	ai_platform_runtime_get_version
+  75              	.LVL5:
+  76 0038 0690     		str	r0, [sp, #24]
+  77 003a 144B     		ldr	r3, .L8+16
+  78 003c 0793     		str	r3, [sp, #28]
+  79 003e 0723     		movs	r3, #7
+  80 0040 8DF82030 		strb	r3, [sp, #32]
+  81 0044 FFF7FEFF 		bl	ai_platform_api_get_version
+  82              	.LVL6:
+  83 0048 0A90     		str	r0, [sp, #40]
+  84 004a FFF7FEFF 		bl	ai_platform_interface_api_get_version
+  85              	.LVL7:
+  86 004e 0B90     		str	r0, [sp, #44]
+  87 0050 0F4B     		ldr	r3, .L8+20
+  88 0052 0C93     		str	r3, [sp, #48]
+ 505:X-CUBE-AI/App/network.c ****       .runtime_version   = ai_platform_runtime_get_version(),
+ 506:X-CUBE-AI/App/network.c **** 
+ 507:X-CUBE-AI/App/network.c ****       .tool_revision     = AI_TOOLS_REVISION_ID,
+ 508:X-CUBE-AI/App/network.c ****       .tool_version      = {AI_TOOLS_VERSION_MAJOR, AI_TOOLS_VERSION_MINOR,
+ 509:X-CUBE-AI/App/network.c ****                             AI_TOOLS_VERSION_MICRO, 0x0},
+ 510:X-CUBE-AI/App/network.c ****       .tool_api_version  = AI_STRUCT_INIT,
+ 511:X-CUBE-AI/App/network.c **** 
+ 512:X-CUBE-AI/App/network.c ****       .api_version            = ai_platform_api_get_version(),
+ 513:X-CUBE-AI/App/network.c ****       .interface_api_version  = ai_platform_interface_api_get_version(),
+ 514:X-CUBE-AI/App/network.c ****       
+ 515:X-CUBE-AI/App/network.c ****       .n_macc            = 2688960,
+ 516:X-CUBE-AI/App/network.c ****       .n_inputs          = 0,
+ 517:X-CUBE-AI/App/network.c ****       .inputs            = NULL,
+ 518:X-CUBE-AI/App/network.c ****       .n_outputs         = 0,
+ 519:X-CUBE-AI/App/network.c ****       .outputs           = NULL,
+ 520:X-CUBE-AI/App/network.c ****       .params            = AI_STRUCT_INIT,
+ 521:X-CUBE-AI/App/network.c ****       .activations       = AI_STRUCT_INIT,
+ 522:X-CUBE-AI/App/network.c ****       .n_nodes           = 0,
+ 523:X-CUBE-AI/App/network.c ****       .signature         = 0x0,
+ 524:X-CUBE-AI/App/network.c ****     };
+ 525:X-CUBE-AI/App/network.c **** 
+ 526:X-CUBE-AI/App/network.c ****     if (!ai_platform_api_get_network_report(network, &r)) return false;
+  89              		.loc 1 526 0
+  90 0054 01A9     		add	r1, sp, #4
+  91 0056 2846     		mov	r0, r5
+  92 0058 FFF7FEFF 		bl	ai_platform_api_get_network_report
+  93              	.LVL8:
+  94 005c 30B1     		cbz	r0, .L6
+ 527:X-CUBE-AI/App/network.c **** 
+ 528:X-CUBE-AI/App/network.c ****     *report = r;
+  95              		.loc 1 528 0
+  96 005e 7422     		movs	r2, #116
+  97 0060 01A9     		add	r1, sp, #4
+  98 0062 2046     		mov	r0, r4
+  99 0064 FFF7FEFF 		bl	memcpy
+ARM GAS  /tmp/ccmYJ82r.s 			page 12
+
+
+ 100              	.LVL9:
+ 529:X-CUBE-AI/App/network.c ****     return true;
+ 101              		.loc 1 529 0
+ 102 0068 0120     		movs	r0, #1
+ 103 006a 00E0     		b	.L2
+ 104              	.L6:
+ 526:X-CUBE-AI/App/network.c **** 
+ 105              		.loc 1 526 0
+ 106 006c 0020     		movs	r0, #0
+ 107              	.L2:
+ 108              	.LBE2:
+ 530:X-CUBE-AI/App/network.c ****   }
+ 531:X-CUBE-AI/App/network.c ****   return false;
+ 532:X-CUBE-AI/App/network.c **** }
+ 109              		.loc 1 532 0 discriminator 1
+ 110 006e 1FB0     		add	sp, sp, #124
+ 111              	.LCFI2:
+ 112              		.cfi_remember_state
+ 113              		.cfi_def_cfa_offset 12
+ 114              		@ sp needed
+ 115 0070 30BD     		pop	{r4, r5, pc}
+ 116              	.LVL10:
+ 117              	.L4:
+ 118              	.LCFI3:
+ 119              		.cfi_restore_state
+ 531:X-CUBE-AI/App/network.c **** }
+ 120              		.loc 1 531 0
+ 121 0072 0020     		movs	r0, #0
+ 122              	.LVL11:
+ 123 0074 FBE7     		b	.L2
+ 124              	.LVL12:
+ 125              	.L5:
+ 126 0076 0020     		movs	r0, #0
+ 127              	.LVL13:
+ 128 0078 F9E7     		b	.L2
+ 129              	.L9:
+ 130 007a 00BF     		.align	2
+ 131              	.L8:
+ 132 007c 00000000 		.word	.LC0
+ 133 0080 08000000 		.word	.LC1
+ 134 0084 2C000000 		.word	.LC2
+ 135 0088 48000000 		.word	.LC3
+ 136 008c 60000000 		.word	.LC4
+ 137 0090 C0072900 		.word	2688960
+ 138              		.cfi_endproc
+ 139              	.LFE5:
+ 141              		.section	.text.ai_network_get_report,"ax",%progbits
+ 142              		.align	1
+ 143              		.global	ai_network_get_report
+ 144              		.syntax unified
+ 145              		.thumb
+ 146              		.thumb_func
+ 147              		.fpu fpv4-sp-d16
+ 149              	ai_network_get_report:
+ 150              	.LFB6:
+ 533:X-CUBE-AI/App/network.c **** 
+ 534:X-CUBE-AI/App/network.c **** AI_API_ENTRY
+ARM GAS  /tmp/ccmYJ82r.s 			page 13
+
+
+ 535:X-CUBE-AI/App/network.c **** ai_bool ai_network_get_report(
+ 536:X-CUBE-AI/App/network.c ****   ai_handle network, ai_network_report* report)
+ 537:X-CUBE-AI/App/network.c **** {
+ 151              		.loc 1 537 0
+ 152              		.cfi_startproc
+ 153              		@ args = 0, pretend = 0, frame = 120
+ 154              		@ frame_needed = 0, uses_anonymous_args = 0
+ 155              	.LVL14:
+ 156 0000 30B5     		push	{r4, r5, lr}
+ 157              	.LCFI4:
+ 158              		.cfi_def_cfa_offset 12
+ 159              		.cfi_offset 4, -12
+ 160              		.cfi_offset 5, -8
+ 161              		.cfi_offset 14, -4
+ 162 0002 9FB0     		sub	sp, sp, #124
+ 163              	.LCFI5:
+ 164              		.cfi_def_cfa_offset 136
+ 165 0004 0546     		mov	r5, r0
+ 166 0006 0C46     		mov	r4, r1
+ 538:X-CUBE-AI/App/network.c ****   ai_network* net_ctx = AI_NETWORK_ACQUIRE_CTX(network);
+ 167              		.loc 1 538 0
+ 168 0008 FFF7FEFF 		bl	ai_platform_context_acquire
+ 169              	.LVL15:
+ 539:X-CUBE-AI/App/network.c **** 
+ 540:X-CUBE-AI/App/network.c ****   if (report && net_ctx)
+ 170              		.loc 1 540 0
+ 171 000c 002C     		cmp	r4, #0
+ 172 000e 32D0     		beq	.L13
+ 173              		.loc 1 540 0 is_stmt 0 discriminator 1
+ 174 0010 0028     		cmp	r0, #0
+ 175 0012 32D0     		beq	.L14
+ 176              	.LBB3:
+ 541:X-CUBE-AI/App/network.c ****   {
+ 542:X-CUBE-AI/App/network.c ****     ai_network_report r = {
+ 177              		.loc 1 542 0 is_stmt 1
+ 178 0014 7422     		movs	r2, #116
+ 179 0016 0021     		movs	r1, #0
+ 180 0018 01A8     		add	r0, sp, #4
+ 181              	.LVL16:
+ 182 001a FFF7FEFF 		bl	memset
+ 183              	.LVL17:
+ 184 001e 184B     		ldr	r3, .L17
+ 185 0020 0193     		str	r3, [sp, #4]
+ 186 0022 184B     		ldr	r3, .L17+4
+ 187 0024 0293     		str	r3, [sp, #8]
+ 188 0026 184B     		ldr	r3, .L17+8
+ 189 0028 0393     		str	r3, [sp, #12]
+ 190 002a 184B     		ldr	r3, .L17+12
+ 191 002c 0493     		str	r3, [sp, #16]
+ 543:X-CUBE-AI/App/network.c ****       .model_name        = AI_NETWORK_MODEL_NAME,
+ 544:X-CUBE-AI/App/network.c ****       .model_signature   = AI_NETWORK_MODEL_SIGNATURE,
+ 545:X-CUBE-AI/App/network.c ****       .model_datetime    = AI_TOOLS_DATE_TIME,
+ 546:X-CUBE-AI/App/network.c ****       
+ 547:X-CUBE-AI/App/network.c ****       .compile_datetime  = AI_TOOLS_COMPILE_TIME,
+ 548:X-CUBE-AI/App/network.c ****       
+ 549:X-CUBE-AI/App/network.c ****       .runtime_revision  = ai_platform_runtime_get_revision(),
+ 192              		.loc 1 549 0
+ARM GAS  /tmp/ccmYJ82r.s 			page 14
+
+
+ 193 002e FFF7FEFF 		bl	ai_platform_runtime_get_revision
+ 194              	.LVL18:
+ 542:X-CUBE-AI/App/network.c ****       .model_name        = AI_NETWORK_MODEL_NAME,
+ 195              		.loc 1 542 0
+ 196 0032 0590     		str	r0, [sp, #20]
+ 197 0034 FFF7FEFF 		bl	ai_platform_runtime_get_version
+ 198              	.LVL19:
+ 199 0038 0690     		str	r0, [sp, #24]
+ 200 003a 154B     		ldr	r3, .L17+16
+ 201 003c 0793     		str	r3, [sp, #28]
+ 202 003e 0723     		movs	r3, #7
+ 203 0040 8DF82030 		strb	r3, [sp, #32]
+ 204 0044 FFF7FEFF 		bl	ai_platform_api_get_version
+ 205              	.LVL20:
+ 206 0048 0A90     		str	r0, [sp, #40]
+ 207 004a FFF7FEFF 		bl	ai_platform_interface_api_get_version
+ 208              	.LVL21:
+ 209 004e 0B90     		str	r0, [sp, #44]
+ 210 0050 104B     		ldr	r3, .L17+20
+ 211 0052 0C93     		str	r3, [sp, #48]
+ 212 0054 104B     		ldr	r3, .L17+24
+ 213 0056 1093     		str	r3, [sp, #64]
+ 550:X-CUBE-AI/App/network.c ****       .runtime_version   = ai_platform_runtime_get_version(),
+ 551:X-CUBE-AI/App/network.c **** 
+ 552:X-CUBE-AI/App/network.c ****       .tool_revision     = AI_TOOLS_REVISION_ID,
+ 553:X-CUBE-AI/App/network.c ****       .tool_version      = {AI_TOOLS_VERSION_MAJOR, AI_TOOLS_VERSION_MINOR,
+ 554:X-CUBE-AI/App/network.c ****                             AI_TOOLS_VERSION_MICRO, 0x0},
+ 555:X-CUBE-AI/App/network.c ****       .tool_api_version  = AI_STRUCT_INIT,
+ 556:X-CUBE-AI/App/network.c **** 
+ 557:X-CUBE-AI/App/network.c ****       .api_version            = ai_platform_api_get_version(),
+ 558:X-CUBE-AI/App/network.c ****       .interface_api_version  = ai_platform_interface_api_get_version(),
+ 559:X-CUBE-AI/App/network.c ****       
+ 560:X-CUBE-AI/App/network.c ****       .n_macc            = 2688960,
+ 561:X-CUBE-AI/App/network.c ****       .n_inputs          = 0,
+ 562:X-CUBE-AI/App/network.c ****       .inputs            = NULL,
+ 563:X-CUBE-AI/App/network.c ****       .n_outputs         = 0,
+ 564:X-CUBE-AI/App/network.c ****       .outputs           = NULL,
+ 565:X-CUBE-AI/App/network.c ****       .map_signature     = AI_MAGIC_SIGNATURE,
+ 566:X-CUBE-AI/App/network.c ****       .map_weights       = AI_STRUCT_INIT,
+ 567:X-CUBE-AI/App/network.c ****       .map_activations   = AI_STRUCT_INIT,
+ 568:X-CUBE-AI/App/network.c ****       .n_nodes           = 0,
+ 569:X-CUBE-AI/App/network.c ****       .signature         = 0x0,
+ 570:X-CUBE-AI/App/network.c ****     };
+ 571:X-CUBE-AI/App/network.c **** 
+ 572:X-CUBE-AI/App/network.c ****     if (!ai_platform_api_get_network_report(network, &r)) return false;
+ 214              		.loc 1 572 0
+ 215 0058 01A9     		add	r1, sp, #4
+ 216 005a 2846     		mov	r0, r5
+ 217 005c FFF7FEFF 		bl	ai_platform_api_get_network_report
+ 218              	.LVL22:
+ 219 0060 30B1     		cbz	r0, .L15
+ 573:X-CUBE-AI/App/network.c **** 
+ 574:X-CUBE-AI/App/network.c ****     *report = r;
+ 220              		.loc 1 574 0
+ 221 0062 7422     		movs	r2, #116
+ 222 0064 01A9     		add	r1, sp, #4
+ 223 0066 2046     		mov	r0, r4
+ARM GAS  /tmp/ccmYJ82r.s 			page 15
+
+
+ 224 0068 FFF7FEFF 		bl	memcpy
+ 225              	.LVL23:
+ 575:X-CUBE-AI/App/network.c ****     return true;
+ 226              		.loc 1 575 0
+ 227 006c 0120     		movs	r0, #1
+ 228 006e 00E0     		b	.L11
+ 229              	.L15:
+ 572:X-CUBE-AI/App/network.c **** 
+ 230              		.loc 1 572 0
+ 231 0070 0020     		movs	r0, #0
+ 232              	.L11:
+ 233              	.LBE3:
+ 576:X-CUBE-AI/App/network.c ****   }
+ 577:X-CUBE-AI/App/network.c ****   return false;
+ 578:X-CUBE-AI/App/network.c **** }
+ 234              		.loc 1 578 0 discriminator 1
+ 235 0072 1FB0     		add	sp, sp, #124
+ 236              	.LCFI6:
+ 237              		.cfi_remember_state
+ 238              		.cfi_def_cfa_offset 12
+ 239              		@ sp needed
+ 240 0074 30BD     		pop	{r4, r5, pc}
+ 241              	.LVL24:
+ 242              	.L13:
+ 243              	.LCFI7:
+ 244              		.cfi_restore_state
+ 577:X-CUBE-AI/App/network.c **** }
+ 245              		.loc 1 577 0
+ 246 0076 0020     		movs	r0, #0
+ 247              	.LVL25:
+ 248 0078 FBE7     		b	.L11
+ 249              	.LVL26:
+ 250              	.L14:
+ 251 007a 0020     		movs	r0, #0
+ 252              	.LVL27:
+ 253 007c F9E7     		b	.L11
+ 254              	.L18:
+ 255 007e 00BF     		.align	2
+ 256              	.L17:
+ 257 0080 00000000 		.word	.LC0
+ 258 0084 08000000 		.word	.LC1
+ 259 0088 2C000000 		.word	.LC2
+ 260 008c 48000000 		.word	.LC3
+ 261 0090 60000000 		.word	.LC4
+ 262 0094 C0072900 		.word	2688960
+ 263 0098 DECAFAA1 		.word	-1577399586
+ 264              		.cfi_endproc
+ 265              	.LFE6:
+ 267              		.section	.text.ai_network_get_error,"ax",%progbits
+ 268              		.align	1
+ 269              		.global	ai_network_get_error
+ 270              		.syntax unified
+ 271              		.thumb
+ 272              		.thumb_func
+ 273              		.fpu fpv4-sp-d16
+ 275              	ai_network_get_error:
+ 276              	.LFB7:
+ARM GAS  /tmp/ccmYJ82r.s 			page 16
+
+
+ 579:X-CUBE-AI/App/network.c **** 
+ 580:X-CUBE-AI/App/network.c **** AI_API_ENTRY
+ 581:X-CUBE-AI/App/network.c **** ai_error ai_network_get_error(ai_handle network)
+ 582:X-CUBE-AI/App/network.c **** {
+ 277              		.loc 1 582 0
+ 278              		.cfi_startproc
+ 279              		@ args = 0, pretend = 0, frame = 0
+ 280              		@ frame_needed = 0, uses_anonymous_args = 0
+ 281              	.LVL28:
+ 282 0000 08B5     		push	{r3, lr}
+ 283              	.LCFI8:
+ 284              		.cfi_def_cfa_offset 8
+ 285              		.cfi_offset 3, -8
+ 286              		.cfi_offset 14, -4
+ 583:X-CUBE-AI/App/network.c ****   return ai_platform_network_get_error(network);
+ 287              		.loc 1 583 0
+ 288 0002 FFF7FEFF 		bl	ai_platform_network_get_error
+ 289              	.LVL29:
+ 584:X-CUBE-AI/App/network.c **** }
+ 290              		.loc 1 584 0
+ 291 0006 08BD     		pop	{r3, pc}
+ 292              		.cfi_endproc
+ 293              	.LFE7:
+ 295              		.section	.text.ai_network_create,"ax",%progbits
+ 296              		.align	1
+ 297              		.global	ai_network_create
+ 298              		.syntax unified
+ 299              		.thumb
+ 300              		.thumb_func
+ 301              		.fpu fpv4-sp-d16
+ 303              	ai_network_create:
+ 304              	.LFB8:
+ 585:X-CUBE-AI/App/network.c **** 
+ 586:X-CUBE-AI/App/network.c **** AI_API_ENTRY
+ 587:X-CUBE-AI/App/network.c **** ai_error ai_network_create(
+ 588:X-CUBE-AI/App/network.c ****   ai_handle* network, const ai_buffer* network_config)
+ 589:X-CUBE-AI/App/network.c **** {
+ 305              		.loc 1 589 0
+ 306              		.cfi_startproc
+ 307              		@ args = 0, pretend = 0, frame = 0
+ 308              		@ frame_needed = 0, uses_anonymous_args = 0
+ 309              	.LVL30:
+ 310 0000 00B5     		push	{lr}
+ 311              	.LCFI9:
+ 312              		.cfi_def_cfa_offset 4
+ 313              		.cfi_offset 14, -4
+ 314 0002 83B0     		sub	sp, sp, #12
+ 315              	.LCFI10:
+ 316              		.cfi_def_cfa_offset 16
+ 590:X-CUBE-AI/App/network.c ****   return ai_platform_network_create(
+ 317              		.loc 1 590 0
+ 318 0004 0023     		movs	r3, #0
+ 319 0006 0193     		str	r3, [sp, #4]
+ 320 0008 0423     		movs	r3, #4
+ 321 000a 0093     		str	r3, [sp]
+ 322 000c 0123     		movs	r3, #1
+ 323 000e 034A     		ldr	r2, .L23
+ARM GAS  /tmp/ccmYJ82r.s 			page 17
+
+
+ 324 0010 FFF7FEFF 		bl	ai_platform_network_create
+ 325              	.LVL31:
+ 591:X-CUBE-AI/App/network.c ****     network, network_config, 
+ 592:X-CUBE-AI/App/network.c ****     &AI_NET_OBJ_INSTANCE,
+ 593:X-CUBE-AI/App/network.c ****     AI_TOOLS_API_VERSION_MAJOR, AI_TOOLS_API_VERSION_MINOR, AI_TOOLS_API_VERSION_MICRO);
+ 594:X-CUBE-AI/App/network.c **** }
+ 326              		.loc 1 594 0
+ 327 0014 03B0     		add	sp, sp, #12
+ 328              	.LCFI11:
+ 329              		.cfi_def_cfa_offset 4
+ 330              		@ sp needed
+ 331 0016 5DF804FB 		ldr	pc, [sp], #4
+ 332              	.L24:
+ 333 001a 00BF     		.align	2
+ 334              	.L23:
+ 335 001c 00000000 		.word	.LANCHOR0
+ 336              		.cfi_endproc
+ 337              	.LFE8:
+ 339              		.section	.text.ai_network_destroy,"ax",%progbits
+ 340              		.align	1
+ 341              		.global	ai_network_destroy
+ 342              		.syntax unified
+ 343              		.thumb
+ 344              		.thumb_func
+ 345              		.fpu fpv4-sp-d16
+ 347              	ai_network_destroy:
+ 348              	.LFB9:
+ 595:X-CUBE-AI/App/network.c **** 
+ 596:X-CUBE-AI/App/network.c **** AI_API_ENTRY
+ 597:X-CUBE-AI/App/network.c **** ai_handle ai_network_destroy(ai_handle network)
+ 598:X-CUBE-AI/App/network.c **** {
+ 349              		.loc 1 598 0
+ 350              		.cfi_startproc
+ 351              		@ args = 0, pretend = 0, frame = 0
+ 352              		@ frame_needed = 0, uses_anonymous_args = 0
+ 353              	.LVL32:
+ 354 0000 08B5     		push	{r3, lr}
+ 355              	.LCFI12:
+ 356              		.cfi_def_cfa_offset 8
+ 357              		.cfi_offset 3, -8
+ 358              		.cfi_offset 14, -4
+ 599:X-CUBE-AI/App/network.c ****   return ai_platform_network_destroy(network);
+ 359              		.loc 1 599 0
+ 360 0002 FFF7FEFF 		bl	ai_platform_network_destroy
+ 361              	.LVL33:
+ 600:X-CUBE-AI/App/network.c **** }
+ 362              		.loc 1 600 0
+ 363 0006 08BD     		pop	{r3, pc}
+ 364              		.cfi_endproc
+ 365              	.LFE9:
+ 367              		.section	.text.ai_network_init,"ax",%progbits
+ 368              		.align	1
+ 369              		.global	ai_network_init
+ 370              		.syntax unified
+ 371              		.thumb
+ 372              		.thumb_func
+ 373              		.fpu fpv4-sp-d16
+ARM GAS  /tmp/ccmYJ82r.s 			page 18
+
+
+ 375              	ai_network_init:
+ 376              	.LFB10:
+ 601:X-CUBE-AI/App/network.c **** 
+ 602:X-CUBE-AI/App/network.c **** AI_API_ENTRY
+ 603:X-CUBE-AI/App/network.c **** ai_bool ai_network_init(
+ 604:X-CUBE-AI/App/network.c ****   ai_handle network, const ai_network_params* params)
+ 605:X-CUBE-AI/App/network.c **** {
+ 377              		.loc 1 605 0
+ 378              		.cfi_startproc
+ 379              		@ args = 0, pretend = 0, frame = 8
+ 380              		@ frame_needed = 0, uses_anonymous_args = 0
+ 381              	.LVL34:
+ 382 0000 70B5     		push	{r4, r5, r6, lr}
+ 383              	.LCFI13:
+ 384              		.cfi_def_cfa_offset 16
+ 385              		.cfi_offset 4, -16
+ 386              		.cfi_offset 5, -12
+ 387              		.cfi_offset 6, -8
+ 388              		.cfi_offset 14, -4
+ 389 0002 82B0     		sub	sp, sp, #8
+ 390              	.LCFI14:
+ 391              		.cfi_def_cfa_offset 24
+ 392 0004 0546     		mov	r5, r0
+ 393 0006 0E46     		mov	r6, r1
+ 606:X-CUBE-AI/App/network.c ****   ai_network* net_ctx = ai_platform_network_init(network, params);
+ 394              		.loc 1 606 0
+ 395 0008 FFF7FEFF 		bl	ai_platform_network_init
+ 396              	.LVL35:
+ 607:X-CUBE-AI/App/network.c ****   if (!net_ctx) return false;
+ 397              		.loc 1 607 0
+ 398 000c 0028     		cmp	r0, #0
+ 399 000e 00F09680 		beq	.L31
+ 400              	.LVL36:
+ 401              	.LBB8:
+ 402              	.LBB9:
+ 452:X-CUBE-AI/App/network.c **** 
+ 403              		.loc 1 452 0
+ 404 0012 02A8     		add	r0, sp, #8
+ 405              	.LVL37:
+ 406 0014 0023     		movs	r3, #0
+ 407 0016 40F8043D 		str	r3, [r0, #-4]!
+ 454:X-CUBE-AI/App/network.c ****     /* Updating weights with array addresses */
+ 408              		.loc 1 454 0
+ 409 001a 3246     		mov	r2, r6
+ 410 001c 0121     		movs	r1, #1
+ 411 001e FFF7FEFF 		bl	ai_platform_get_weights_map
+ 412              	.LVL38:
+ 413 0022 0028     		cmp	r0, #0
+ 414 0024 00F08780 		beq	.L32
+ 457:X-CUBE-AI/App/network.c ****     conv2d_weights_array.data = AI_PTR(weights_map[0] + 0);
+ 415              		.loc 1 457 0
+ 416 0028 464A     		ldr	r2, .L35
+ 417 002a 1368     		ldr	r3, [r2]
+ 418 002c 43F08043 		orr	r3, r3, #1073741824
+ 419 0030 1360     		str	r3, [r2]
+ 458:X-CUBE-AI/App/network.c ****     conv2d_weights_array.data_start = AI_PTR(weights_map[0] + 0);
+ 420              		.loc 1 458 0
+ARM GAS  /tmp/ccmYJ82r.s 			page 19
+
+
+ 421 0032 019B     		ldr	r3, [sp, #4]
+ 422 0034 9360     		str	r3, [r2, #8]
+ 459:X-CUBE-AI/App/network.c ****     conv2d_bias_array.format |= AI_FMT_FLAG_CONST;
+ 423              		.loc 1 459 0
+ 424 0036 D360     		str	r3, [r2, #12]
+ 460:X-CUBE-AI/App/network.c ****     conv2d_bias_array.data = AI_PTR(weights_map[0] + 1152);
+ 425              		.loc 1 460 0
+ 426 0038 434A     		ldr	r2, .L35+4
+ 427 003a 1168     		ldr	r1, [r2]
+ 428 003c 41F08041 		orr	r1, r1, #1073741824
+ 429 0040 1160     		str	r1, [r2]
+ 461:X-CUBE-AI/App/network.c ****     conv2d_bias_array.data_start = AI_PTR(weights_map[0] + 1152);
+ 430              		.loc 1 461 0
+ 431 0042 03F59061 		add	r1, r3, #1152
+ 432 0046 9160     		str	r1, [r2, #8]
+ 462:X-CUBE-AI/App/network.c ****     conv2d_1_weights_array.format |= AI_FMT_FLAG_CONST;
+ 433              		.loc 1 462 0
+ 434 0048 D160     		str	r1, [r2, #12]
+ 463:X-CUBE-AI/App/network.c ****     conv2d_1_weights_array.data = AI_PTR(weights_map[0] + 1280);
+ 435              		.loc 1 463 0
+ 436 004a 404A     		ldr	r2, .L35+8
+ 437 004c 1168     		ldr	r1, [r2]
+ 438 004e 41F08041 		orr	r1, r1, #1073741824
+ 439 0052 1160     		str	r1, [r2]
+ 464:X-CUBE-AI/App/network.c ****     conv2d_1_weights_array.data_start = AI_PTR(weights_map[0] + 1280);
+ 440              		.loc 1 464 0
+ 441 0054 03F5A061 		add	r1, r3, #1280
+ 442 0058 9160     		str	r1, [r2, #8]
+ 465:X-CUBE-AI/App/network.c ****     conv2d_1_bias_array.format |= AI_FMT_FLAG_CONST;
+ 443              		.loc 1 465 0
+ 444 005a D160     		str	r1, [r2, #12]
+ 466:X-CUBE-AI/App/network.c ****     conv2d_1_bias_array.data = AI_PTR(weights_map[0] + 75008);
+ 445              		.loc 1 466 0
+ 446 005c 3C4A     		ldr	r2, .L35+12
+ 447 005e 1168     		ldr	r1, [r2]
+ 448 0060 41F08041 		orr	r1, r1, #1073741824
+ 449 0064 1160     		str	r1, [r2]
+ 467:X-CUBE-AI/App/network.c ****     conv2d_1_bias_array.data_start = AI_PTR(weights_map[0] + 75008);
+ 450              		.loc 1 467 0
+ 451 0066 03F59231 		add	r1, r3, #74752
+ 452 006a 01F58071 		add	r1, r1, #256
+ 453 006e 9160     		str	r1, [r2, #8]
+ 468:X-CUBE-AI/App/network.c ****     dense_weights_array.format |= AI_FMT_FLAG_CONST;
+ 454              		.loc 1 468 0
+ 455 0070 D160     		str	r1, [r2, #12]
+ 469:X-CUBE-AI/App/network.c ****     dense_weights_array.data = AI_PTR(weights_map[0] + 75328);
+ 456              		.loc 1 469 0
+ 457 0072 384A     		ldr	r2, .L35+16
+ 458 0074 1168     		ldr	r1, [r2]
+ 459 0076 41F08041 		orr	r1, r1, #1073741824
+ 460 007a 1160     		str	r1, [r2]
+ 470:X-CUBE-AI/App/network.c ****     dense_weights_array.data_start = AI_PTR(weights_map[0] + 75264);
+ 461              		.loc 1 470 0
+ 462 007c 03F59331 		add	r1, r3, #75264
+ 463 0080 01F14000 		add	r0, r1, #64
+ 464 0084 9060     		str	r0, [r2, #8]
+ 471:X-CUBE-AI/App/network.c ****     dense_bias_array.format |= AI_FMT_FLAG_CONST;
+ARM GAS  /tmp/ccmYJ82r.s 			page 20
+
+
+ 465              		.loc 1 471 0
+ 466 0086 D160     		str	r1, [r2, #12]
+ 472:X-CUBE-AI/App/network.c ****     dense_bias_array.data = AI_PTR(weights_map[0] + 177728);
+ 467              		.loc 1 472 0
+ 468 0088 334A     		ldr	r2, .L35+20
+ 469 008a 1168     		ldr	r1, [r2]
+ 470 008c 41F08041 		orr	r1, r1, #1073741824
+ 471 0090 1160     		str	r1, [r2]
+ 473:X-CUBE-AI/App/network.c ****     dense_bias_array.data_start = AI_PTR(weights_map[0] + 177728);
+ 472              		.loc 1 473 0
+ 473 0092 03F52D31 		add	r1, r3, #177152
+ 474 0096 01F51071 		add	r1, r1, #576
+ 475 009a 9160     		str	r1, [r2, #8]
+ 474:X-CUBE-AI/App/network.c ****     dense_1_weights_array.format |= AI_FMT_FLAG_CONST;
+ 476              		.loc 1 474 0
+ 477 009c D160     		str	r1, [r2, #12]
+ 475:X-CUBE-AI/App/network.c ****     dense_1_weights_array.data = AI_PTR(weights_map[0] + 178240);
+ 478              		.loc 1 475 0
+ 479 009e 2F4A     		ldr	r2, .L35+24
+ 480 00a0 1168     		ldr	r1, [r2]
+ 481 00a2 41F08041 		orr	r1, r1, #1073741824
+ 482 00a6 1160     		str	r1, [r2]
+ 476:X-CUBE-AI/App/network.c ****     dense_1_weights_array.data_start = AI_PTR(weights_map[0] + 178240);
+ 483              		.loc 1 476 0
+ 484 00a8 03F52E31 		add	r1, r3, #178176
+ 485 00ac 4031     		adds	r1, r1, #64
+ 486 00ae 9160     		str	r1, [r2, #8]
+ 477:X-CUBE-AI/App/network.c ****     dense_1_bias_array.format |= AI_FMT_FLAG_CONST;
+ 487              		.loc 1 477 0
+ 488 00b0 D160     		str	r1, [r2, #12]
+ 478:X-CUBE-AI/App/network.c ****     dense_1_bias_array.data = AI_PTR(weights_map[0] + 183360);
+ 489              		.loc 1 478 0
+ 490 00b2 2B4A     		ldr	r2, .L35+28
+ 491 00b4 1168     		ldr	r1, [r2]
+ 492 00b6 41F08041 		orr	r1, r1, #1073741824
+ 493 00ba 1160     		str	r1, [r2]
+ 479:X-CUBE-AI/App/network.c ****     dense_1_bias_array.data_start = AI_PTR(weights_map[0] + 183360);
+ 494              		.loc 1 479 0
+ 495 00bc 03F53333 		add	r3, r3, #183296
+ 496 00c0 4033     		adds	r3, r3, #64
+ 497 00c2 9360     		str	r3, [r2, #8]
+ 480:X-CUBE-AI/App/network.c ****     return true;
+ 498              		.loc 1 480 0
+ 499 00c4 D360     		str	r3, [r2, #12]
+ 481:X-CUBE-AI/App/network.c ****   }
+ 500              		.loc 1 481 0
+ 501 00c6 0124     		movs	r4, #1
+ 502              	.L29:
+ 503              	.LVL39:
+ 504              	.LBE9:
+ 505              	.LBE8:
+ 506              	.LBB11:
+ 507              	.LBB12:
+ 415:X-CUBE-AI/App/network.c **** 
+ 508              		.loc 1 415 0
+ 509 00c8 02A8     		add	r0, sp, #8
+ 510 00ca 0023     		movs	r3, #0
+ARM GAS  /tmp/ccmYJ82r.s 			page 21
+
+
+ 511 00cc 40F8043D 		str	r3, [r0, #-4]!
+ 417:X-CUBE-AI/App/network.c ****     /* Updating activations (byte) offsets */
+ 512              		.loc 1 417 0
+ 513 00d0 3246     		mov	r2, r6
+ 514 00d2 0121     		movs	r1, #1
+ 515 00d4 FFF7FEFF 		bl	ai_platform_get_activations_map
+ 516              	.LVL40:
+ 517 00d8 0028     		cmp	r0, #0
+ 518 00da 2ED0     		beq	.L33
+ 419:X-CUBE-AI/App/network.c ****     input_0_output_array.data_start = AI_PTR(NULL);
+ 519              		.loc 1 419 0
+ 520 00dc 214B     		ldr	r3, .L35+32
+ 521 00de 0022     		movs	r2, #0
+ 522 00e0 9A60     		str	r2, [r3, #8]
+ 420:X-CUBE-AI/App/network.c ****     conv2d_output_array.data = AI_PTR(activations_map[0] + 1536);
+ 523              		.loc 1 420 0
+ 524 00e2 DA60     		str	r2, [r3, #12]
+ 421:X-CUBE-AI/App/network.c ****     conv2d_output_array.data_start = AI_PTR(activations_map[0] + 1536);
+ 525              		.loc 1 421 0
+ 526 00e4 019B     		ldr	r3, [sp, #4]
+ 527 00e6 03F5C060 		add	r0, r3, #1536
+ 528 00ea 1F49     		ldr	r1, .L35+36
+ 529 00ec 8860     		str	r0, [r1, #8]
+ 422:X-CUBE-AI/App/network.c ****     conv2d_1_output_array.data = AI_PTR(activations_map[0] + 0);
+ 530              		.loc 1 422 0
+ 531 00ee C860     		str	r0, [r1, #12]
+ 423:X-CUBE-AI/App/network.c ****     conv2d_1_output_array.data_start = AI_PTR(activations_map[0] + 0);
+ 532              		.loc 1 423 0
+ 533 00f0 1E49     		ldr	r1, .L35+40
+ 534 00f2 8B60     		str	r3, [r1, #8]
+ 424:X-CUBE-AI/App/network.c ****     dense_output_array.data = AI_PTR(activations_map[0] + 6400);
+ 535              		.loc 1 424 0
+ 536 00f4 CB60     		str	r3, [r1, #12]
+ 425:X-CUBE-AI/App/network.c ****     dense_output_array.data_start = AI_PTR(activations_map[0] + 6400);
+ 537              		.loc 1 425 0
+ 538 00f6 03F5C850 		add	r0, r3, #6400
+ 539 00fa 1D49     		ldr	r1, .L35+44
+ 540 00fc 8860     		str	r0, [r1, #8]
+ 426:X-CUBE-AI/App/network.c ****     dense_nl_output_array.data = AI_PTR(activations_map[0] + 0);
+ 541              		.loc 1 426 0
+ 542 00fe C860     		str	r0, [r1, #12]
+ 427:X-CUBE-AI/App/network.c ****     dense_nl_output_array.data_start = AI_PTR(activations_map[0] + 0);
+ 543              		.loc 1 427 0
+ 544 0100 1C49     		ldr	r1, .L35+48
+ 545 0102 8B60     		str	r3, [r1, #8]
+ 428:X-CUBE-AI/App/network.c ****     dense_1_output_array.data = AI_PTR(activations_map[0] + 512);
+ 546              		.loc 1 428 0
+ 547 0104 CB60     		str	r3, [r1, #12]
+ 429:X-CUBE-AI/App/network.c ****     dense_1_output_array.data_start = AI_PTR(activations_map[0] + 512);
+ 548              		.loc 1 429 0
+ 549 0106 03F50070 		add	r0, r3, #512
+ 550 010a 1B49     		ldr	r1, .L35+52
+ 551 010c 8860     		str	r0, [r1, #8]
+ 430:X-CUBE-AI/App/network.c ****     dense_1_nl_output_array.data = AI_PTR(NULL);
+ 552              		.loc 1 430 0
+ 553 010e C860     		str	r0, [r1, #12]
+ 431:X-CUBE-AI/App/network.c ****     dense_1_nl_output_array.data_start = AI_PTR(NULL);
+ARM GAS  /tmp/ccmYJ82r.s 			page 22
+
+
+ 554              		.loc 1 431 0
+ 555 0110 1A49     		ldr	r1, .L35+56
+ 556 0112 8A60     		str	r2, [r1, #8]
+ 432:X-CUBE-AI/App/network.c ****     conv2d_scratch0_array.data = AI_PTR(activations_map[0] + 23168);
+ 557              		.loc 1 432 0
+ 558 0114 CA60     		str	r2, [r1, #12]
+ 433:X-CUBE-AI/App/network.c ****     conv2d_scratch0_array.data_start = AI_PTR(activations_map[0] + 23168);
+ 559              		.loc 1 433 0
+ 560 0116 03F5B543 		add	r3, r3, #23168
+ 561 011a 194A     		ldr	r2, .L35+60
+ 562 011c 9360     		str	r3, [r2, #8]
+ 434:X-CUBE-AI/App/network.c ****     conv2d_1_scratch0_array.data = AI_PTR(activations_map[0] + 23168);
+ 563              		.loc 1 434 0
+ 564 011e D360     		str	r3, [r2, #12]
+ 435:X-CUBE-AI/App/network.c ****     conv2d_1_scratch0_array.data_start = AI_PTR(activations_map[0] + 23168);
+ 565              		.loc 1 435 0
+ 566 0120 184A     		ldr	r2, .L35+64
+ 567 0122 9360     		str	r3, [r2, #8]
+ 436:X-CUBE-AI/App/network.c ****     
+ 568              		.loc 1 436 0
+ 569 0124 D360     		str	r3, [r2, #12]
+ 438:X-CUBE-AI/App/network.c ****   }
+ 570              		.loc 1 438 0
+ 571 0126 0120     		movs	r0, #1
+ 572              	.L30:
+ 573              	.LVL41:
+ 574 0128 0440     		ands	r4, r4, r0
+ 575              	.LVL42:
+ 576              	.LBE12:
+ 577              	.LBE11:
+ 608:X-CUBE-AI/App/network.c **** 
+ 609:X-CUBE-AI/App/network.c ****   ai_bool ok = true;
+ 610:X-CUBE-AI/App/network.c ****   ok &= network_configure_weights(net_ctx, params);
+ 611:X-CUBE-AI/App/network.c ****   ok &= network_configure_activations(net_ctx, params);
+ 612:X-CUBE-AI/App/network.c **** 
+ 613:X-CUBE-AI/App/network.c ****   ok &= ai_platform_network_post_init(network);
+ 578              		.loc 1 613 0
+ 579 012a 2846     		mov	r0, r5
+ 580 012c FFF7FEFF 		bl	ai_platform_network_post_init
+ 581              	.LVL43:
+ 582 0130 2040     		ands	r0, r0, r4
+ 583              	.LVL44:
+ 584              	.L28:
+ 614:X-CUBE-AI/App/network.c **** 
+ 615:X-CUBE-AI/App/network.c ****   return ok;
+ 616:X-CUBE-AI/App/network.c **** }
+ 585              		.loc 1 616 0
+ 586 0132 02B0     		add	sp, sp, #8
+ 587              	.LCFI15:
+ 588              		.cfi_remember_state
+ 589              		.cfi_def_cfa_offset 16
+ 590              		@ sp needed
+ 591 0134 70BD     		pop	{r4, r5, r6, pc}
+ 592              	.LVL45:
+ 593              	.L32:
+ 594              	.LCFI16:
+ 595              		.cfi_restore_state
+ARM GAS  /tmp/ccmYJ82r.s 			page 23
+
+
+ 596              	.LBB14:
+ 597              	.LBB10:
+ 483:X-CUBE-AI/App/network.c **** }
+ 598              		.loc 1 483 0
+ 599 0136 0024     		movs	r4, #0
+ 600 0138 C6E7     		b	.L29
+ 601              	.LVL46:
+ 602              	.L33:
+ 603              	.LBE10:
+ 604              	.LBE14:
+ 605              	.LBB15:
+ 606              	.LBB13:
+ 440:X-CUBE-AI/App/network.c **** }
+ 607              		.loc 1 440 0
+ 608 013a 0020     		movs	r0, #0
+ 609 013c F4E7     		b	.L30
+ 610              	.LVL47:
+ 611              	.L31:
+ 612              	.LBE13:
+ 613              	.LBE15:
+ 607:X-CUBE-AI/App/network.c **** 
+ 614              		.loc 1 607 0
+ 615 013e 0020     		movs	r0, #0
+ 616              	.LVL48:
+ 617 0140 F7E7     		b	.L28
+ 618              	.L36:
+ 619 0142 00BF     		.align	2
+ 620              	.L35:
+ 621 0144 00000000 		.word	.LANCHOR1
+ 622 0148 00000000 		.word	.LANCHOR2
+ 623 014c 00000000 		.word	.LANCHOR3
+ 624 0150 00000000 		.word	.LANCHOR4
+ 625 0154 00000000 		.word	.LANCHOR5
+ 626 0158 00000000 		.word	.LANCHOR6
+ 627 015c 00000000 		.word	.LANCHOR7
+ 628 0160 00000000 		.word	.LANCHOR8
+ 629 0164 00000000 		.word	.LANCHOR9
+ 630 0168 00000000 		.word	.LANCHOR10
+ 631 016c 00000000 		.word	.LANCHOR11
+ 632 0170 00000000 		.word	.LANCHOR12
+ 633 0174 00000000 		.word	.LANCHOR13
+ 634 0178 00000000 		.word	.LANCHOR14
+ 635 017c 00000000 		.word	.LANCHOR15
+ 636 0180 00000000 		.word	.LANCHOR16
+ 637 0184 00000000 		.word	.LANCHOR17
+ 638              		.cfi_endproc
+ 639              	.LFE10:
+ 641              		.section	.text.ai_network_run,"ax",%progbits
+ 642              		.align	1
+ 643              		.global	ai_network_run
+ 644              		.syntax unified
+ 645              		.thumb
+ 646              		.thumb_func
+ 647              		.fpu fpv4-sp-d16
+ 649              	ai_network_run:
+ 650              	.LFB11:
+ 617:X-CUBE-AI/App/network.c **** 
+ARM GAS  /tmp/ccmYJ82r.s 			page 24
+
+
+ 618:X-CUBE-AI/App/network.c **** 
+ 619:X-CUBE-AI/App/network.c **** AI_API_ENTRY
+ 620:X-CUBE-AI/App/network.c **** ai_i32 ai_network_run(
+ 621:X-CUBE-AI/App/network.c ****   ai_handle network, const ai_buffer* input, ai_buffer* output)
+ 622:X-CUBE-AI/App/network.c **** {
+ 651              		.loc 1 622 0
+ 652              		.cfi_startproc
+ 653              		@ args = 0, pretend = 0, frame = 0
+ 654              		@ frame_needed = 0, uses_anonymous_args = 0
+ 655              	.LVL49:
+ 656 0000 08B5     		push	{r3, lr}
+ 657              	.LCFI17:
+ 658              		.cfi_def_cfa_offset 8
+ 659              		.cfi_offset 3, -8
+ 660              		.cfi_offset 14, -4
+ 623:X-CUBE-AI/App/network.c ****   return ai_platform_network_process(network, input, output);
+ 661              		.loc 1 623 0
+ 662 0002 FFF7FEFF 		bl	ai_platform_network_process
+ 663              	.LVL50:
+ 624:X-CUBE-AI/App/network.c **** }
+ 664              		.loc 1 624 0
+ 665 0006 08BD     		pop	{r3, pc}
+ 666              		.cfi_endproc
+ 667              	.LFE11:
+ 669              		.section	.text.ai_network_forward,"ax",%progbits
+ 670              		.align	1
+ 671              		.global	ai_network_forward
+ 672              		.syntax unified
+ 673              		.thumb
+ 674              		.thumb_func
+ 675              		.fpu fpv4-sp-d16
+ 677              	ai_network_forward:
+ 678              	.LFB12:
+ 625:X-CUBE-AI/App/network.c **** 
+ 626:X-CUBE-AI/App/network.c **** AI_API_ENTRY
+ 627:X-CUBE-AI/App/network.c **** ai_i32 ai_network_forward(ai_handle network, const ai_buffer* input)
+ 628:X-CUBE-AI/App/network.c **** {
+ 679              		.loc 1 628 0
+ 680              		.cfi_startproc
+ 681              		@ args = 0, pretend = 0, frame = 0
+ 682              		@ frame_needed = 0, uses_anonymous_args = 0
+ 683              	.LVL51:
+ 684 0000 08B5     		push	{r3, lr}
+ 685              	.LCFI18:
+ 686              		.cfi_def_cfa_offset 8
+ 687              		.cfi_offset 3, -8
+ 688              		.cfi_offset 14, -4
+ 629:X-CUBE-AI/App/network.c ****   return ai_platform_network_process(network, input, NULL);
+ 689              		.loc 1 629 0
+ 690 0002 0022     		movs	r2, #0
+ 691 0004 FFF7FEFF 		bl	ai_platform_network_process
+ 692              	.LVL52:
+ 630:X-CUBE-AI/App/network.c **** }
+ 693              		.loc 1 630 0
+ 694 0008 08BD     		pop	{r3, pc}
+ 695              		.cfi_endproc
+ 696              	.LFE12:
+ARM GAS  /tmp/ccmYJ82r.s 			page 25
+
+
+ 698              		.section	.bss.__compound_literal.38,"aw",%nobits
+ 699              		.align	2
+ 702              	__compound_literal.38:
+ 703 0000 00000000 		.space	4
+ 704              		.section	.bss.__compound_literal.39,"aw",%nobits
+ 705              		.align	2
+ 708              	__compound_literal.39:
+ 709 0000 00000000 		.space	4
+ 710              		.section	.bss.__compound_literal.44,"aw",%nobits
+ 711              		.align	2
+ 714              	__compound_literal.44:
+ 715 0000 00000000 		.space	4
+ 716              		.section	.bss.__compound_literal.48,"aw",%nobits
+ 717              		.align	2
+ 720              	__compound_literal.48:
+ 721 0000 00000000 		.space	4
+ 722              		.section	.bss.__compound_literal.49,"aw",%nobits
+ 723              		.align	2
+ 726              	__compound_literal.49:
+ 727 0000 00000000 		.space	4
+ 728              		.section	.bss.__compound_literal.54,"aw",%nobits
+ 729              		.align	2
+ 732              	__compound_literal.54:
+ 733 0000 00000000 		.space	4
+ 734              		.section	.bss.__compound_literal.61,"aw",%nobits
+ 735              		.align	2
+ 738              	__compound_literal.61:
+ 739 0000 00000000 		.space	16
+ 739      00000000 
+ 739      00000000 
+ 739      00000000 
+ 740              		.section	.bss.__compound_literal.62,"aw",%nobits
+ 741              		.align	2
+ 744              	__compound_literal.62:
+ 745 0000 00000000 		.space	16
+ 745      00000000 
+ 745      00000000 
+ 745      00000000 
+ 746              		.section	.bss.__compound_literal.68,"aw",%nobits
+ 747              		.align	2
+ 750              	__compound_literal.68:
+ 751 0000 00000000 		.space	16
+ 751      00000000 
+ 751      00000000 
+ 751      00000000 
+ 752              		.section	.bss.__compound_literal.69,"aw",%nobits
+ 753              		.align	2
+ 756              	__compound_literal.69:
+ 757 0000 00000000 		.space	16
+ 757      00000000 
+ 757      00000000 
+ 757      00000000 
+ 758              		.section	.bss.__compound_literal.73,"aw",%nobits
+ 759              		.align	2
+ 762              	__compound_literal.73:
+ 763 0000 00000000 		.space	24
+ 763      00000000 
+ARM GAS  /tmp/ccmYJ82r.s 			page 26
+
+
+ 763      00000000 
+ 763      00000000 
+ 763      00000000 
+ 764              		.section	.bss.__compound_literal.74,"aw",%nobits
+ 765              		.align	2
+ 768              	__compound_literal.74:
+ 769 0000 00000000 		.space	16
+ 769      00000000 
+ 769      00000000 
+ 769      00000000 
+ 770              		.section	.bss.__compound_literal.75,"aw",%nobits
+ 771              		.align	2
+ 774              	__compound_literal.75:
+ 775 0000 00000000 		.space	8
+ 775      00000000 
+ 776              		.section	.bss.__compound_literal.78,"aw",%nobits
+ 777              		.align	2
+ 780              	__compound_literal.78:
+ 781 0000 00000000 		.space	24
+ 781      00000000 
+ 781      00000000 
+ 781      00000000 
+ 781      00000000 
+ 782              		.section	.bss.__compound_literal.79,"aw",%nobits
+ 783              		.align	2
+ 786              	__compound_literal.79:
+ 787 0000 00000000 		.space	16
+ 787      00000000 
+ 787      00000000 
+ 787      00000000 
+ 788              		.section	.bss.__compound_literal.80,"aw",%nobits
+ 789              		.align	2
+ 792              	__compound_literal.80:
+ 793 0000 00000000 		.space	8
+ 793      00000000 
+ 794              		.section	.data.__compound_literal.0,"aw",%progbits
+ 795              		.align	2
+ 798              	__compound_literal.0:
+ 799 0000 01000000 		.word	1
+ 800 0004 01000000 		.word	1
+ 801 0008 1C000000 		.word	28
+ 802 000c 1C000000 		.word	28
+ 803              		.section	.data.__compound_literal.1,"aw",%progbits
+ 804              		.align	2
+ 807              	__compound_literal.1:
+ 808 0000 04000000 		.word	4
+ 809 0004 04000000 		.word	4
+ 810 0008 04000000 		.word	4
+ 811 000c 70000000 		.word	112
+ 812              		.section	.data.__compound_literal.10,"aw",%progbits
+ 813              		.align	2
+ 816              	__compound_literal.10:
+ 817 0000 01000000 		.word	1
+ 818 0004 80000000 		.word	128
+ 819 0008 01000000 		.word	1
+ 820 000c 01000000 		.word	1
+ 821              		.section	.data.__compound_literal.11,"aw",%progbits
+ARM GAS  /tmp/ccmYJ82r.s 			page 27
+
+
+ 822              		.align	2
+ 825              	__compound_literal.11:
+ 826 0000 04000000 		.word	4
+ 827 0004 04000000 		.word	4
+ 828 0008 00020000 		.word	512
+ 829 000c 00020000 		.word	512
+ 830              		.section	.data.__compound_literal.12,"aw",%progbits
+ 831              		.align	2
+ 834              	__compound_literal.12:
+ 835 0000 01000000 		.word	1
+ 836 0004 0A000000 		.word	10
+ 837 0008 01000000 		.word	1
+ 838 000c 01000000 		.word	1
+ 839              		.section	.data.__compound_literal.13,"aw",%progbits
+ 840              		.align	2
+ 843              	__compound_literal.13:
+ 844 0000 04000000 		.word	4
+ 845 0004 04000000 		.word	4
+ 846 0008 28000000 		.word	40
+ 847 000c 28000000 		.word	40
+ 848              		.section	.data.__compound_literal.14,"aw",%progbits
+ 849              		.align	2
+ 852              	__compound_literal.14:
+ 853 0000 01000000 		.word	1
+ 854 0004 0A000000 		.word	10
+ 855 0008 01000000 		.word	1
+ 856 000c 01000000 		.word	1
+ 857              		.section	.data.__compound_literal.15,"aw",%progbits
+ 858              		.align	2
+ 861              	__compound_literal.15:
+ 862 0000 04000000 		.word	4
+ 863 0004 04000000 		.word	4
+ 864 0008 28000000 		.word	40
+ 865 000c 28000000 		.word	40
+ 866              		.section	.data.__compound_literal.16,"aw",%progbits
+ 867              		.align	2
+ 870              	__compound_literal.16:
+ 871 0000 01000000 		.word	1
+ 872 0004 03000000 		.word	3
+ 873 0008 03000000 		.word	3
+ 874 000c 20000000 		.word	32
+ 875              		.section	.data.__compound_literal.17,"aw",%progbits
+ 876              		.align	2
+ 879              	__compound_literal.17:
+ 880 0000 04000000 		.word	4
+ 881 0004 04000000 		.word	4
+ 882 0008 0C000000 		.word	12
+ 883 000c 24000000 		.word	36
+ 884              		.section	.data.__compound_literal.18,"aw",%progbits
+ 885              		.align	2
+ 888              	__compound_literal.18:
+ 889 0000 01000000 		.word	1
+ 890 0004 20000000 		.word	32
+ 891 0008 01000000 		.word	1
+ 892 000c 01000000 		.word	1
+ 893              		.section	.data.__compound_literal.19,"aw",%progbits
+ 894              		.align	2
+ARM GAS  /tmp/ccmYJ82r.s 			page 28
+
+
+ 897              	__compound_literal.19:
+ 898 0000 04000000 		.word	4
+ 899 0004 04000000 		.word	4
+ 900 0008 80000000 		.word	128
+ 901 000c 80000000 		.word	128
+ 902              		.section	.data.__compound_literal.2,"aw",%progbits
+ 903              		.align	2
+ 906              	__compound_literal.2:
+ 907 0000 01000000 		.word	1
+ 908 0004 20000000 		.word	32
+ 909 0008 0D000000 		.word	13
+ 910 000c 0D000000 		.word	13
+ 911              		.section	.data.__compound_literal.20,"aw",%progbits
+ 912              		.align	2
+ 915              	__compound_literal.20:
+ 916 0000 20000000 		.word	32
+ 917 0004 03000000 		.word	3
+ 918 0008 03000000 		.word	3
+ 919 000c 40000000 		.word	64
+ 920              		.section	.data.__compound_literal.21,"aw",%progbits
+ 921              		.align	2
+ 924              	__compound_literal.21:
+ 925 0000 04000000 		.word	4
+ 926 0004 80000000 		.word	128
+ 927 0008 80010000 		.word	384
+ 928 000c 80040000 		.word	1152
+ 929              		.section	.data.__compound_literal.22,"aw",%progbits
+ 930              		.align	2
+ 933              	__compound_literal.22:
+ 934 0000 01000000 		.word	1
+ 935 0004 40000000 		.word	64
+ 936 0008 01000000 		.word	1
+ 937 000c 01000000 		.word	1
+ 938              		.section	.data.__compound_literal.23,"aw",%progbits
+ 939              		.align	2
+ 942              	__compound_literal.23:
+ 943 0000 04000000 		.word	4
+ 944 0004 04000000 		.word	4
+ 945 0008 00010000 		.word	256
+ 946 000c 00010000 		.word	256
+ 947              		.section	.data.__compound_literal.24,"aw",%progbits
+ 948              		.align	2
+ 951              	__compound_literal.24:
+ 952 0000 40060000 		.word	1600
+ 953 0004 80000000 		.word	128
+ 954 0008 01000000 		.word	1
+ 955 000c 01000000 		.word	1
+ 956              		.section	.data.__compound_literal.25,"aw",%progbits
+ 957              		.align	2
+ 960              	__compound_literal.25:
+ 961 0000 01000000 		.word	1
+ 962 0004 20030000 		.word	800
+ 963 0008 00900100 		.word	102400
+ 964 000c 00900100 		.word	102400
+ 965              		.section	.data.__compound_literal.26,"aw",%progbits
+ 966              		.align	2
+ 969              	__compound_literal.26:
+ARM GAS  /tmp/ccmYJ82r.s 			page 29
+
+
+ 970 0000 01000000 		.word	1
+ 971 0004 80000000 		.word	128
+ 972 0008 01000000 		.word	1
+ 973 000c 01000000 		.word	1
+ 974              		.section	.data.__compound_literal.27,"aw",%progbits
+ 975              		.align	2
+ 978              	__compound_literal.27:
+ 979 0000 04000000 		.word	4
+ 980 0004 04000000 		.word	4
+ 981 0008 00020000 		.word	512
+ 982 000c 00020000 		.word	512
+ 983              		.section	.data.__compound_literal.28,"aw",%progbits
+ 984              		.align	2
+ 987              	__compound_literal.28:
+ 988 0000 80000000 		.word	128
+ 989 0004 0A000000 		.word	10
+ 990 0008 01000000 		.word	1
+ 991 000c 01000000 		.word	1
+ 992              		.section	.data.__compound_literal.29,"aw",%progbits
+ 993              		.align	2
+ 996              	__compound_literal.29:
+ 997 0000 04000000 		.word	4
+ 998 0004 00020000 		.word	512
+ 999 0008 00140000 		.word	5120
+ 1000 000c 00140000 		.word	5120
+ 1001              		.section	.data.__compound_literal.3,"aw",%progbits
+ 1002              		.align	2
+ 1005              	__compound_literal.3:
+ 1006 0000 04000000 		.word	4
+ 1007 0004 04000000 		.word	4
+ 1008 0008 80000000 		.word	128
+ 1009 000c 80060000 		.word	1664
+ 1010              		.section	.data.__compound_literal.30,"aw",%progbits
+ 1011              		.align	2
+ 1014              	__compound_literal.30:
+ 1015 0000 01000000 		.word	1
+ 1016 0004 0A000000 		.word	10
+ 1017 0008 01000000 		.word	1
+ 1018 000c 01000000 		.word	1
+ 1019              		.section	.data.__compound_literal.31,"aw",%progbits
+ 1020              		.align	2
+ 1023              	__compound_literal.31:
+ 1024 0000 04000000 		.word	4
+ 1025 0004 04000000 		.word	4
+ 1026 0008 28000000 		.word	40
+ 1027 000c 28000000 		.word	40
+ 1028              		.section	.data.__compound_literal.32,"aw",%progbits
+ 1029              		.align	2
+ 1032              	__compound_literal.32:
+ 1033 0000 01000000 		.word	1
+ 1034 0004 20000000 		.word	32
+ 1035 0008 1A000000 		.word	26
+ 1036 000c 02000000 		.word	2
+ 1037              		.section	.data.__compound_literal.33,"aw",%progbits
+ 1038              		.align	2
+ 1041              	__compound_literal.33:
+ 1042 0000 04000000 		.word	4
+ARM GAS  /tmp/ccmYJ82r.s 			page 30
+
+
+ 1043 0004 04000000 		.word	4
+ 1044 0008 80000000 		.word	128
+ 1045 000c 000D0000 		.word	3328
+ 1046              		.section	.data.__compound_literal.34,"aw",%progbits
+ 1047              		.align	2
+ 1050              	__compound_literal.34:
+ 1051 0000 01000000 		.word	1
+ 1052 0004 40000000 		.word	64
+ 1053 0008 0B000000 		.word	11
+ 1054 000c 02000000 		.word	2
+ 1055              		.section	.data.__compound_literal.35,"aw",%progbits
+ 1056              		.align	2
+ 1059              	__compound_literal.35:
+ 1060 0000 04000000 		.word	4
+ 1061 0004 04000000 		.word	4
+ 1062 0008 00010000 		.word	256
+ 1063 000c 000B0000 		.word	2816
+ 1064              		.section	.data.__compound_literal.36,"aw",%progbits
+ 1065              		.align	2
+ 1068              	__compound_literal.36:
+ 1069 0000 00000000 		.word	dense_1_output
+ 1070              		.section	.data.__compound_literal.37,"aw",%progbits
+ 1071              		.align	2
+ 1074              	__compound_literal.37:
+ 1075 0000 00000000 		.word	dense_1_nl_output
+ 1076              		.section	.data.__compound_literal.4,"aw",%progbits
+ 1077              		.align	2
+ 1080              	__compound_literal.4:
+ 1081 0000 01000000 		.word	1
+ 1082 0004 40000000 		.word	64
+ 1083 0008 05000000 		.word	5
+ 1084 000c 05000000 		.word	5
+ 1085              		.section	.data.__compound_literal.40,"aw",%progbits
+ 1086              		.align	2
+ 1089              	__compound_literal.40:
+ 1090 0000 0100     		.short	1
+ 1091 0002 0000     		.short	0
+ 1092 0004 00000000 		.word	__compound_literal.36
+ 1093 0008 00000000 		.word	0
+ 1094 000c 0100     		.short	1
+ 1095 000e 0000     		.short	0
+ 1096 0010 00000000 		.word	__compound_literal.37
+ 1097 0014 00000000 		.word	0
+ 1098 0018 0000     		.short	0
+ 1099 001a 0000     		.short	0
+ 1100 001c 00000000 		.word	__compound_literal.38
+ 1101 0020 00000000 		.word	0
+ 1102 0024 0000     		.short	0
+ 1103 0026 0000     		.short	0
+ 1104 0028 00000000 		.word	__compound_literal.39
+ 1105 002c 00000000 		.word	0
+ 1106              		.section	.data.__compound_literal.41,"aw",%progbits
+ 1107              		.align	2
+ 1110              	__compound_literal.41:
+ 1111 0000 00000000 		.word	dense_nl_output
+ 1112              		.section	.data.__compound_literal.42,"aw",%progbits
+ 1113              		.align	2
+ARM GAS  /tmp/ccmYJ82r.s 			page 31
+
+
+ 1116              	__compound_literal.42:
+ 1117 0000 00000000 		.word	dense_1_output
+ 1118              		.section	.data.__compound_literal.43,"aw",%progbits
+ 1119              		.align	2
+ 1122              	__compound_literal.43:
+ 1123 0000 00000000 		.word	dense_1_weights
+ 1124 0004 00000000 		.word	dense_1_bias
+ 1125              		.section	.data.__compound_literal.45,"aw",%progbits
+ 1126              		.align	2
+ 1129              	__compound_literal.45:
+ 1130 0000 0100     		.short	1
+ 1131 0002 0000     		.short	0
+ 1132 0004 00000000 		.word	__compound_literal.41
+ 1133 0008 00000000 		.word	0
+ 1134 000c 0100     		.short	1
+ 1135 000e 0000     		.short	0
+ 1136 0010 00000000 		.word	__compound_literal.42
+ 1137 0014 00000000 		.word	0
+ 1138 0018 0200     		.short	2
+ 1139 001a 0000     		.short	0
+ 1140 001c 00000000 		.word	__compound_literal.43
+ 1141 0020 00000000 		.word	0
+ 1142 0024 0000     		.short	0
+ 1143 0026 0000     		.short	0
+ 1144 0028 00000000 		.word	__compound_literal.44
+ 1145 002c 00000000 		.word	0
+ 1146              		.section	.data.__compound_literal.46,"aw",%progbits
+ 1147              		.align	2
+ 1150              	__compound_literal.46:
+ 1151 0000 00000000 		.word	dense_output
+ 1152              		.section	.data.__compound_literal.47,"aw",%progbits
+ 1153              		.align	2
+ 1156              	__compound_literal.47:
+ 1157 0000 00000000 		.word	dense_nl_output
+ 1158              		.section	.data.__compound_literal.5,"aw",%progbits
+ 1159              		.align	2
+ 1162              	__compound_literal.5:
+ 1163 0000 04000000 		.word	4
+ 1164 0004 04000000 		.word	4
+ 1165 0008 00010000 		.word	256
+ 1166 000c 00050000 		.word	1280
+ 1167              		.section	.data.__compound_literal.50,"aw",%progbits
+ 1168              		.align	2
+ 1171              	__compound_literal.50:
+ 1172 0000 0100     		.short	1
+ 1173 0002 0000     		.short	0
+ 1174 0004 00000000 		.word	__compound_literal.46
+ 1175 0008 00000000 		.word	0
+ 1176 000c 0100     		.short	1
+ 1177 000e 0000     		.short	0
+ 1178 0010 00000000 		.word	__compound_literal.47
+ 1179 0014 00000000 		.word	0
+ 1180 0018 0000     		.short	0
+ 1181 001a 0000     		.short	0
+ 1182 001c 00000000 		.word	__compound_literal.48
+ 1183 0020 00000000 		.word	0
+ 1184 0024 0000     		.short	0
+ARM GAS  /tmp/ccmYJ82r.s 			page 32
+
+
+ 1185 0026 0000     		.short	0
+ 1186 0028 00000000 		.word	__compound_literal.49
+ 1187 002c 00000000 		.word	0
+ 1188              		.section	.data.__compound_literal.51,"aw",%progbits
+ 1189              		.align	2
+ 1192              	__compound_literal.51:
+ 1193 0000 00000000 		.word	conv2d_1_output0
+ 1194              		.section	.data.__compound_literal.52,"aw",%progbits
+ 1195              		.align	2
+ 1198              	__compound_literal.52:
+ 1199 0000 00000000 		.word	dense_output
+ 1200              		.section	.data.__compound_literal.53,"aw",%progbits
+ 1201              		.align	2
+ 1204              	__compound_literal.53:
+ 1205 0000 00000000 		.word	dense_weights
+ 1206 0004 00000000 		.word	dense_bias
+ 1207              		.section	.data.__compound_literal.55,"aw",%progbits
+ 1208              		.align	2
+ 1211              	__compound_literal.55:
+ 1212 0000 0100     		.short	1
+ 1213 0002 0000     		.short	0
+ 1214 0004 00000000 		.word	__compound_literal.51
+ 1215 0008 00000000 		.word	0
+ 1216 000c 0100     		.short	1
+ 1217 000e 0000     		.short	0
+ 1218 0010 00000000 		.word	__compound_literal.52
+ 1219 0014 00000000 		.word	0
+ 1220 0018 0200     		.short	2
+ 1221 001a 0000     		.short	0
+ 1222 001c 00000000 		.word	__compound_literal.53
+ 1223 0020 00000000 		.word	0
+ 1224 0024 0000     		.short	0
+ 1225 0026 0000     		.short	0
+ 1226 0028 00000000 		.word	__compound_literal.54
+ 1227 002c 00000000 		.word	0
+ 1228              		.section	.data.__compound_literal.56,"aw",%progbits
+ 1229              		.align	2
+ 1232              	__compound_literal.56:
+ 1233 0000 00000000 		.word	conv2d_output
+ 1234              		.section	.data.__compound_literal.57,"aw",%progbits
+ 1235              		.align	2
+ 1238              	__compound_literal.57:
+ 1239 0000 00000000 		.word	conv2d_1_output
+ 1240              		.section	.data.__compound_literal.58,"aw",%progbits
+ 1241              		.align	2
+ 1244              	__compound_literal.58:
+ 1245 0000 00000000 		.word	conv2d_1_weights
+ 1246 0004 00000000 		.word	conv2d_1_bias
+ 1247 0008 00000000 		.word	0
+ 1248              		.section	.data.__compound_literal.59,"aw",%progbits
+ 1249              		.align	2
+ 1252              	__compound_literal.59:
+ 1253 0000 00000000 		.word	conv2d_1_scratch0
+ 1254              		.section	.data.__compound_literal.6,"aw",%progbits
+ 1255              		.align	2
+ 1258              	__compound_literal.6:
+ 1259 0000 01000000 		.word	1
+ARM GAS  /tmp/ccmYJ82r.s 			page 33
+
+
+ 1260 0004 40060000 		.word	1600
+ 1261 0008 01000000 		.word	1
+ 1262 000c 01000000 		.word	1
+ 1263              		.section	.data.__compound_literal.60,"aw",%progbits
+ 1264              		.align	2
+ 1267              	__compound_literal.60:
+ 1268 0000 0100     		.short	1
+ 1269 0002 0000     		.short	0
+ 1270 0004 00000000 		.word	__compound_literal.56
+ 1271 0008 00000000 		.word	0
+ 1272 000c 0100     		.short	1
+ 1273 000e 0000     		.short	0
+ 1274 0010 00000000 		.word	__compound_literal.57
+ 1275 0014 00000000 		.word	0
+ 1276 0018 0300     		.short	3
+ 1277 001a 0000     		.short	0
+ 1278 001c 00000000 		.word	__compound_literal.58
+ 1279 0020 00000000 		.word	0
+ 1280 0024 0100     		.short	1
+ 1281 0026 0000     		.short	0
+ 1282 0028 00000000 		.word	__compound_literal.59
+ 1283 002c 00000000 		.word	0
+ 1284              		.section	.data.__compound_literal.63,"aw",%progbits
+ 1285              		.align	2
+ 1288              	__compound_literal.63:
+ 1289 0000 00000000 		.word	input_0_output
+ 1290              		.section	.data.__compound_literal.64,"aw",%progbits
+ 1291              		.align	2
+ 1294              	__compound_literal.64:
+ 1295 0000 00000000 		.word	conv2d_output
+ 1296              		.section	.data.__compound_literal.65,"aw",%progbits
+ 1297              		.align	2
+ 1300              	__compound_literal.65:
+ 1301 0000 00000000 		.word	conv2d_weights
+ 1302 0004 00000000 		.word	conv2d_bias
+ 1303 0008 00000000 		.word	0
+ 1304              		.section	.data.__compound_literal.66,"aw",%progbits
+ 1305              		.align	2
+ 1308              	__compound_literal.66:
+ 1309 0000 00000000 		.word	conv2d_scratch0
+ 1310              		.section	.data.__compound_literal.67,"aw",%progbits
+ 1311              		.align	2
+ 1314              	__compound_literal.67:
+ 1315 0000 0100     		.short	1
+ 1316 0002 0000     		.short	0
+ 1317 0004 00000000 		.word	__compound_literal.63
+ 1318 0008 00000000 		.word	0
+ 1319 000c 0100     		.short	1
+ 1320 000e 0000     		.short	0
+ 1321 0010 00000000 		.word	__compound_literal.64
+ 1322 0014 00000000 		.word	0
+ 1323 0018 0300     		.short	3
+ 1324 001a 0000     		.short	0
+ 1325 001c 00000000 		.word	__compound_literal.65
+ 1326 0020 00000000 		.word	0
+ 1327 0024 0100     		.short	1
+ 1328 0026 0000     		.short	0
+ARM GAS  /tmp/ccmYJ82r.s 			page 34
+
+
+ 1329 0028 00000000 		.word	__compound_literal.66
+ 1330 002c 00000000 		.word	0
+ 1331              		.section	.data.__compound_literal.7,"aw",%progbits
+ 1332              		.align	2
+ 1335              	__compound_literal.7:
+ 1336 0000 04000000 		.word	4
+ 1337 0004 04000000 		.word	4
+ 1338 0008 00190000 		.word	6400
+ 1339 000c 00190000 		.word	6400
+ 1340              		.section	.data.__compound_literal.70,"aw",%progbits
+ 1341              		.align	2
+ 1344              	__compound_literal.70:
+ 1345 0000 40040400 		.word	263232
+ 1346 0004 0100     		.short	1
+ 1347 0006 0100     		.short	1
+ 1348 0008 0100     		.short	1
+ 1349 000a 0000     		.space	2
+ 1350 000c 68CC0200 		.word	183400
+ 1351 0010 00000000 		.word	0
+ 1352 0014 00000000 		.word	0
+ 1353              		.section	.data.__compound_literal.71,"aw",%progbits
+ 1354              		.align	2
+ 1357              	__compound_literal.71:
+ 1358 0000 40040400 		.word	263232
+ 1359 0004 0100     		.short	1
+ 1360 0006 0100     		.short	1
+ 1361 0008 0100     		.short	1
+ 1362 000a 0000     		.space	2
+ 1363 000c 80740000 		.word	29824
+ 1364 0010 00000000 		.word	0
+ 1365 0014 00000000 		.word	0
+ 1366              		.section	.data.__compound_literal.72,"aw",%progbits
+ 1367              		.align	2
+ 1370              	__compound_literal.72:
+ 1371 0000 00000000 		.word	input_0_output
+ 1372              		.section	.data.__compound_literal.76,"aw",%progbits
+ 1373              		.align	2
+ 1376              	__compound_literal.76:
+ 1377 0000 00000000 		.word	__compound_literal.74
+ 1378 0004 00000000 		.word	__compound_literal.73
+ 1379 0008 00000000 		.word	__compound_literal.75
+ 1380              		.section	.data.__compound_literal.77,"aw",%progbits
+ 1381              		.align	2
+ 1384              	__compound_literal.77:
+ 1385 0000 00000000 		.word	dense_1_nl_output
+ 1386              		.section	.data.__compound_literal.8,"aw",%progbits
+ 1387              		.align	2
+ 1390              	__compound_literal.8:
+ 1391 0000 01000000 		.word	1
+ 1392 0004 80000000 		.word	128
+ 1393 0008 01000000 		.word	1
+ 1394 000c 01000000 		.word	1
+ 1395              		.section	.data.__compound_literal.81,"aw",%progbits
+ 1396              		.align	2
+ 1399              	__compound_literal.81:
+ 1400 0000 00000000 		.word	__compound_literal.79
+ 1401 0004 00000000 		.word	__compound_literal.78
+ARM GAS  /tmp/ccmYJ82r.s 			page 35
+
+
+ 1402 0008 00000000 		.word	__compound_literal.80
+ 1403              		.section	.data.__compound_literal.82,"aw",%progbits
+ 1404              		.align	2
+ 1407              	__compound_literal.82:
+ 1408 0000 0100     		.short	1
+ 1409 0002 0000     		.short	0
+ 1410 0004 00000000 		.word	__compound_literal.72
+ 1411 0008 00000000 		.word	__compound_literal.76
+ 1412 000c 0100     		.short	1
+ 1413 000e 0000     		.short	0
+ 1414 0010 00000000 		.word	__compound_literal.77
+ 1415 0014 00000000 		.word	__compound_literal.81
+ 1416              		.section	.data.__compound_literal.9,"aw",%progbits
+ 1417              		.align	2
+ 1420              	__compound_literal.9:
+ 1421 0000 04000000 		.word	4
+ 1422 0004 04000000 		.word	4
+ 1423 0008 00020000 		.word	512
+ 1424 000c 00020000 		.word	512
+ 1425              		.section	.data.conv2d_1_bias,"aw",%progbits
+ 1426              		.align	2
+ 1429              	conv2d_1_bias:
+ 1430 0000 00000000 		.word	0
+ 1431 0004 0B00     		.short	11
+ 1432 0006 00       		.byte	0
+ 1433 0007 01       		.byte	1
+ 1434 0008 00       		.byte	0
+ 1435 0009 04       		.byte	4
+ 1436 000a 00       		.byte	0
+ 1437 000b 00       		.byte	0
+ 1438 000c 00000000 		.word	__compound_literal.22
+ 1439 0010 01       		.byte	1
+ 1440 0011 04       		.byte	4
+ 1441 0012 00       		.byte	0
+ 1442 0013 00       		.byte	0
+ 1443 0014 00000000 		.word	__compound_literal.23
+ 1444 0018 00000000 		.word	conv2d_1_bias_array
+ 1445              		.section	.data.conv2d_1_bias_array,"aw",%progbits
+ 1446              		.align	2
+ 1447              		.set	.LANCHOR4,. + 0
+ 1450              	conv2d_1_bias_array:
+ 1451 0000 40108201 		.word	25301056
+ 1452 0004 40000000 		.word	64
+ 1453 0008 00000000 		.word	0
+ 1454 000c 00000000 		.word	0
+ 1455              		.section	.data.conv2d_1_layer,"aw",%progbits
+ 1456              		.align	2
+ 1459              	conv2d_1_layer:
+ 1460 0000 0901     		.short	265
+ 1461 0002 0300     		.short	3
+ 1462 0004 00000000 		.word	0
+ 1463 0008 00000000 		.word	0
+ 1464 000c 00000000 		.word	0
+ 1465 0010 00000000 		.word	dense_layer
+ 1466 0014 00000000 		.word	forward_conv2d_nl_pool
+ 1467 0018 00000000 		.word	conv2d_1_chain
+ 1468 001c 01000000 		.word	1
+ARM GAS  /tmp/ccmYJ82r.s 			page 36
+
+
+ 1469 0020 00000000 		.word	0
+ 1470 0024 00000000 		.word	nl_func_relu_array_f32
+ 1471 0028 01000000 		.word	1
+ 1472 002c 01000000 		.word	1
+ 1473 0030 01000000 		.word	1
+ 1474 0034 01000000 		.word	1
+ 1475 0038 00       		.byte	0
+ 1476 0039 04       		.byte	4
+ 1477 003a 00       		.byte	0
+ 1478 003b 00       		.byte	0
+ 1479 003c 00000000 		.word	__compound_literal.61
+ 1480 0040 02000000 		.word	2
+ 1481 0044 02000000 		.word	2
+ 1482 0048 02000000 		.word	2
+ 1483 004c 02000000 		.word	2
+ 1484 0050 00       		.byte	0
+ 1485 0051 04       		.byte	4
+ 1486 0052 00       		.byte	0
+ 1487 0053 00       		.byte	0
+ 1488 0054 00000000 		.word	__compound_literal.62
+ 1489 0058 00000000 		.word	pool_func_mp_array_f32
+ 1490              		.section	.data.conv2d_1_output,"aw",%progbits
+ 1491              		.align	2
+ 1494              	conv2d_1_output:
+ 1495 0000 00000000 		.word	0
+ 1496 0004 0200     		.short	2
+ 1497 0006 00       		.byte	0
+ 1498 0007 01       		.byte	1
+ 1499 0008 00       		.byte	0
+ 1500 0009 04       		.byte	4
+ 1501 000a 00       		.byte	0
+ 1502 000b 00       		.byte	0
+ 1503 000c 00000000 		.word	__compound_literal.4
+ 1504 0010 01       		.byte	1
+ 1505 0011 04       		.byte	4
+ 1506 0012 00       		.byte	0
+ 1507 0013 00       		.byte	0
+ 1508 0014 00000000 		.word	__compound_literal.5
+ 1509 0018 00000000 		.word	conv2d_1_output_array
+ 1510              		.section	.data.conv2d_1_output0,"aw",%progbits
+ 1511              		.align	2
+ 1514              	conv2d_1_output0:
+ 1515 0000 00000000 		.word	0
+ 1516 0004 0300     		.short	3
+ 1517 0006 00       		.byte	0
+ 1518 0007 01       		.byte	1
+ 1519 0008 00       		.byte	0
+ 1520 0009 04       		.byte	4
+ 1521 000a 00       		.byte	0
+ 1522 000b 00       		.byte	0
+ 1523 000c 00000000 		.word	__compound_literal.6
+ 1524 0010 01       		.byte	1
+ 1525 0011 04       		.byte	4
+ 1526 0012 00       		.byte	0
+ 1527 0013 00       		.byte	0
+ 1528 0014 00000000 		.word	__compound_literal.7
+ 1529 0018 00000000 		.word	conv2d_1_output_array
+ARM GAS  /tmp/ccmYJ82r.s 			page 37
+
+
+ 1530              		.section	.data.conv2d_1_output_array,"aw",%progbits
+ 1531              		.align	2
+ 1532              		.set	.LANCHOR11,. + 0
+ 1535              	conv2d_1_output_array:
+ 1536 0000 40108201 		.word	25301056
+ 1537 0004 40060000 		.word	1600
+ 1538 0008 00000000 		.word	0
+ 1539 000c 00000000 		.word	0
+ 1540              		.section	.data.conv2d_1_scratch0,"aw",%progbits
+ 1541              		.align	2
+ 1544              	conv2d_1_scratch0:
+ 1545 0000 00000000 		.word	0
+ 1546 0004 1100     		.short	17
+ 1547 0006 00       		.byte	0
+ 1548 0007 01       		.byte	1
+ 1549 0008 00       		.byte	0
+ 1550 0009 04       		.byte	4
+ 1551 000a 00       		.byte	0
+ 1552 000b 00       		.byte	0
+ 1553 000c 00000000 		.word	__compound_literal.34
+ 1554 0010 01       		.byte	1
+ 1555 0011 04       		.byte	4
+ 1556 0012 00       		.byte	0
+ 1557 0013 00       		.byte	0
+ 1558 0014 00000000 		.word	__compound_literal.35
+ 1559 0018 00000000 		.word	conv2d_1_scratch0_array
+ 1560              		.section	.data.conv2d_1_scratch0_array,"aw",%progbits
+ 1561              		.align	2
+ 1562              		.set	.LANCHOR17,. + 0
+ 1565              	conv2d_1_scratch0_array:
+ 1566 0000 40108201 		.word	25301056
+ 1567 0004 80050000 		.word	1408
+ 1568 0008 00000000 		.word	0
+ 1569 000c 00000000 		.word	0
+ 1570              		.section	.data.conv2d_1_weights,"aw",%progbits
+ 1571              		.align	2
+ 1574              	conv2d_1_weights:
+ 1575 0000 00000000 		.word	0
+ 1576 0004 0A00     		.short	10
+ 1577 0006 00       		.byte	0
+ 1578 0007 01       		.byte	1
+ 1579 0008 00       		.byte	0
+ 1580 0009 04       		.byte	4
+ 1581 000a 00       		.byte	0
+ 1582 000b 00       		.byte	0
+ 1583 000c 00000000 		.word	__compound_literal.20
+ 1584 0010 01       		.byte	1
+ 1585 0011 04       		.byte	4
+ 1586 0012 00       		.byte	0
+ 1587 0013 00       		.byte	0
+ 1588 0014 00000000 		.word	__compound_literal.21
+ 1589 0018 00000000 		.word	conv2d_1_weights_array
+ 1590              		.section	.data.conv2d_1_weights_array,"aw",%progbits
+ 1591              		.align	2
+ 1592              		.set	.LANCHOR3,. + 0
+ 1595              	conv2d_1_weights_array:
+ 1596 0000 40108201 		.word	25301056
+ARM GAS  /tmp/ccmYJ82r.s 			page 38
+
+
+ 1597 0004 00480000 		.word	18432
+ 1598 0008 00000000 		.word	0
+ 1599 000c 00000000 		.word	0
+ 1600              		.section	.data.conv2d_bias,"aw",%progbits
+ 1601              		.align	2
+ 1604              	conv2d_bias:
+ 1605 0000 00000000 		.word	0
+ 1606 0004 0900     		.short	9
+ 1607 0006 00       		.byte	0
+ 1608 0007 01       		.byte	1
+ 1609 0008 00       		.byte	0
+ 1610 0009 04       		.byte	4
+ 1611 000a 00       		.byte	0
+ 1612 000b 00       		.byte	0
+ 1613 000c 00000000 		.word	__compound_literal.18
+ 1614 0010 01       		.byte	1
+ 1615 0011 04       		.byte	4
+ 1616 0012 00       		.byte	0
+ 1617 0013 00       		.byte	0
+ 1618 0014 00000000 		.word	__compound_literal.19
+ 1619 0018 00000000 		.word	conv2d_bias_array
+ 1620              		.section	.data.conv2d_bias_array,"aw",%progbits
+ 1621              		.align	2
+ 1622              		.set	.LANCHOR2,. + 0
+ 1625              	conv2d_bias_array:
+ 1626 0000 40108201 		.word	25301056
+ 1627 0004 20000000 		.word	32
+ 1628 0008 00000000 		.word	0
+ 1629 000c 00000000 		.word	0
+ 1630              		.section	.data.conv2d_layer,"aw",%progbits
+ 1631              		.align	2
+ 1634              	conv2d_layer:
+ 1635 0000 0901     		.short	265
+ 1636 0002 0100     		.short	1
+ 1637 0004 00000000 		.word	0
+ 1638 0008 00000000 		.word	0
+ 1639 000c 00000000 		.word	0
+ 1640 0010 00000000 		.word	conv2d_1_layer
+ 1641 0014 00000000 		.word	forward_conv2d_nl_pool
+ 1642 0018 00000000 		.word	conv2d_chain
+ 1643 001c 01000000 		.word	1
+ 1644 0020 00000000 		.word	0
+ 1645 0024 00000000 		.word	nl_func_relu_array_f32
+ 1646 0028 01000000 		.word	1
+ 1647 002c 01000000 		.word	1
+ 1648 0030 01000000 		.word	1
+ 1649 0034 01000000 		.word	1
+ 1650 0038 00       		.byte	0
+ 1651 0039 04       		.byte	4
+ 1652 003a 00       		.byte	0
+ 1653 003b 00       		.byte	0
+ 1654 003c 00000000 		.word	__compound_literal.68
+ 1655 0040 02000000 		.word	2
+ 1656 0044 02000000 		.word	2
+ 1657 0048 02000000 		.word	2
+ 1658 004c 02000000 		.word	2
+ 1659 0050 00       		.byte	0
+ARM GAS  /tmp/ccmYJ82r.s 			page 39
+
+
+ 1660 0051 04       		.byte	4
+ 1661 0052 00       		.byte	0
+ 1662 0053 00       		.byte	0
+ 1663 0054 00000000 		.word	__compound_literal.69
+ 1664 0058 00000000 		.word	pool_func_mp_array_f32
+ 1665              		.section	.data.conv2d_output,"aw",%progbits
+ 1666              		.align	2
+ 1669              	conv2d_output:
+ 1670 0000 00000000 		.word	0
+ 1671 0004 0100     		.short	1
+ 1672 0006 00       		.byte	0
+ 1673 0007 01       		.byte	1
+ 1674 0008 00       		.byte	0
+ 1675 0009 04       		.byte	4
+ 1676 000a 00       		.byte	0
+ 1677 000b 00       		.byte	0
+ 1678 000c 00000000 		.word	__compound_literal.2
+ 1679 0010 01       		.byte	1
+ 1680 0011 04       		.byte	4
+ 1681 0012 00       		.byte	0
+ 1682 0013 00       		.byte	0
+ 1683 0014 00000000 		.word	__compound_literal.3
+ 1684 0018 00000000 		.word	conv2d_output_array
+ 1685              		.section	.data.conv2d_output_array,"aw",%progbits
+ 1686              		.align	2
+ 1687              		.set	.LANCHOR10,. + 0
+ 1690              	conv2d_output_array:
+ 1691 0000 40108201 		.word	25301056
+ 1692 0004 20150000 		.word	5408
+ 1693 0008 00000000 		.word	0
+ 1694 000c 00000000 		.word	0
+ 1695              		.section	.data.conv2d_scratch0,"aw",%progbits
+ 1696              		.align	2
+ 1699              	conv2d_scratch0:
+ 1700 0000 00000000 		.word	0
+ 1701 0004 1000     		.short	16
+ 1702 0006 00       		.byte	0
+ 1703 0007 01       		.byte	1
+ 1704 0008 00       		.byte	0
+ 1705 0009 04       		.byte	4
+ 1706 000a 00       		.byte	0
+ 1707 000b 00       		.byte	0
+ 1708 000c 00000000 		.word	__compound_literal.32
+ 1709 0010 01       		.byte	1
+ 1710 0011 04       		.byte	4
+ 1711 0012 00       		.byte	0
+ 1712 0013 00       		.byte	0
+ 1713 0014 00000000 		.word	__compound_literal.33
+ 1714 0018 00000000 		.word	conv2d_scratch0_array
+ 1715              		.section	.data.conv2d_scratch0_array,"aw",%progbits
+ 1716              		.align	2
+ 1717              		.set	.LANCHOR16,. + 0
+ 1720              	conv2d_scratch0_array:
+ 1721 0000 40108201 		.word	25301056
+ 1722 0004 80060000 		.word	1664
+ 1723 0008 00000000 		.word	0
+ 1724 000c 00000000 		.word	0
+ARM GAS  /tmp/ccmYJ82r.s 			page 40
+
+
+ 1725              		.section	.data.conv2d_weights,"aw",%progbits
+ 1726              		.align	2
+ 1729              	conv2d_weights:
+ 1730 0000 00000000 		.word	0
+ 1731 0004 0800     		.short	8
+ 1732 0006 00       		.byte	0
+ 1733 0007 01       		.byte	1
+ 1734 0008 00       		.byte	0
+ 1735 0009 04       		.byte	4
+ 1736 000a 00       		.byte	0
+ 1737 000b 00       		.byte	0
+ 1738 000c 00000000 		.word	__compound_literal.16
+ 1739 0010 01       		.byte	1
+ 1740 0011 04       		.byte	4
+ 1741 0012 00       		.byte	0
+ 1742 0013 00       		.byte	0
+ 1743 0014 00000000 		.word	__compound_literal.17
+ 1744 0018 00000000 		.word	conv2d_weights_array
+ 1745              		.section	.data.conv2d_weights_array,"aw",%progbits
+ 1746              		.align	2
+ 1747              		.set	.LANCHOR1,. + 0
+ 1750              	conv2d_weights_array:
+ 1751 0000 40108201 		.word	25301056
+ 1752 0004 20010000 		.word	288
+ 1753 0008 00000000 		.word	0
+ 1754 000c 00000000 		.word	0
+ 1755              		.section	.data.dense_1_bias,"aw",%progbits
+ 1756              		.align	2
+ 1759              	dense_1_bias:
+ 1760 0000 00000000 		.word	0
+ 1761 0004 0F00     		.short	15
+ 1762 0006 00       		.byte	0
+ 1763 0007 01       		.byte	1
+ 1764 0008 00       		.byte	0
+ 1765 0009 04       		.byte	4
+ 1766 000a 00       		.byte	0
+ 1767 000b 00       		.byte	0
+ 1768 000c 00000000 		.word	__compound_literal.30
+ 1769 0010 01       		.byte	1
+ 1770 0011 04       		.byte	4
+ 1771 0012 00       		.byte	0
+ 1772 0013 00       		.byte	0
+ 1773 0014 00000000 		.word	__compound_literal.31
+ 1774 0018 00000000 		.word	dense_1_bias_array
+ 1775              		.section	.data.dense_1_bias_array,"aw",%progbits
+ 1776              		.align	2
+ 1777              		.set	.LANCHOR8,. + 0
+ 1780              	dense_1_bias_array:
+ 1781 0000 40108201 		.word	25301056
+ 1782 0004 0A000000 		.word	10
+ 1783 0008 00000000 		.word	0
+ 1784 000c 00000000 		.word	0
+ 1785              		.section	.data.dense_1_layer,"aw",%progbits
+ 1786              		.align	2
+ 1789              	dense_1_layer:
+ 1790 0000 0401     		.short	260
+ 1791 0002 0800     		.short	8
+ARM GAS  /tmp/ccmYJ82r.s 			page 41
+
+
+ 1792 0004 00000000 		.word	0
+ 1793 0008 00000000 		.word	0
+ 1794 000c 00000000 		.word	0
+ 1795 0010 00000000 		.word	dense_1_nl_layer
+ 1796 0014 00000000 		.word	forward_dense
+ 1797 0018 00000000 		.word	dense_1_chain
+ 1798              		.section	.data.dense_1_nl_layer,"aw",%progbits
+ 1799              		.align	2
+ 1802              	dense_1_nl_layer:
+ 1803 0000 0701     		.short	263
+ 1804 0002 0800     		.short	8
+ 1805 0004 00000000 		.word	0
+ 1806 0008 00000000 		.word	0
+ 1807 000c 00000000 		.word	0
+ 1808 0010 00000000 		.word	dense_1_nl_layer
+ 1809 0014 00000000 		.word	forward_sm
+ 1810 0018 00000000 		.word	dense_1_nl_chain
+ 1811 001c 00000000 		.word	0
+ 1812              		.section	.data.dense_1_nl_output,"aw",%progbits
+ 1813              		.align	2
+ 1816              	dense_1_nl_output:
+ 1817 0000 00000000 		.word	0
+ 1818 0004 0700     		.short	7
+ 1819 0006 00       		.byte	0
+ 1820 0007 01       		.byte	1
+ 1821 0008 00       		.byte	0
+ 1822 0009 04       		.byte	4
+ 1823 000a 00       		.byte	0
+ 1824 000b 00       		.byte	0
+ 1825 000c 00000000 		.word	__compound_literal.14
+ 1826 0010 01       		.byte	1
+ 1827 0011 04       		.byte	4
+ 1828 0012 00       		.byte	0
+ 1829 0013 00       		.byte	0
+ 1830 0014 00000000 		.word	__compound_literal.15
+ 1831 0018 00000000 		.word	dense_1_nl_output_array
+ 1832              		.section	.data.dense_1_nl_output_array,"aw",%progbits
+ 1833              		.align	2
+ 1834              		.set	.LANCHOR15,. + 0
+ 1837              	dense_1_nl_output_array:
+ 1838 0000 40108209 		.word	159518784
+ 1839 0004 0A000000 		.word	10
+ 1840 0008 00000000 		.word	0
+ 1841 000c 00000000 		.word	0
+ 1842              		.section	.data.dense_1_output,"aw",%progbits
+ 1843              		.align	2
+ 1846              	dense_1_output:
+ 1847 0000 00000000 		.word	0
+ 1848 0004 0600     		.short	6
+ 1849 0006 00       		.byte	0
+ 1850 0007 01       		.byte	1
+ 1851 0008 00       		.byte	0
+ 1852 0009 04       		.byte	4
+ 1853 000a 00       		.byte	0
+ 1854 000b 00       		.byte	0
+ 1855 000c 00000000 		.word	__compound_literal.12
+ 1856 0010 01       		.byte	1
+ARM GAS  /tmp/ccmYJ82r.s 			page 42
+
+
+ 1857 0011 04       		.byte	4
+ 1858 0012 00       		.byte	0
+ 1859 0013 00       		.byte	0
+ 1860 0014 00000000 		.word	__compound_literal.13
+ 1861 0018 00000000 		.word	dense_1_output_array
+ 1862              		.section	.data.dense_1_output_array,"aw",%progbits
+ 1863              		.align	2
+ 1864              		.set	.LANCHOR14,. + 0
+ 1867              	dense_1_output_array:
+ 1868 0000 40108201 		.word	25301056
+ 1869 0004 0A000000 		.word	10
+ 1870 0008 00000000 		.word	0
+ 1871 000c 00000000 		.word	0
+ 1872              		.section	.data.dense_1_weights,"aw",%progbits
+ 1873              		.align	2
+ 1876              	dense_1_weights:
+ 1877 0000 00000000 		.word	0
+ 1878 0004 0E00     		.short	14
+ 1879 0006 00       		.byte	0
+ 1880 0007 01       		.byte	1
+ 1881 0008 00       		.byte	0
+ 1882 0009 04       		.byte	4
+ 1883 000a 00       		.byte	0
+ 1884 000b 00       		.byte	0
+ 1885 000c 00000000 		.word	__compound_literal.28
+ 1886 0010 01       		.byte	1
+ 1887 0011 04       		.byte	4
+ 1888 0012 00       		.byte	0
+ 1889 0013 00       		.byte	0
+ 1890 0014 00000000 		.word	__compound_literal.29
+ 1891 0018 00000000 		.word	dense_1_weights_array
+ 1892              		.section	.data.dense_1_weights_array,"aw",%progbits
+ 1893              		.align	2
+ 1894              		.set	.LANCHOR7,. + 0
+ 1897              	dense_1_weights_array:
+ 1898 0000 40108201 		.word	25301056
+ 1899 0004 00050000 		.word	1280
+ 1900 0008 00000000 		.word	0
+ 1901 000c 00000000 		.word	0
+ 1902              		.section	.data.dense_bias,"aw",%progbits
+ 1903              		.align	2
+ 1906              	dense_bias:
+ 1907 0000 00000000 		.word	0
+ 1908 0004 0D00     		.short	13
+ 1909 0006 00       		.byte	0
+ 1910 0007 01       		.byte	1
+ 1911 0008 00       		.byte	0
+ 1912 0009 04       		.byte	4
+ 1913 000a 00       		.byte	0
+ 1914 000b 00       		.byte	0
+ 1915 000c 00000000 		.word	__compound_literal.26
+ 1916 0010 01       		.byte	1
+ 1917 0011 04       		.byte	4
+ 1918 0012 00       		.byte	0
+ 1919 0013 00       		.byte	0
+ 1920 0014 00000000 		.word	__compound_literal.27
+ 1921 0018 00000000 		.word	dense_bias_array
+ARM GAS  /tmp/ccmYJ82r.s 			page 43
+
+
+ 1922              		.section	.data.dense_bias_array,"aw",%progbits
+ 1923              		.align	2
+ 1924              		.set	.LANCHOR6,. + 0
+ 1927              	dense_bias_array:
+ 1928 0000 40108201 		.word	25301056
+ 1929 0004 80000000 		.word	128
+ 1930 0008 00000000 		.word	0
+ 1931 000c 00000000 		.word	0
+ 1932              		.section	.data.dense_layer,"aw",%progbits
+ 1933              		.align	2
+ 1936              	dense_layer:
+ 1937 0000 0401     		.short	260
+ 1938 0002 0600     		.short	6
+ 1939 0004 00000000 		.word	0
+ 1940 0008 00000000 		.word	0
+ 1941 000c 00000000 		.word	0
+ 1942 0010 00000000 		.word	dense_nl_layer
+ 1943 0014 00000000 		.word	forward_dense
+ 1944 0018 00000000 		.word	dense_chain
+ 1945              		.section	.data.dense_nl_layer,"aw",%progbits
+ 1946              		.align	2
+ 1949              	dense_nl_layer:
+ 1950 0000 0701     		.short	263
+ 1951 0002 0600     		.short	6
+ 1952 0004 00000000 		.word	0
+ 1953 0008 00000000 		.word	0
+ 1954 000c 00000000 		.word	0
+ 1955 0010 00000000 		.word	dense_1_layer
+ 1956 0014 00000000 		.word	forward_relu
+ 1957 0018 00000000 		.word	dense_nl_chain
+ 1958 001c 00000000 		.word	0
+ 1959              		.section	.data.dense_nl_output,"aw",%progbits
+ 1960              		.align	2
+ 1963              	dense_nl_output:
+ 1964 0000 00000000 		.word	0
+ 1965 0004 0500     		.short	5
+ 1966 0006 00       		.byte	0
+ 1967 0007 01       		.byte	1
+ 1968 0008 00       		.byte	0
+ 1969 0009 04       		.byte	4
+ 1970 000a 00       		.byte	0
+ 1971 000b 00       		.byte	0
+ 1972 000c 00000000 		.word	__compound_literal.10
+ 1973 0010 01       		.byte	1
+ 1974 0011 04       		.byte	4
+ 1975 0012 00       		.byte	0
+ 1976 0013 00       		.byte	0
+ 1977 0014 00000000 		.word	__compound_literal.11
+ 1978 0018 00000000 		.word	dense_nl_output_array
+ 1979              		.section	.data.dense_nl_output_array,"aw",%progbits
+ 1980              		.align	2
+ 1981              		.set	.LANCHOR13,. + 0
+ 1984              	dense_nl_output_array:
+ 1985 0000 40108201 		.word	25301056
+ 1986 0004 80000000 		.word	128
+ 1987 0008 00000000 		.word	0
+ 1988 000c 00000000 		.word	0
+ARM GAS  /tmp/ccmYJ82r.s 			page 44
+
+
+ 1989              		.section	.data.dense_output,"aw",%progbits
+ 1990              		.align	2
+ 1993              	dense_output:
+ 1994 0000 00000000 		.word	0
+ 1995 0004 0400     		.short	4
+ 1996 0006 00       		.byte	0
+ 1997 0007 01       		.byte	1
+ 1998 0008 00       		.byte	0
+ 1999 0009 04       		.byte	4
+ 2000 000a 00       		.byte	0
+ 2001 000b 00       		.byte	0
+ 2002 000c 00000000 		.word	__compound_literal.8
+ 2003 0010 01       		.byte	1
+ 2004 0011 04       		.byte	4
+ 2005 0012 00       		.byte	0
+ 2006 0013 00       		.byte	0
+ 2007 0014 00000000 		.word	__compound_literal.9
+ 2008 0018 00000000 		.word	dense_output_array
+ 2009              		.section	.data.dense_output_array,"aw",%progbits
+ 2010              		.align	2
+ 2011              		.set	.LANCHOR12,. + 0
+ 2014              	dense_output_array:
+ 2015 0000 40108201 		.word	25301056
+ 2016 0004 80000000 		.word	128
+ 2017 0008 00000000 		.word	0
+ 2018 000c 00000000 		.word	0
+ 2019              		.section	.data.dense_weights,"aw",%progbits
+ 2020              		.align	2
+ 2023              	dense_weights:
+ 2024 0000 00000000 		.word	0
+ 2025 0004 0C00     		.short	12
+ 2026 0006 00       		.byte	0
+ 2027 0007 01       		.byte	1
+ 2028 0008 00       		.byte	0
+ 2029 0009 04       		.byte	4
+ 2030 000a 00       		.byte	0
+ 2031 000b 00       		.byte	0
+ 2032 000c 00000000 		.word	__compound_literal.24
+ 2033 0010 01       		.byte	1
+ 2034 0011 04       		.byte	4
+ 2035 0012 00       		.byte	0
+ 2036 0013 00       		.byte	0
+ 2037 0014 00000000 		.word	__compound_literal.25
+ 2038 0018 00000000 		.word	dense_weights_array
+ 2039              		.section	.data.dense_weights_array,"aw",%progbits
+ 2040              		.align	2
+ 2041              		.set	.LANCHOR5,. + 0
+ 2044              	dense_weights_array:
+ 2045 0000 4010E801 		.word	31985728
+ 2046 0004 00200300 		.word	204800
+ 2047 0008 00000000 		.word	0
+ 2048 000c 00000000 		.word	0
+ 2049              		.section	.data.g_network,"aw",%progbits
+ 2050              		.align	2
+ 2051              		.set	.LANCHOR0,. + 0
+ 2054              	g_network:
+ 2055 0000 00000000 		.word	0
+ARM GAS  /tmp/ccmYJ82r.s 			page 45
+
+
+ 2056 0004 00000000 		.word	0
+ 2057 0008 00000000 		.word	0
+ 2058 000c 00000000 		.word	0
+ 2059 0010 00       		.byte	0
+ 2060 0011 00       		.byte	0
+ 2061 0012 00       		.byte	0
+ 2062 0013 00       		.byte	0
+ 2063 0014 0000     		.short	0
+ 2064 0016 0000     		.short	0
+ 2065 0018 DECAFAA1 		.word	-1577399586
+ 2066 001c 0000     		.short	0
+ 2067 001e 0100     		.short	1
+ 2068 0020 00000000 		.word	__compound_literal.70
+ 2069 0024 0000     		.short	0
+ 2070 0026 0100     		.short	1
+ 2071 0028 00000000 		.word	__compound_literal.71
+ 2072 002c 0200     		.short	2
+ 2073 002e 0000     		.short	0
+ 2074 0030 00000000 		.word	__compound_literal.82
+ 2075 0034 00000000 		.word	conv2d_layer
+ 2076 0038 00000000 		.word	0
+ 2077 003c 00000000 		.word	0
+ 2078 0040 00000000 		.word	0
+ 2079 0044 00000000 		.space	4
+ 2080              		.section	.data.input_0_output,"aw",%progbits
+ 2081              		.align	2
+ 2084              	input_0_output:
+ 2085 0000 00000000 		.word	0
+ 2086 0004 0000     		.short	0
+ 2087 0006 00       		.byte	0
+ 2088 0007 01       		.byte	1
+ 2089 0008 00       		.byte	0
+ 2090 0009 04       		.byte	4
+ 2091 000a 00       		.byte	0
+ 2092 000b 00       		.byte	0
+ 2093 000c 00000000 		.word	__compound_literal.0
+ 2094 0010 01       		.byte	1
+ 2095 0011 04       		.byte	4
+ 2096 0012 00       		.byte	0
+ 2097 0013 00       		.byte	0
+ 2098 0014 00000000 		.word	__compound_literal.1
+ 2099 0018 00000000 		.word	input_0_output_array
+ 2100              		.section	.data.input_0_output_array,"aw",%progbits
+ 2101              		.align	2
+ 2102              		.set	.LANCHOR9,. + 0
+ 2105              	input_0_output_array:
+ 2106 0000 40108209 		.word	159518784
+ 2107 0004 10030000 		.word	784
+ 2108 0008 00000000 		.word	0
+ 2109 000c 00000000 		.word	0
+ 2110              		.section	.rodata.ai_network_get_info.str1.4,"aMS",%progbits,1
+ 2111              		.align	2
+ 2112              	.LC0:
+ 2113 0000 6E657477 		.ascii	"network\000"
+ 2113      6F726B00 
+ 2114              	.LC1:
+ 2115 0008 37643961 		.ascii	"7d9a2645209e2d7d7448b22377688aaf\000"
+ARM GAS  /tmp/ccmYJ82r.s 			page 46
+
+
+ 2115      32363435 
+ 2115      32303965 
+ 2115      32643764 
+ 2115      37343438 
+ 2116 0029 000000   		.space	3
+ 2117              	.LC2:
+ 2118 002c 57656420 		.ascii	"Wed Aug  4 16:00:07 2021\000"
+ 2118      41756720 
+ 2118      20342031 
+ 2118      363A3030 
+ 2118      3A303720 
+ 2119 0045 000000   		.space	3
+ 2120              	.LC3:
+ 2121 0048 41756720 		.ascii	"Aug  4 2021 17:36:53\000"
+ 2121      20342032 
+ 2121      30323120 
+ 2121      31373A33 
+ 2121      363A3533 
+ 2122 005d 000000   		.space	3
+ 2123              	.LC4:
+ 2124 0060 00       		.ascii	"\000"
+ 2125              		.section	.rodata.conv2d_1_chain,"a",%progbits
+ 2126              		.align	2
+ 2129              	conv2d_1_chain:
+ 2130 0000 0400     		.short	4
+ 2131 0002 0000     		.short	0
+ 2132 0004 00000000 		.word	__compound_literal.60
+ 2133              		.section	.rodata.conv2d_chain,"a",%progbits
+ 2134              		.align	2
+ 2137              	conv2d_chain:
+ 2138 0000 0400     		.short	4
+ 2139 0002 0000     		.short	0
+ 2140 0004 00000000 		.word	__compound_literal.67
+ 2141              		.section	.rodata.dense_1_chain,"a",%progbits
+ 2142              		.align	2
+ 2145              	dense_1_chain:
+ 2146 0000 0400     		.short	4
+ 2147 0002 0000     		.short	0
+ 2148 0004 00000000 		.word	__compound_literal.45
+ 2149              		.section	.rodata.dense_1_nl_chain,"a",%progbits
+ 2150              		.align	2
+ 2153              	dense_1_nl_chain:
+ 2154 0000 0400     		.short	4
+ 2155 0002 0000     		.short	0
+ 2156 0004 00000000 		.word	__compound_literal.40
+ 2157              		.section	.rodata.dense_chain,"a",%progbits
+ 2158              		.align	2
+ 2161              	dense_chain:
+ 2162 0000 0400     		.short	4
+ 2163 0002 0000     		.short	0
+ 2164 0004 00000000 		.word	__compound_literal.55
+ 2165              		.section	.rodata.dense_nl_chain,"a",%progbits
+ 2166              		.align	2
+ 2169              	dense_nl_chain:
+ 2170 0000 0400     		.short	4
+ 2171 0002 0000     		.short	0
+ 2172 0004 00000000 		.word	__compound_literal.50
+ARM GAS  /tmp/ccmYJ82r.s 			page 47
+
+
+ 2173              		.text
+ 2174              	.Letext0:
+ 2175              		.file 2 "/usr/include/newlib/machine/_default_types.h"
+ 2176              		.file 3 "/usr/include/newlib/sys/_stdint.h"
+ 2177              		.file 4 "Middlewares/ST/AI/Inc/ai_platform.h"
+ 2178              		.file 5 "Middlewares/ST/AI/Inc/datatypes_network.h"
+ 2179              		.file 6 "/usr/include/newlib/sys/lock.h"
+ 2180              		.file 7 "/usr/include/newlib/sys/_types.h"
+ 2181              		.file 8 "/usr/lib/gcc/arm-none-eabi/6.3.1/include/stddef.h"
+ 2182              		.file 9 "/usr/include/newlib/sys/reent.h"
+ 2183              		.file 10 "Middlewares/ST/AI/Inc/core_datatypes.h"
+ 2184              		.file 11 "Middlewares/ST/AI/Inc/ai_datatypes_format.h"
+ 2185              		.file 12 "Middlewares/ST/AI/Inc/ai_platform_interface.h"
+ 2186              		.file 13 "Middlewares/ST/AI/Inc/core_common.h"
+ 2187              		.file 14 "/usr/include/newlib/math.h"
+ 2188              		.file 15 "/usr/include/newlib/stdlib.h"
+ 2189              		.file 16 "Middlewares/ST/AI/Inc/layers_common.h"
+ 2190              		.file 17 "Middlewares/ST/AI/Inc/layers_nl.h"
+ 2191              		.file 18 "Middlewares/ST/AI/Inc/layers_pool.h"
+ 2192              		.file 19 "Middlewares/ST/AI/Inc/layers_conv2d.h"
+ARM GAS  /tmp/ccmYJ82r.s 			page 48
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 network.c
+     /tmp/ccmYJ82r.s:18     .text.ai_network_get_info:0000000000000000 $t
+     /tmp/ccmYJ82r.s:25     .text.ai_network_get_info:0000000000000000 ai_network_get_info
+     /tmp/ccmYJ82r.s:132    .text.ai_network_get_info:000000000000007c $d
+     /tmp/ccmYJ82r.s:142    .text.ai_network_get_report:0000000000000000 $t
+     /tmp/ccmYJ82r.s:149    .text.ai_network_get_report:0000000000000000 ai_network_get_report
+     /tmp/ccmYJ82r.s:257    .text.ai_network_get_report:0000000000000080 $d
+     /tmp/ccmYJ82r.s:268    .text.ai_network_get_error:0000000000000000 $t
+     /tmp/ccmYJ82r.s:275    .text.ai_network_get_error:0000000000000000 ai_network_get_error
+     /tmp/ccmYJ82r.s:296    .text.ai_network_create:0000000000000000 $t
+     /tmp/ccmYJ82r.s:303    .text.ai_network_create:0000000000000000 ai_network_create
+     /tmp/ccmYJ82r.s:335    .text.ai_network_create:000000000000001c $d
+     /tmp/ccmYJ82r.s:340    .text.ai_network_destroy:0000000000000000 $t
+     /tmp/ccmYJ82r.s:347    .text.ai_network_destroy:0000000000000000 ai_network_destroy
+     /tmp/ccmYJ82r.s:368    .text.ai_network_init:0000000000000000 $t
+     /tmp/ccmYJ82r.s:375    .text.ai_network_init:0000000000000000 ai_network_init
+     /tmp/ccmYJ82r.s:621    .text.ai_network_init:0000000000000144 $d
+     /tmp/ccmYJ82r.s:642    .text.ai_network_run:0000000000000000 $t
+     /tmp/ccmYJ82r.s:649    .text.ai_network_run:0000000000000000 ai_network_run
+     /tmp/ccmYJ82r.s:670    .text.ai_network_forward:0000000000000000 $t
+     /tmp/ccmYJ82r.s:677    .text.ai_network_forward:0000000000000000 ai_network_forward
+     /tmp/ccmYJ82r.s:699    .bss.__compound_literal.38:0000000000000000 $d
+     /tmp/ccmYJ82r.s:702    .bss.__compound_literal.38:0000000000000000 __compound_literal.38
+     /tmp/ccmYJ82r.s:705    .bss.__compound_literal.39:0000000000000000 $d
+     /tmp/ccmYJ82r.s:708    .bss.__compound_literal.39:0000000000000000 __compound_literal.39
+     /tmp/ccmYJ82r.s:711    .bss.__compound_literal.44:0000000000000000 $d
+     /tmp/ccmYJ82r.s:714    .bss.__compound_literal.44:0000000000000000 __compound_literal.44
+     /tmp/ccmYJ82r.s:717    .bss.__compound_literal.48:0000000000000000 $d
+     /tmp/ccmYJ82r.s:720    .bss.__compound_literal.48:0000000000000000 __compound_literal.48
+     /tmp/ccmYJ82r.s:723    .bss.__compound_literal.49:0000000000000000 $d
+     /tmp/ccmYJ82r.s:726    .bss.__compound_literal.49:0000000000000000 __compound_literal.49
+     /tmp/ccmYJ82r.s:729    .bss.__compound_literal.54:0000000000000000 $d
+     /tmp/ccmYJ82r.s:732    .bss.__compound_literal.54:0000000000000000 __compound_literal.54
+     /tmp/ccmYJ82r.s:735    .bss.__compound_literal.61:0000000000000000 $d
+     /tmp/ccmYJ82r.s:738    .bss.__compound_literal.61:0000000000000000 __compound_literal.61
+     /tmp/ccmYJ82r.s:741    .bss.__compound_literal.62:0000000000000000 $d
+     /tmp/ccmYJ82r.s:744    .bss.__compound_literal.62:0000000000000000 __compound_literal.62
+     /tmp/ccmYJ82r.s:747    .bss.__compound_literal.68:0000000000000000 $d
+     /tmp/ccmYJ82r.s:750    .bss.__compound_literal.68:0000000000000000 __compound_literal.68
+     /tmp/ccmYJ82r.s:753    .bss.__compound_literal.69:0000000000000000 $d
+     /tmp/ccmYJ82r.s:756    .bss.__compound_literal.69:0000000000000000 __compound_literal.69
+     /tmp/ccmYJ82r.s:759    .bss.__compound_literal.73:0000000000000000 $d
+     /tmp/ccmYJ82r.s:762    .bss.__compound_literal.73:0000000000000000 __compound_literal.73
+     /tmp/ccmYJ82r.s:765    .bss.__compound_literal.74:0000000000000000 $d
+     /tmp/ccmYJ82r.s:768    .bss.__compound_literal.74:0000000000000000 __compound_literal.74
+     /tmp/ccmYJ82r.s:771    .bss.__compound_literal.75:0000000000000000 $d
+     /tmp/ccmYJ82r.s:774    .bss.__compound_literal.75:0000000000000000 __compound_literal.75
+     /tmp/ccmYJ82r.s:777    .bss.__compound_literal.78:0000000000000000 $d
+     /tmp/ccmYJ82r.s:780    .bss.__compound_literal.78:0000000000000000 __compound_literal.78
+     /tmp/ccmYJ82r.s:783    .bss.__compound_literal.79:0000000000000000 $d
+     /tmp/ccmYJ82r.s:786    .bss.__compound_literal.79:0000000000000000 __compound_literal.79
+     /tmp/ccmYJ82r.s:789    .bss.__compound_literal.80:0000000000000000 $d
+     /tmp/ccmYJ82r.s:792    .bss.__compound_literal.80:0000000000000000 __compound_literal.80
+     /tmp/ccmYJ82r.s:795    .data.__compound_literal.0:0000000000000000 $d
+     /tmp/ccmYJ82r.s:798    .data.__compound_literal.0:0000000000000000 __compound_literal.0
+     /tmp/ccmYJ82r.s:804    .data.__compound_literal.1:0000000000000000 $d
+ARM GAS  /tmp/ccmYJ82r.s 			page 49
+
+
+     /tmp/ccmYJ82r.s:807    .data.__compound_literal.1:0000000000000000 __compound_literal.1
+     /tmp/ccmYJ82r.s:813    .data.__compound_literal.10:0000000000000000 $d
+     /tmp/ccmYJ82r.s:816    .data.__compound_literal.10:0000000000000000 __compound_literal.10
+     /tmp/ccmYJ82r.s:822    .data.__compound_literal.11:0000000000000000 $d
+     /tmp/ccmYJ82r.s:825    .data.__compound_literal.11:0000000000000000 __compound_literal.11
+     /tmp/ccmYJ82r.s:831    .data.__compound_literal.12:0000000000000000 $d
+     /tmp/ccmYJ82r.s:834    .data.__compound_literal.12:0000000000000000 __compound_literal.12
+     /tmp/ccmYJ82r.s:840    .data.__compound_literal.13:0000000000000000 $d
+     /tmp/ccmYJ82r.s:843    .data.__compound_literal.13:0000000000000000 __compound_literal.13
+     /tmp/ccmYJ82r.s:849    .data.__compound_literal.14:0000000000000000 $d
+     /tmp/ccmYJ82r.s:852    .data.__compound_literal.14:0000000000000000 __compound_literal.14
+     /tmp/ccmYJ82r.s:858    .data.__compound_literal.15:0000000000000000 $d
+     /tmp/ccmYJ82r.s:861    .data.__compound_literal.15:0000000000000000 __compound_literal.15
+     /tmp/ccmYJ82r.s:867    .data.__compound_literal.16:0000000000000000 $d
+     /tmp/ccmYJ82r.s:870    .data.__compound_literal.16:0000000000000000 __compound_literal.16
+     /tmp/ccmYJ82r.s:876    .data.__compound_literal.17:0000000000000000 $d
+     /tmp/ccmYJ82r.s:879    .data.__compound_literal.17:0000000000000000 __compound_literal.17
+     /tmp/ccmYJ82r.s:885    .data.__compound_literal.18:0000000000000000 $d
+     /tmp/ccmYJ82r.s:888    .data.__compound_literal.18:0000000000000000 __compound_literal.18
+     /tmp/ccmYJ82r.s:894    .data.__compound_literal.19:0000000000000000 $d
+     /tmp/ccmYJ82r.s:897    .data.__compound_literal.19:0000000000000000 __compound_literal.19
+     /tmp/ccmYJ82r.s:903    .data.__compound_literal.2:0000000000000000 $d
+     /tmp/ccmYJ82r.s:906    .data.__compound_literal.2:0000000000000000 __compound_literal.2
+     /tmp/ccmYJ82r.s:912    .data.__compound_literal.20:0000000000000000 $d
+     /tmp/ccmYJ82r.s:915    .data.__compound_literal.20:0000000000000000 __compound_literal.20
+     /tmp/ccmYJ82r.s:921    .data.__compound_literal.21:0000000000000000 $d
+     /tmp/ccmYJ82r.s:924    .data.__compound_literal.21:0000000000000000 __compound_literal.21
+     /tmp/ccmYJ82r.s:930    .data.__compound_literal.22:0000000000000000 $d
+     /tmp/ccmYJ82r.s:933    .data.__compound_literal.22:0000000000000000 __compound_literal.22
+     /tmp/ccmYJ82r.s:939    .data.__compound_literal.23:0000000000000000 $d
+     /tmp/ccmYJ82r.s:942    .data.__compound_literal.23:0000000000000000 __compound_literal.23
+     /tmp/ccmYJ82r.s:948    .data.__compound_literal.24:0000000000000000 $d
+     /tmp/ccmYJ82r.s:951    .data.__compound_literal.24:0000000000000000 __compound_literal.24
+     /tmp/ccmYJ82r.s:957    .data.__compound_literal.25:0000000000000000 $d
+     /tmp/ccmYJ82r.s:960    .data.__compound_literal.25:0000000000000000 __compound_literal.25
+     /tmp/ccmYJ82r.s:966    .data.__compound_literal.26:0000000000000000 $d
+     /tmp/ccmYJ82r.s:969    .data.__compound_literal.26:0000000000000000 __compound_literal.26
+     /tmp/ccmYJ82r.s:975    .data.__compound_literal.27:0000000000000000 $d
+     /tmp/ccmYJ82r.s:978    .data.__compound_literal.27:0000000000000000 __compound_literal.27
+     /tmp/ccmYJ82r.s:984    .data.__compound_literal.28:0000000000000000 $d
+     /tmp/ccmYJ82r.s:987    .data.__compound_literal.28:0000000000000000 __compound_literal.28
+     /tmp/ccmYJ82r.s:993    .data.__compound_literal.29:0000000000000000 $d
+     /tmp/ccmYJ82r.s:996    .data.__compound_literal.29:0000000000000000 __compound_literal.29
+     /tmp/ccmYJ82r.s:1002   .data.__compound_literal.3:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1005   .data.__compound_literal.3:0000000000000000 __compound_literal.3
+     /tmp/ccmYJ82r.s:1011   .data.__compound_literal.30:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1014   .data.__compound_literal.30:0000000000000000 __compound_literal.30
+     /tmp/ccmYJ82r.s:1020   .data.__compound_literal.31:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1023   .data.__compound_literal.31:0000000000000000 __compound_literal.31
+     /tmp/ccmYJ82r.s:1029   .data.__compound_literal.32:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1032   .data.__compound_literal.32:0000000000000000 __compound_literal.32
+     /tmp/ccmYJ82r.s:1038   .data.__compound_literal.33:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1041   .data.__compound_literal.33:0000000000000000 __compound_literal.33
+     /tmp/ccmYJ82r.s:1047   .data.__compound_literal.34:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1050   .data.__compound_literal.34:0000000000000000 __compound_literal.34
+     /tmp/ccmYJ82r.s:1056   .data.__compound_literal.35:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1059   .data.__compound_literal.35:0000000000000000 __compound_literal.35
+ARM GAS  /tmp/ccmYJ82r.s 			page 50
+
+
+     /tmp/ccmYJ82r.s:1065   .data.__compound_literal.36:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1068   .data.__compound_literal.36:0000000000000000 __compound_literal.36
+     /tmp/ccmYJ82r.s:1846   .data.dense_1_output:0000000000000000 dense_1_output
+     /tmp/ccmYJ82r.s:1071   .data.__compound_literal.37:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1074   .data.__compound_literal.37:0000000000000000 __compound_literal.37
+     /tmp/ccmYJ82r.s:1816   .data.dense_1_nl_output:0000000000000000 dense_1_nl_output
+     /tmp/ccmYJ82r.s:1077   .data.__compound_literal.4:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1080   .data.__compound_literal.4:0000000000000000 __compound_literal.4
+     /tmp/ccmYJ82r.s:1086   .data.__compound_literal.40:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1089   .data.__compound_literal.40:0000000000000000 __compound_literal.40
+     /tmp/ccmYJ82r.s:1107   .data.__compound_literal.41:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1110   .data.__compound_literal.41:0000000000000000 __compound_literal.41
+     /tmp/ccmYJ82r.s:1963   .data.dense_nl_output:0000000000000000 dense_nl_output
+     /tmp/ccmYJ82r.s:1113   .data.__compound_literal.42:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1116   .data.__compound_literal.42:0000000000000000 __compound_literal.42
+     /tmp/ccmYJ82r.s:1119   .data.__compound_literal.43:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1122   .data.__compound_literal.43:0000000000000000 __compound_literal.43
+     /tmp/ccmYJ82r.s:1876   .data.dense_1_weights:0000000000000000 dense_1_weights
+     /tmp/ccmYJ82r.s:1759   .data.dense_1_bias:0000000000000000 dense_1_bias
+     /tmp/ccmYJ82r.s:1126   .data.__compound_literal.45:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1129   .data.__compound_literal.45:0000000000000000 __compound_literal.45
+     /tmp/ccmYJ82r.s:1147   .data.__compound_literal.46:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1150   .data.__compound_literal.46:0000000000000000 __compound_literal.46
+     /tmp/ccmYJ82r.s:1993   .data.dense_output:0000000000000000 dense_output
+     /tmp/ccmYJ82r.s:1153   .data.__compound_literal.47:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1156   .data.__compound_literal.47:0000000000000000 __compound_literal.47
+     /tmp/ccmYJ82r.s:1159   .data.__compound_literal.5:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1162   .data.__compound_literal.5:0000000000000000 __compound_literal.5
+     /tmp/ccmYJ82r.s:1168   .data.__compound_literal.50:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1171   .data.__compound_literal.50:0000000000000000 __compound_literal.50
+     /tmp/ccmYJ82r.s:1189   .data.__compound_literal.51:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1192   .data.__compound_literal.51:0000000000000000 __compound_literal.51
+     /tmp/ccmYJ82r.s:1514   .data.conv2d_1_output0:0000000000000000 conv2d_1_output0
+     /tmp/ccmYJ82r.s:1195   .data.__compound_literal.52:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1198   .data.__compound_literal.52:0000000000000000 __compound_literal.52
+     /tmp/ccmYJ82r.s:1201   .data.__compound_literal.53:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1204   .data.__compound_literal.53:0000000000000000 __compound_literal.53
+     /tmp/ccmYJ82r.s:2023   .data.dense_weights:0000000000000000 dense_weights
+     /tmp/ccmYJ82r.s:1906   .data.dense_bias:0000000000000000 dense_bias
+     /tmp/ccmYJ82r.s:1208   .data.__compound_literal.55:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1211   .data.__compound_literal.55:0000000000000000 __compound_literal.55
+     /tmp/ccmYJ82r.s:1229   .data.__compound_literal.56:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1232   .data.__compound_literal.56:0000000000000000 __compound_literal.56
+     /tmp/ccmYJ82r.s:1669   .data.conv2d_output:0000000000000000 conv2d_output
+     /tmp/ccmYJ82r.s:1235   .data.__compound_literal.57:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1238   .data.__compound_literal.57:0000000000000000 __compound_literal.57
+     /tmp/ccmYJ82r.s:1494   .data.conv2d_1_output:0000000000000000 conv2d_1_output
+     /tmp/ccmYJ82r.s:1241   .data.__compound_literal.58:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1244   .data.__compound_literal.58:0000000000000000 __compound_literal.58
+     /tmp/ccmYJ82r.s:1574   .data.conv2d_1_weights:0000000000000000 conv2d_1_weights
+     /tmp/ccmYJ82r.s:1429   .data.conv2d_1_bias:0000000000000000 conv2d_1_bias
+     /tmp/ccmYJ82r.s:1249   .data.__compound_literal.59:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1252   .data.__compound_literal.59:0000000000000000 __compound_literal.59
+     /tmp/ccmYJ82r.s:1544   .data.conv2d_1_scratch0:0000000000000000 conv2d_1_scratch0
+     /tmp/ccmYJ82r.s:1255   .data.__compound_literal.6:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1258   .data.__compound_literal.6:0000000000000000 __compound_literal.6
+     /tmp/ccmYJ82r.s:1264   .data.__compound_literal.60:0000000000000000 $d
+ARM GAS  /tmp/ccmYJ82r.s 			page 51
+
+
+     /tmp/ccmYJ82r.s:1267   .data.__compound_literal.60:0000000000000000 __compound_literal.60
+     /tmp/ccmYJ82r.s:1285   .data.__compound_literal.63:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1288   .data.__compound_literal.63:0000000000000000 __compound_literal.63
+     /tmp/ccmYJ82r.s:2084   .data.input_0_output:0000000000000000 input_0_output
+     /tmp/ccmYJ82r.s:1291   .data.__compound_literal.64:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1294   .data.__compound_literal.64:0000000000000000 __compound_literal.64
+     /tmp/ccmYJ82r.s:1297   .data.__compound_literal.65:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1300   .data.__compound_literal.65:0000000000000000 __compound_literal.65
+     /tmp/ccmYJ82r.s:1729   .data.conv2d_weights:0000000000000000 conv2d_weights
+     /tmp/ccmYJ82r.s:1604   .data.conv2d_bias:0000000000000000 conv2d_bias
+     /tmp/ccmYJ82r.s:1305   .data.__compound_literal.66:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1308   .data.__compound_literal.66:0000000000000000 __compound_literal.66
+     /tmp/ccmYJ82r.s:1699   .data.conv2d_scratch0:0000000000000000 conv2d_scratch0
+     /tmp/ccmYJ82r.s:1311   .data.__compound_literal.67:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1314   .data.__compound_literal.67:0000000000000000 __compound_literal.67
+     /tmp/ccmYJ82r.s:1332   .data.__compound_literal.7:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1335   .data.__compound_literal.7:0000000000000000 __compound_literal.7
+     /tmp/ccmYJ82r.s:1341   .data.__compound_literal.70:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1344   .data.__compound_literal.70:0000000000000000 __compound_literal.70
+     /tmp/ccmYJ82r.s:1354   .data.__compound_literal.71:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1357   .data.__compound_literal.71:0000000000000000 __compound_literal.71
+     /tmp/ccmYJ82r.s:1367   .data.__compound_literal.72:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1370   .data.__compound_literal.72:0000000000000000 __compound_literal.72
+     /tmp/ccmYJ82r.s:1373   .data.__compound_literal.76:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1376   .data.__compound_literal.76:0000000000000000 __compound_literal.76
+     /tmp/ccmYJ82r.s:1381   .data.__compound_literal.77:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1384   .data.__compound_literal.77:0000000000000000 __compound_literal.77
+     /tmp/ccmYJ82r.s:1387   .data.__compound_literal.8:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1390   .data.__compound_literal.8:0000000000000000 __compound_literal.8
+     /tmp/ccmYJ82r.s:1396   .data.__compound_literal.81:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1399   .data.__compound_literal.81:0000000000000000 __compound_literal.81
+     /tmp/ccmYJ82r.s:1404   .data.__compound_literal.82:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1407   .data.__compound_literal.82:0000000000000000 __compound_literal.82
+     /tmp/ccmYJ82r.s:1417   .data.__compound_literal.9:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1420   .data.__compound_literal.9:0000000000000000 __compound_literal.9
+     /tmp/ccmYJ82r.s:1426   .data.conv2d_1_bias:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1450   .data.conv2d_1_bias_array:0000000000000000 conv2d_1_bias_array
+     /tmp/ccmYJ82r.s:1446   .data.conv2d_1_bias_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1456   .data.conv2d_1_layer:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1459   .data.conv2d_1_layer:0000000000000000 conv2d_1_layer
+     /tmp/ccmYJ82r.s:1936   .data.dense_layer:0000000000000000 dense_layer
+     /tmp/ccmYJ82r.s:2129   .rodata.conv2d_1_chain:0000000000000000 conv2d_1_chain
+     /tmp/ccmYJ82r.s:1491   .data.conv2d_1_output:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1535   .data.conv2d_1_output_array:0000000000000000 conv2d_1_output_array
+     /tmp/ccmYJ82r.s:1511   .data.conv2d_1_output0:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1531   .data.conv2d_1_output_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1541   .data.conv2d_1_scratch0:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1565   .data.conv2d_1_scratch0_array:0000000000000000 conv2d_1_scratch0_array
+     /tmp/ccmYJ82r.s:1561   .data.conv2d_1_scratch0_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1571   .data.conv2d_1_weights:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1595   .data.conv2d_1_weights_array:0000000000000000 conv2d_1_weights_array
+     /tmp/ccmYJ82r.s:1591   .data.conv2d_1_weights_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1601   .data.conv2d_bias:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1625   .data.conv2d_bias_array:0000000000000000 conv2d_bias_array
+     /tmp/ccmYJ82r.s:1621   .data.conv2d_bias_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1631   .data.conv2d_layer:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1634   .data.conv2d_layer:0000000000000000 conv2d_layer
+ARM GAS  /tmp/ccmYJ82r.s 			page 52
+
+
+     /tmp/ccmYJ82r.s:2137   .rodata.conv2d_chain:0000000000000000 conv2d_chain
+     /tmp/ccmYJ82r.s:1666   .data.conv2d_output:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1690   .data.conv2d_output_array:0000000000000000 conv2d_output_array
+     /tmp/ccmYJ82r.s:1686   .data.conv2d_output_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1696   .data.conv2d_scratch0:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1720   .data.conv2d_scratch0_array:0000000000000000 conv2d_scratch0_array
+     /tmp/ccmYJ82r.s:1716   .data.conv2d_scratch0_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1726   .data.conv2d_weights:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1750   .data.conv2d_weights_array:0000000000000000 conv2d_weights_array
+     /tmp/ccmYJ82r.s:1746   .data.conv2d_weights_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1756   .data.dense_1_bias:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1780   .data.dense_1_bias_array:0000000000000000 dense_1_bias_array
+     /tmp/ccmYJ82r.s:1776   .data.dense_1_bias_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1786   .data.dense_1_layer:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1789   .data.dense_1_layer:0000000000000000 dense_1_layer
+     /tmp/ccmYJ82r.s:1802   .data.dense_1_nl_layer:0000000000000000 dense_1_nl_layer
+     /tmp/ccmYJ82r.s:2145   .rodata.dense_1_chain:0000000000000000 dense_1_chain
+     /tmp/ccmYJ82r.s:1799   .data.dense_1_nl_layer:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2153   .rodata.dense_1_nl_chain:0000000000000000 dense_1_nl_chain
+     /tmp/ccmYJ82r.s:1813   .data.dense_1_nl_output:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1837   .data.dense_1_nl_output_array:0000000000000000 dense_1_nl_output_array
+     /tmp/ccmYJ82r.s:1833   .data.dense_1_nl_output_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1843   .data.dense_1_output:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1867   .data.dense_1_output_array:0000000000000000 dense_1_output_array
+     /tmp/ccmYJ82r.s:1863   .data.dense_1_output_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1873   .data.dense_1_weights:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1897   .data.dense_1_weights_array:0000000000000000 dense_1_weights_array
+     /tmp/ccmYJ82r.s:1893   .data.dense_1_weights_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1903   .data.dense_bias:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1927   .data.dense_bias_array:0000000000000000 dense_bias_array
+     /tmp/ccmYJ82r.s:1923   .data.dense_bias_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1933   .data.dense_layer:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1949   .data.dense_nl_layer:0000000000000000 dense_nl_layer
+     /tmp/ccmYJ82r.s:2161   .rodata.dense_chain:0000000000000000 dense_chain
+     /tmp/ccmYJ82r.s:1946   .data.dense_nl_layer:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2169   .rodata.dense_nl_chain:0000000000000000 dense_nl_chain
+     /tmp/ccmYJ82r.s:1960   .data.dense_nl_output:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1984   .data.dense_nl_output_array:0000000000000000 dense_nl_output_array
+     /tmp/ccmYJ82r.s:1980   .data.dense_nl_output_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:1990   .data.dense_output:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2014   .data.dense_output_array:0000000000000000 dense_output_array
+     /tmp/ccmYJ82r.s:2010   .data.dense_output_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2020   .data.dense_weights:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2044   .data.dense_weights_array:0000000000000000 dense_weights_array
+     /tmp/ccmYJ82r.s:2040   .data.dense_weights_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2050   .data.g_network:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2054   .data.g_network:0000000000000000 g_network
+     /tmp/ccmYJ82r.s:2081   .data.input_0_output:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2105   .data.input_0_output_array:0000000000000000 input_0_output_array
+     /tmp/ccmYJ82r.s:2101   .data.input_0_output_array:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2111   .rodata.ai_network_get_info.str1.4:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2126   .rodata.conv2d_1_chain:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2134   .rodata.conv2d_chain:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2142   .rodata.dense_1_chain:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2150   .rodata.dense_1_nl_chain:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2158   .rodata.dense_chain:0000000000000000 $d
+     /tmp/ccmYJ82r.s:2166   .rodata.dense_nl_chain:0000000000000000 $d
+ARM GAS  /tmp/ccmYJ82r.s 			page 53
+
+
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+ai_platform_context_acquire
+memset
+ai_platform_runtime_get_revision
+ai_platform_runtime_get_version
+ai_platform_api_get_version
+ai_platform_interface_api_get_version
+ai_platform_api_get_network_report
+memcpy
+ai_platform_network_get_error
+ai_platform_network_create
+ai_platform_network_destroy
+ai_platform_network_init
+ai_platform_get_weights_map
+ai_platform_get_activations_map
+ai_platform_network_post_init
+ai_platform_network_process
+forward_conv2d_nl_pool
+nl_func_relu_array_f32
+pool_func_mp_array_f32
+forward_dense
+forward_sm
+forward_relu

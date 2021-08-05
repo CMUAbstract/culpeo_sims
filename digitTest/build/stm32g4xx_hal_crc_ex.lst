@@ -1,0 +1,489 @@
+ARM GAS  /tmp/ccZT4MpY.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.eabi_attribute 27, 1
+   3              		.eabi_attribute 28, 1
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"stm32g4xx_hal_crc_ex.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.text.HAL_CRCEx_Polynomial_Set,"ax",%progbits
+  18              		.align	1
+  19              		.global	HAL_CRCEx_Polynomial_Set
+  20              		.syntax unified
+  21              		.thumb
+  22              		.thumb_func
+  23              		.fpu fpv4-sp-d16
+  25              	HAL_CRCEx_Polynomial_Set:
+  26              	.LFB132:
+  27              		.file 1 "Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c"
+   1:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /**
+   2:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   ******************************************************************************
+   3:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @file    stm32g4xx_hal_crc_ex.c
+   4:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @author  MCD Application Team
+   5:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @brief   Extended CRC HAL module driver.
+   6:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          This file provides firmware functions to manage the extended
+   7:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          functionalities of the CRC peripheral.
+   8:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *
+   9:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   @verbatim
+  10:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** ================================================================================
+  11:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****             ##### How to use this driver #####
+  12:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** ================================================================================
+  13:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     [..]
+  14:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****          (+) Set user-defined generating polynomial through HAL_CRCEx_Polynomial_Set()
+  15:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****          (+) Configure Input or Output data inversion
+  16:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  17:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   @endverbatim
+  18:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   ******************************************************************************
+  19:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @attention
+  20:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *
+  21:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+  22:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * All rights reserved.</center></h2>
+  23:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *
+  24:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * This software component is licensed by ST under BSD 3-Clause license,
+  25:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * the "License"; You may not use this file except in compliance with the
+  26:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * License. You may obtain a copy of the License at:
+  27:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *                        opensource.org/licenses/BSD-3-Clause
+  28:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *
+  29:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   ******************************************************************************
+  30:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   */
+  31:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ARM GAS  /tmp/ccZT4MpY.s 			page 2
+
+
+  32:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /* Includes ------------------------------------------------------------------*/
+  33:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** #include "stm32g4xx_hal.h"
+  34:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  35:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /** @addtogroup STM32G4xx_HAL_Driver
+  36:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @{
+  37:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   */
+  38:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  39:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /** @defgroup CRCEx CRCEx
+  40:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @brief CRC Extended HAL module driver
+  41:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @{
+  42:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   */
+  43:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  44:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** #ifdef HAL_CRC_MODULE_ENABLED
+  45:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  46:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /* Private typedef -----------------------------------------------------------*/
+  47:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /* Private define ------------------------------------------------------------*/
+  48:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /* Private macro -------------------------------------------------------------*/
+  49:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /* Private variables ---------------------------------------------------------*/
+  50:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /* Private function prototypes -----------------------------------------------*/
+  51:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /* Exported functions --------------------------------------------------------*/
+  52:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  53:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /** @defgroup CRCEx_Exported_Functions CRC Extended Exported Functions
+  54:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @{
+  55:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   */
+  56:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  57:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /** @defgroup CRCEx_Exported_Functions_Group1 Extended Initialization/de-initialization functions
+  58:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @brief    Extended Initialization and Configuration functions.
+  59:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *
+  60:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** @verbatim
+  61:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****  ===============================================================================
+  62:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****             ##### Extended configuration functions #####
+  63:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****  ===============================================================================
+  64:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     [..]  This section provides functions allowing to:
+  65:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       (+) Configure the generating polynomial
+  66:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       (+) Configure the input data inversion
+  67:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       (+) Configure the output data inversion
+  68:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  69:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** @endverbatim
+  70:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @{
+  71:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   */
+  72:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  73:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  74:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /**
+  75:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @brief  Initialize the CRC polynomial if different from default one.
+  76:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @param  hcrc CRC handle
+  77:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @param  Pol CRC generating polynomial (7, 8, 16 or 32-bit long).
+  78:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *         This parameter is written in normal representation, e.g.
+  79:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *         @arg for a polynomial of degree 7, X^7 + X^6 + X^5 + X^2 + 1 is written 0x65
+  80:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *         @arg for a polynomial of degree 16, X^16 + X^12 + X^5 + 1 is written 0x1021
+  81:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @param  PolyLength CRC polynomial length.
+  82:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *         This parameter can be one of the following values:
+  83:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          @arg @ref CRC_POLYLENGTH_7B  7-bit long CRC (generating polynomial of degree 7)
+  84:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          @arg @ref CRC_POLYLENGTH_8B  8-bit long CRC (generating polynomial of degree 8)
+  85:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          @arg @ref CRC_POLYLENGTH_16B 16-bit long CRC (generating polynomial of degree 16)
+  86:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          @arg @ref CRC_POLYLENGTH_32B 32-bit long CRC (generating polynomial of degree 32)
+  87:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @retval HAL status
+  88:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   */
+ARM GAS  /tmp/ccZT4MpY.s 			page 3
+
+
+  89:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** HAL_StatusTypeDef HAL_CRCEx_Polynomial_Set(CRC_HandleTypeDef *hcrc, uint32_t Pol, uint32_t PolyLeng
+  90:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** {
+  28              		.loc 1 90 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+  33              	.LVL0:
+  34 0000 30B4     		push	{r4, r5}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 8
+  37              		.cfi_offset 4, -8
+  38              		.cfi_offset 5, -4
+  39              	.LVL1:
+  91:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   HAL_StatusTypeDef status = HAL_OK;
+  92:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   uint32_t msb = 31U; /* polynomial degree is 32 at most, so msb is initialized to max value */
+  40              		.loc 1 92 0
+  41 0002 1F24     		movs	r4, #31
+  42              	.LVL2:
+  43              	.L3:
+  93:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  94:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* Check the parameters */
+  95:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   assert_param(IS_CRC_POL_LENGTH(PolyLength));
+  96:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+  97:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* check polynomial definition vs polynomial size:
+  98:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****    * polynomial length must be aligned with polynomial
+  99:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****    * definition. HAL_ERROR is reported if Pol degree is
+ 100:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****    * larger than that indicated by PolyLength.
+ 101:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****    * Look for MSB position: msb will contain the degree of
+ 102:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****    *  the second to the largest polynomial member. E.g., for
+ 103:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****    *  X^7 + X^6 + X^5 + X^2 + 1, msb = 6. */
+ 104:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   while ((msb-- > 0U) && ((Pol & ((uint32_t)(0x1U) << (msb & 0x1FU))) == 0U))
+  44              		.loc 1 104 0 discriminator 2
+  45 0004 651E     		subs	r5, r4, #1
+  46              	.LVL3:
+  47 0006 3CB1     		cbz	r4, .L2
+  48              		.loc 1 104 0 is_stmt 0 discriminator 1
+  49 0008 05F01F03 		and	r3, r5, #31
+  50 000c 21FA03F3 		lsr	r3, r1, r3
+  51 0010 2C46     		mov	r4, r5
+  52 0012 13F0010F 		tst	r3, #1
+  53 0016 F5D0     		beq	.L3
+  54              	.L2:
+ 105:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   {
+ 106:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   }
+ 107:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 108:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   switch (PolyLength)
+  55              		.loc 1 108 0 is_stmt 1
+  56 0018 182A     		cmp	r2, #24
+  57 001a 27D8     		bhi	.L11
+  58 001c DFE802F0 		tbb	[pc, r2]
+  59              	.L6:
+  60 0020 0D       		.byte	(.L5-.L6)/2
+  61 0021 26       		.byte	(.L11-.L6)/2
+  62 0022 26       		.byte	(.L11-.L6)/2
+  63 0023 26       		.byte	(.L11-.L6)/2
+  64 0024 26       		.byte	(.L11-.L6)/2
+ARM GAS  /tmp/ccZT4MpY.s 			page 4
+
+
+  65 0025 26       		.byte	(.L11-.L6)/2
+  66 0026 26       		.byte	(.L11-.L6)/2
+  67 0027 26       		.byte	(.L11-.L6)/2
+  68 0028 22       		.byte	(.L7-.L6)/2
+  69 0029 26       		.byte	(.L11-.L6)/2
+  70 002a 26       		.byte	(.L11-.L6)/2
+  71 002b 26       		.byte	(.L11-.L6)/2
+  72 002c 26       		.byte	(.L11-.L6)/2
+  73 002d 26       		.byte	(.L11-.L6)/2
+  74 002e 26       		.byte	(.L11-.L6)/2
+  75 002f 26       		.byte	(.L11-.L6)/2
+  76 0030 1E       		.byte	(.L8-.L6)/2
+  77 0031 26       		.byte	(.L11-.L6)/2
+  78 0032 26       		.byte	(.L11-.L6)/2
+  79 0033 26       		.byte	(.L11-.L6)/2
+  80 0034 26       		.byte	(.L11-.L6)/2
+  81 0035 26       		.byte	(.L11-.L6)/2
+  82 0036 26       		.byte	(.L11-.L6)/2
+  83 0037 26       		.byte	(.L11-.L6)/2
+  84 0038 1A       		.byte	(.L9-.L6)/2
+  85 0039 00       		.p2align 1
+  86              	.L5:
+  91:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   uint32_t msb = 31U; /* polynomial degree is 32 at most, so msb is initialized to max value */
+  87              		.loc 1 91 0
+  88 003a 0023     		movs	r3, #0
+  89              	.L4:
+  90              	.LVL4:
+ 109:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   {
+ 110:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     case CRC_POLYLENGTH_7B:
+ 111:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       if (msb >= HAL_CRC_LENGTH_7B)
+ 112:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       {
+ 113:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****         status =   HAL_ERROR;
+ 114:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       }
+ 115:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       break;
+ 116:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     case CRC_POLYLENGTH_8B:
+ 117:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       if (msb >= HAL_CRC_LENGTH_8B)
+ 118:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       {
+ 119:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****         status =   HAL_ERROR;
+ 120:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       }
+ 121:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       break;
+ 122:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     case CRC_POLYLENGTH_16B:
+ 123:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       if (msb >= HAL_CRC_LENGTH_16B)
+ 124:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       {
+ 125:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****         status =   HAL_ERROR;
+ 126:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       }
+ 127:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       break;
+ 128:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 129:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     case CRC_POLYLENGTH_32B:
+ 130:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       /* no polynomial definition vs. polynomial length issue possible */
+ 131:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       break;
+ 132:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     default:
+ 133:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       status =  HAL_ERROR;
+ 134:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       break;
+ 135:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   }
+ 136:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   if (status == HAL_OK)
+  91              		.loc 1 136 0
+  92 003c 3BB9     		cbnz	r3, .L10
+ARM GAS  /tmp/ccZT4MpY.s 			page 5
+
+
+ 137:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   {
+ 138:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     /* set generating polynomial */
+ 139:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     WRITE_REG(hcrc->Instance->POL, Pol);
+  93              		.loc 1 139 0
+  94 003e 0468     		ldr	r4, [r0]
+  95 0040 6161     		str	r1, [r4, #20]
+ 140:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 141:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     /* set generating polynomial size */
+ 142:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****     MODIFY_REG(hcrc->Instance->CR, CRC_CR_POLYSIZE, PolyLength);
+  96              		.loc 1 142 0
+  97 0042 0068     		ldr	r0, [r0]
+  98              	.LVL5:
+  99 0044 8168     		ldr	r1, [r0, #8]
+ 100              	.LVL6:
+ 101 0046 21F01801 		bic	r1, r1, #24
+ 102 004a 0A43     		orrs	r2, r2, r1
+ 103              	.LVL7:
+ 104 004c 8260     		str	r2, [r0, #8]
+ 105              	.LVL8:
+ 106              	.L10:
+ 143:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   }
+ 144:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* Return function status */
+ 145:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   return status;
+ 146:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** }
+ 107              		.loc 1 146 0
+ 108 004e 1846     		mov	r0, r3
+ 109 0050 30BC     		pop	{r4, r5}
+ 110              	.LCFI1:
+ 111              		.cfi_remember_state
+ 112              		.cfi_restore 5
+ 113              		.cfi_restore 4
+ 114              		.cfi_def_cfa_offset 0
+ 115              	.LVL9:
+ 116 0052 7047     		bx	lr
+ 117              	.LVL10:
+ 118              	.L9:
+ 119              	.LCFI2:
+ 120              		.cfi_restore_state
+ 111:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       {
+ 121              		.loc 1 111 0
+ 122 0054 062D     		cmp	r5, #6
+ 123 0056 0BD8     		bhi	.L12
+  91:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   uint32_t msb = 31U; /* polynomial degree is 32 at most, so msb is initialized to max value */
+ 124              		.loc 1 91 0
+ 125 0058 0023     		movs	r3, #0
+ 126 005a EFE7     		b	.L4
+ 127              	.L8:
+ 117:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       {
+ 128              		.loc 1 117 0
+ 129 005c 072D     		cmp	r5, #7
+ 130 005e 09D8     		bhi	.L13
+  91:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   uint32_t msb = 31U; /* polynomial degree is 32 at most, so msb is initialized to max value */
+ 131              		.loc 1 91 0
+ 132 0060 0023     		movs	r3, #0
+ 133 0062 EBE7     		b	.L4
+ 134              	.L7:
+ 123:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       {
+ARM GAS  /tmp/ccZT4MpY.s 			page 6
+
+
+ 135              		.loc 1 123 0
+ 136 0064 0F2D     		cmp	r5, #15
+ 137 0066 07D8     		bhi	.L14
+  91:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   uint32_t msb = 31U; /* polynomial degree is 32 at most, so msb is initialized to max value */
+ 138              		.loc 1 91 0
+ 139 0068 0023     		movs	r3, #0
+ 140 006a E7E7     		b	.L4
+ 141              	.L11:
+ 133:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       break;
+ 142              		.loc 1 133 0
+ 143 006c 0123     		movs	r3, #1
+ 144 006e E5E7     		b	.L4
+ 145              	.L12:
+ 113:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       }
+ 146              		.loc 1 113 0
+ 147 0070 0123     		movs	r3, #1
+ 148 0072 E3E7     		b	.L4
+ 149              	.L13:
+ 119:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       }
+ 150              		.loc 1 119 0
+ 151 0074 0123     		movs	r3, #1
+ 152 0076 E1E7     		b	.L4
+ 153              	.L14:
+ 125:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****       }
+ 154              		.loc 1 125 0
+ 155 0078 0123     		movs	r3, #1
+ 156 007a DFE7     		b	.L4
+ 157              		.cfi_endproc
+ 158              	.LFE132:
+ 160              		.section	.text.HAL_CRCEx_Input_Data_Reverse,"ax",%progbits
+ 161              		.align	1
+ 162              		.global	HAL_CRCEx_Input_Data_Reverse
+ 163              		.syntax unified
+ 164              		.thumb
+ 165              		.thumb_func
+ 166              		.fpu fpv4-sp-d16
+ 168              	HAL_CRCEx_Input_Data_Reverse:
+ 169              	.LFB133:
+ 147:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 148:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /**
+ 149:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @brief  Set the Reverse Input data mode.
+ 150:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @param  hcrc CRC handle
+ 151:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @param  InputReverseMode Input Data inversion mode.
+ 152:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *         This parameter can be one of the following values:
+ 153:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          @arg @ref CRC_INPUTDATA_INVERSION_NONE     no change in bit order (default value)
+ 154:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          @arg @ref CRC_INPUTDATA_INVERSION_BYTE     Byte-wise bit reversal
+ 155:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          @arg @ref CRC_INPUTDATA_INVERSION_HALFWORD HalfWord-wise bit reversal
+ 156:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          @arg @ref CRC_INPUTDATA_INVERSION_WORD     Word-wise bit reversal
+ 157:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @retval HAL status
+ 158:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   */
+ 159:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** HAL_StatusTypeDef HAL_CRCEx_Input_Data_Reverse(CRC_HandleTypeDef *hcrc, uint32_t InputReverseMode)
+ 160:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** {
+ 170              		.loc 1 160 0
+ 171              		.cfi_startproc
+ 172              		@ args = 0, pretend = 0, frame = 0
+ 173              		@ frame_needed = 0, uses_anonymous_args = 0
+ 174              		@ link register save eliminated.
+ARM GAS  /tmp/ccZT4MpY.s 			page 7
+
+
+ 175              	.LVL11:
+ 161:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* Check the parameters */
+ 162:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   assert_param(IS_CRC_INPUTDATA_INVERSION_MODE(InputReverseMode));
+ 163:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 164:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* Change CRC peripheral state */
+ 165:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   hcrc->State = HAL_CRC_STATE_BUSY;
+ 176              		.loc 1 165 0
+ 177 0000 0223     		movs	r3, #2
+ 178 0002 4377     		strb	r3, [r0, #29]
+ 166:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 167:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* set input data inversion mode */
+ 168:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   MODIFY_REG(hcrc->Instance->CR, CRC_CR_REV_IN, InputReverseMode);
+ 179              		.loc 1 168 0
+ 180 0004 0268     		ldr	r2, [r0]
+ 181 0006 9368     		ldr	r3, [r2, #8]
+ 182 0008 23F06003 		bic	r3, r3, #96
+ 183 000c 1943     		orrs	r1, r1, r3
+ 184              	.LVL12:
+ 185 000e 9160     		str	r1, [r2, #8]
+ 169:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* Change CRC peripheral state */
+ 170:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   hcrc->State = HAL_CRC_STATE_READY;
+ 186              		.loc 1 170 0
+ 187 0010 0123     		movs	r3, #1
+ 188 0012 4377     		strb	r3, [r0, #29]
+ 171:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 172:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* Return function status */
+ 173:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   return HAL_OK;
+ 174:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** }
+ 189              		.loc 1 174 0
+ 190 0014 0020     		movs	r0, #0
+ 191              	.LVL13:
+ 192 0016 7047     		bx	lr
+ 193              		.cfi_endproc
+ 194              	.LFE133:
+ 196              		.section	.text.HAL_CRCEx_Output_Data_Reverse,"ax",%progbits
+ 197              		.align	1
+ 198              		.global	HAL_CRCEx_Output_Data_Reverse
+ 199              		.syntax unified
+ 200              		.thumb
+ 201              		.thumb_func
+ 202              		.fpu fpv4-sp-d16
+ 204              	HAL_CRCEx_Output_Data_Reverse:
+ 205              	.LFB134:
+ 175:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 176:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** /**
+ 177:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @brief  Set the Reverse Output data mode.
+ 178:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @param  hcrc CRC handle
+ 179:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @param  OutputReverseMode Output Data inversion mode.
+ 180:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *         This parameter can be one of the following values:
+ 181:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          @arg @ref CRC_OUTPUTDATA_INVERSION_DISABLE no CRC inversion (default value)
+ 182:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   *          @arg @ref CRC_OUTPUTDATA_INVERSION_ENABLE  bit-level inversion (e.g. for a 8-bit CRC: 
+ 183:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   * @retval HAL status
+ 184:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   */
+ 185:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** HAL_StatusTypeDef HAL_CRCEx_Output_Data_Reverse(CRC_HandleTypeDef *hcrc, uint32_t OutputReverseMode
+ 186:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** {
+ 206              		.loc 1 186 0
+ 207              		.cfi_startproc
+ARM GAS  /tmp/ccZT4MpY.s 			page 8
+
+
+ 208              		@ args = 0, pretend = 0, frame = 0
+ 209              		@ frame_needed = 0, uses_anonymous_args = 0
+ 210              		@ link register save eliminated.
+ 211              	.LVL14:
+ 187:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* Check the parameters */
+ 188:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   assert_param(IS_CRC_OUTPUTDATA_INVERSION_MODE(OutputReverseMode));
+ 189:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 190:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* Change CRC peripheral state */
+ 191:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   hcrc->State = HAL_CRC_STATE_BUSY;
+ 212              		.loc 1 191 0
+ 213 0000 0223     		movs	r3, #2
+ 214 0002 4377     		strb	r3, [r0, #29]
+ 192:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 193:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* set output data inversion mode */
+ 194:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   MODIFY_REG(hcrc->Instance->CR, CRC_CR_REV_OUT, OutputReverseMode);
+ 215              		.loc 1 194 0
+ 216 0004 0268     		ldr	r2, [r0]
+ 217 0006 9368     		ldr	r3, [r2, #8]
+ 218 0008 23F08003 		bic	r3, r3, #128
+ 219 000c 1943     		orrs	r1, r1, r3
+ 220              	.LVL15:
+ 221 000e 9160     		str	r1, [r2, #8]
+ 195:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 196:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* Change CRC peripheral state */
+ 197:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   hcrc->State = HAL_CRC_STATE_READY;
+ 222              		.loc 1 197 0
+ 223 0010 0123     		movs	r3, #1
+ 224 0012 4377     		strb	r3, [r0, #29]
+ 198:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** 
+ 199:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   /* Return function status */
+ 200:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c ****   return HAL_OK;
+ 201:Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_crc_ex.c **** }
+ 225              		.loc 1 201 0
+ 226 0014 0020     		movs	r0, #0
+ 227              	.LVL16:
+ 228 0016 7047     		bx	lr
+ 229              		.cfi_endproc
+ 230              	.LFE134:
+ 232              		.text
+ 233              	.Letext0:
+ 234              		.file 2 "/usr/include/newlib/machine/_default_types.h"
+ 235              		.file 3 "/usr/include/newlib/sys/_stdint.h"
+ 236              		.file 4 "Drivers/CMSIS/Include/core_cm4.h"
+ 237              		.file 5 "Drivers/CMSIS/Device/ST/STM32G4xx/Include/system_stm32g4xx.h"
+ 238              		.file 6 "Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g474xx.h"
+ 239              		.file 7 "Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_def.h"
+ 240              		.file 8 "Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_crc.h"
+ 241              		.file 9 "Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_flash.h"
+ 242              		.file 10 "Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h"
+ARM GAS  /tmp/ccZT4MpY.s 			page 9
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 stm32g4xx_hal_crc_ex.c
+     /tmp/ccZT4MpY.s:18     .text.HAL_CRCEx_Polynomial_Set:0000000000000000 $t
+     /tmp/ccZT4MpY.s:25     .text.HAL_CRCEx_Polynomial_Set:0000000000000000 HAL_CRCEx_Polynomial_Set
+     /tmp/ccZT4MpY.s:60     .text.HAL_CRCEx_Polynomial_Set:0000000000000020 $d
+     /tmp/ccZT4MpY.s:161    .text.HAL_CRCEx_Input_Data_Reverse:0000000000000000 $t
+     /tmp/ccZT4MpY.s:168    .text.HAL_CRCEx_Input_Data_Reverse:0000000000000000 HAL_CRCEx_Input_Data_Reverse
+     /tmp/ccZT4MpY.s:197    .text.HAL_CRCEx_Output_Data_Reverse:0000000000000000 $t
+     /tmp/ccZT4MpY.s:204    .text.HAL_CRCEx_Output_Data_Reverse:0000000000000000 HAL_CRCEx_Output_Data_Reverse
+                     .debug_frame:0000000000000010 $d
+     /tmp/ccZT4MpY.s:85     .text.HAL_CRCEx_Polynomial_Set:0000000000000039 $d
+     /tmp/ccZT4MpY.s:85     .text.HAL_CRCEx_Polynomial_Set:000000000000003a $t
+
+NO UNDEFINED SYMBOLS
