@@ -10,7 +10,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import re
 import glob
-
+import pickle
 
 DO_PLOT = False
 V_RANGE = 3.17
@@ -124,6 +124,15 @@ def make_adc_file_str(expt_id, val):
   file_str = "#define VSAFE_ID" + str(expt_id) + " " + str(adc_val) + "\n"
   return file_str
 
+def make_adc_val(val):
+  adc = np.ceil(4096*val/V_RANGE)
+  adc_val = int(adc)
+  return adc_val
+
+catnap_vals = {}
+culpeo_vals = {}
+conservative_vals = {}
+
 
 if __name__ == "__main__":
   file_str = "vsafe_" + str(V_MIN) + "_" + str(CAP_VAL)
@@ -190,6 +199,7 @@ if __name__ == "__main__":
     # Catnap
     catnap_E = .5*CAP_VAL*(start_avg**2 - stop_avg**2)
     catnap_Vsafe = np.sqrt(2*catnap_E/CAP_VAL + V_MIN**2)
+    catnap_vals[expt_id] = {make_adc_val(catnap_Vsafe)}
     catnap_file_str = make_adc_file_str(expt_id,catnap_Vsafe)
     ##----------------------------------------------------------
     # Estimate E with some understanding of the power system
@@ -216,9 +226,11 @@ if __name__ == "__main__":
     # Use Vmin of the system
     conservative_estimate = np.sqrt(2*catnap_E/CAP_VAL + (V_MIN + max_i*minV.CAP_ESR)**2)
     print("Conservative2: ",conservative_estimate)
+    conservative_vals[expt_id] = {make_adc_val(conservative_estimate)}
     conservative_str = make_adc_file_str(expt_id,conservative_estimate)
 
     Vsafe = minV.calc_min_forward(I,dt,DO_PLOT)
+    culpeo_vals[expt_id] = {make_adc_val(Vsafe)}
     Vsafe_culpeo_str = make_adc_file_str(expt_id,Vsafe)
     print("Expt ",expt_id," Vsafe is ",Vsafe)
     if DO_PLOT == True:
@@ -234,4 +246,15 @@ if __name__ == "__main__":
   naive_file.close()
   naive_better_file.close()
   conservative_file.close()
+  culpeo_pickle = open('culpeo_vsafe.pkl','wb')
+  pickle.dump(culpeo_vals,culpeo_pickle)
+  culpeo_pickle.close()
+  catnap_pickle = open('catnap_vsafe.pkl','wb')
+  pickle.dump(catnap_vals,catnap_pickle)
+  catnap_pickle.close()
+  conservative_pickle = open('conservative_vsafe.pkl','wb')
+  pickle.dump(conservative_vals,conservative_pickle)
+  conservative_pickle.close()
+
+
 
