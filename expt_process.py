@@ -1,6 +1,6 @@
 # Script for extracting the results of the load tests that test how well
 # different vsafe calculations match up with reality
-
+# Only takes files from one scheduling system at a time
 import pandas as pd
 import numpy as np
 import sys
@@ -9,26 +9,15 @@ import matplotlib
 import matplotlib.pyplot as plt
 import re
 import glob
+import pickle
 
 configs = {0:1.8, 1:1.6}
 
 file_dict = {}
 
 
-
-#while i < num_files:
-#  numbers = re.findall(r'[0-9]+',sys.argv[i])
-#  expt_id = int(numbers[0])
-#  config =int(numbers[1])
-#  if expt_id in file_dict{}:
-#    file_dict[expt_id].append(sys.argv[i])
-#  else:
-#    file_dict[expt_id] = []
-#    file_dict[expt_id].append(sys.arg[i])
-#for expt_id in file_dict:
-  
-  
-Vhigh = 2.47
+Vhigh = 2.48
+results = {}
 
 if __name__ == "__main__":
   num_files = len(sys.argv)
@@ -70,9 +59,13 @@ if __name__ == "__main__":
     print("Expt: ",expt_id," Config: ",config)
     print("\tFailures: ",fail_count,"Average min: ",np.average(mins)," Std dev:",\
     np.std(mins))
+    results[expt_id] = {'fails':fail_count,'avg_min':np.average(mins),'std':np.std(mins)}
     if (start_vcap < 2.42):
       total_fails += fail_count
   print("Total failures is: ",total_fails)
+  results_file = open('expt_process_summary.pkl','wb')
+  pickle.dump(results,results_file)
+  results_file.close()
 
 
 
