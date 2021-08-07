@@ -8,5 +8,4 @@ expt_baseline_traces/*.csv
 *.csv
 __pycache__
 */__pycache__
-*.pkl
 results_disk

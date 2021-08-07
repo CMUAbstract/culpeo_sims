@@ -46,9 +46,9 @@ def plot_esr():
     legs.append(patches.Patch(fc=colors[i],lw=1,alpha=1,label=label))
   fig.legend(handles=legs,loc='upper center',ncol=3,fontsize=10)
   plt.show()
-  fig.savefig('space_exp.pdf',format='pdf',bbox_inches='tight')
+  fig.savefig('esr_plot.pdf',format='pdf',bbox_inches='tight')
 
-  
+
 
 
 if __name__ == "__main__":

@@ -148,4 +148,10 @@ conditions. For instance:
 `python3 expt_process.py hw_expts/expt_output_traces/EXPT*_1_*culpeo* `
 
 
+# Application tests
+
+* The M4 tests use the application in the digitTest directory
+* The LoRa test uses the application in camaroptera/src/loraTest.c from the
+Abstract github, you compile
+it with the Makefile in that directory. 
 
