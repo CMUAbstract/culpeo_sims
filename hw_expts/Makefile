@@ -23,7 +23,7 @@ ifeq ($(USE_VSAFE),1)
 CFLAGS += -DUSE_VSAFE
 endif
 
-CONFIG ?= 0
+CONFIG ?= 1
 
 MSPGCC_PATH := /opt/ti/mspgcc/bin
 MSP430_INC_PATH := /opt/ti/mspgcc/include/
