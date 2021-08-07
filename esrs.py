@@ -19,6 +19,8 @@ CAP_VAL = 45e-3
 EFF_VMIN = .5
 #CAP_VAL = 63e-3
 
+datasheet_esr = 25/6
+
 esrs = {
 1000: 34.13,
 100: 21.59,
@@ -132,7 +134,7 @@ def make_adc_val(val):
 catnap_vals = {}
 culpeo_vals = {}
 conservative_vals = {}
-
+datasheet_vals = {}
 
 if __name__ == "__main__":
   file_str = "vsafe_" + str(V_MIN) + "_" + str(CAP_VAL)
@@ -150,6 +152,8 @@ if __name__ == "__main__":
   file_str = "grey_hat_culpeo_" + str(V_MIN) + "_" + str(CAP_VAL)
   conservative_file = open(file_str,"w")
 
+  file_str = "datasheet_esr_culpeo_" + str(V_MIN) + "_" + str(CAP_VAL)
+  datasheet_file = open(file_str,"w")
   num_files = len(sys.argv)
   i = 1
   all_files = []
@@ -233,6 +237,12 @@ if __name__ == "__main__":
     culpeo_vals[expt_id] = {make_adc_val(Vsafe)}
     Vsafe_culpeo_str = make_adc_file_str(expt_id,Vsafe)
     print("Expt ",expt_id," Vsafe is ",Vsafe)
+
+    minV.CAP_ESR = datasheet_esr
+    datasheet_vsafe = minV.calc_min_forward(I,dt,DO_PLOT)
+    datasheet_vals[expt_id] = {make_adc_val(datasheet_vsafe)}
+    datasheet_str = make_adc_file_str(expt_id,datasheet_vsafe)
+
     if DO_PLOT == True:
       minV.calc_sim_starting_point(I,dt,Vsafe)
 
@@ -241,11 +251,14 @@ if __name__ == "__main__":
     naive_file.write(naive_min_str)
     naive_better_file.write(naive_better_min_str)
     conservative_file.write(conservative_str)
+    datasheet_file.write(datasheet_str)
   esr_file.close()
   catnap_file.close()
   naive_file.close()
   naive_better_file.close()
   conservative_file.close()
+ datasheet_file.close()
+ 
   culpeo_pickle = open('culpeo_vsafe.pkl','wb')
   pickle.dump(culpeo_vals,culpeo_pickle)
   culpeo_pickle.close()
@@ -255,6 +268,9 @@ if __name__ == "__main__":
   conservative_pickle = open('conservative_vsafe.pkl','wb')
   pickle.dump(conservative_vals,conservative_pickle)
   conservative_pickle.close()
+  datasheet_pickle = open('datasheet_vsafe.pkl','wb')
+  pickle.dump(datasheet_vals,datasheet_pickle)
+  datasheet_pickle.close()
 
 
 

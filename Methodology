@@ -154,4 +154,8 @@ conditions. For instance:
 * The LoRa test uses the application in camaroptera/src/loraTest.c from the
 Abstract github, you compile
 it with the Makefile in that directory. 
-
+* The BLE tests is hacked on the beginning of main_sensors_jit.c from
+pacarana_mezzo_tests (it'll need to get ported somewhere real) you build it by just
+compiling with USE_SENSORS=1
+* The apds test is in main_apds_alone.c in pacarana_mezzo_tests and uses the version
+* of libapds in that repo. Build it by setting USE_SENSORS=0 RUN_APDS_SOLO=1
