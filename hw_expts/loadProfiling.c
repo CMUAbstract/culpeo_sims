@@ -110,7 +110,9 @@ int main(void)
     // before we turn on power to anything external
 #ifdef TEST_EXTERNAL
     P2OUT |= BIT5;
-    mcu_delayms(10000);
+    //mcu_delayms(2000);
+    mcu_delayms(25); 
+    P2OUT &= ~BIT5;
 #endif
     // Tap out load profile here
     P4OUT |= BIT2;

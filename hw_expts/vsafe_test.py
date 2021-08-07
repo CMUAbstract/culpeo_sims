@@ -20,8 +20,10 @@ import platform
 import cmd_maker as cmds
 
 # Arrays
-expt_ids = range(1,37)
-vmin_levels = [0,1] # Correspond to 1.8 and 1.6
+#expt_ids = range(1,37)
+expt_ids = [3,4,5,6,7,8,10,11,12,27,28,30,31,32,34,35,36]
+#vmin_levels = [0,1] # Correspond to 1.8 and 1.6
+vmin_levels = [1] # Correspond to 1.6
 Vstart_names = ["Vsafe_culpeo","Vsafe_conservative","Vsafe_catnap"]#"Vsafe_naive","Vsafe_naive_better"]
 
 # Scalar macros
@@ -29,7 +31,7 @@ Vstart_names = ["Vsafe_culpeo","Vsafe_conservative","Vsafe_catnap"]#"Vsafe_naive
 REPEATS = 6
 
 def saleae_capture(host='localhost', port=10429, \
-output_dir='./expt_output_traces/', output='outputs', ID='1234', \
+output_dir='/media/abstract/frick/culpeo_results/seiko_expts/', output='outputs', ID='1234', \
 capture_time=1,analogRate=125e3):
     s = sal.Saleae(host,port)
     try:
