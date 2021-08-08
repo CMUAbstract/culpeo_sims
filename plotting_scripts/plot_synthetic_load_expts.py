@@ -11,7 +11,7 @@ import esr_data
 import pickle
 
 expts_to_use = [3,4,5,6,7,8,9,10,11,12,27,28,29,30,31,32,33,34,35,36]
-GRP_CNT = 3
+GRP_CNT = 4
 VHIGH = 3228
 VMIN = 1.6
 VMAX = 2.56
