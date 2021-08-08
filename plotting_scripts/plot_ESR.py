@@ -13,9 +13,11 @@ import esr_data
 T = 10.0
 duty_cycles = ['99.99','99.9','99','90']
 loads = ['5','10','25','50']
-caps = [esr_data.BestCapESR,esr_data.kemetESR,esr_data.seikoESR]
+#caps = [esr_data.BestCapESR,esr_data.kemetESR,esr_data.seikoESR]
+caps = [esr_data.seikoESR]
 colors = ["#084594", "#4292c6", "#9ecae1"]
-labels = ['BestCap','Kemet','Seiko']
+#labels = ['BestCap','Kemet','Seiko']
+labels = ['Seiko']
 
 def plot_esr():
   fig, ax = plt.subplots()
@@ -28,7 +30,6 @@ def plot_esr():
         time_on = T - .01*float(duty_cycle)*T
         if duty_cycle in cap.keys():
           if load in cap[duty_cycle].keys():
-            print(cap_count)
             esrs.append(float(cap[duty_cycle][load]))
             times.append(time_on)
             scatter_colors.append(colors[cap_count])
@@ -36,9 +37,15 @@ def plot_esr():
   plt.xticks(fontsize=12)
   plt.yticks(fontsize=16)
   ax.set_xscale('log')
-  ax.set_yscale('log')
   boldness = 300
-  plt.grid(True,which="both")   
+  # y = A + B log(x)
+  logfit = np.polyfit(np.log(times),esrs,1)
+  print("Log fit is: ",logfit)
+  curve2 = np.poly1d(logfit)
+  xp = np.linspace(min(times), max(times), 1000)
+  #ax.plot(xp,curve(xp),'r')
+  ax.plot(xp,curve2(np.log(xp)),'r')
+  plt.grid(True,which="both")
   ax.set_xlabel('Pulse Time (s)', fontsize=16,fontweight=boldness)
   ax.set_ylabel('ESR ($\Omega$)', fontsize=16,fontweight=boldness)
   legs = []
