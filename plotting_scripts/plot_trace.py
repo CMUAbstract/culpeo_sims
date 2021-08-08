@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import re
 import glob
 
+R_SHUNT = 4.7
+DO_I = True
 
 if __name__ == "__main__":
   num_files = len(sys.argv)
@@ -29,5 +31,18 @@ if __name__ == "__main__":
     vals = df.values
     fig, ax = plt.subplots()
     ax.plot(vals[:,0],vals[:,1])
-    plt.show()
+    #plt.show()
     fig.savefig(name + '_plot.pdf',format='pdf',bbox_inches='tight')
+    if DO_I:
+      fig, ax = plt.subplots()
+      diffs = np.subtract(vals[:,3],vals[:,2])
+      numbers = re.findall(r'[0-9]+',filename)
+      gain = int(numbers[-1])
+      print(gain)
+      I = np.divide(diffs,R_SHUNT*gain)
+      ax.plot(vals[:,0],I)
+      ax2 = ax.twinx()
+      plt.scatter(vals[:,10],vals[:,11],c='k')
+      #plt.show()
+      fig.savefig(name + '_current_plot.pdf',format='pdf',bbox_inches='tight')
+      
