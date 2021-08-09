@@ -31,7 +31,7 @@ if __name__ == "__main__":
     vals = df.values
     fig, ax = plt.subplots()
     ax.plot(vals[:,0],vals[:,1])
-    #plt.show()
+    plt.show()
     fig.savefig(name + '_plot.pdf',format='pdf',bbox_inches='tight')
     if DO_I:
       fig, ax = plt.subplots()
@@ -43,6 +43,6 @@ if __name__ == "__main__":
       ax.plot(vals[:,0],I)
       ax2 = ax.twinx()
       plt.scatter(vals[:,10],vals[:,11],c='k')
-      #plt.show()
+      plt.show()
       fig.savefig(name + '_current_plot.pdf',format='pdf',bbox_inches='tight')
-      
+

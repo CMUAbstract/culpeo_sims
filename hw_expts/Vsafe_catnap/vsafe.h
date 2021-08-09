@@ -100,6 +100,10 @@
 #define VSAFE_ID8 2080
 #define VSAFE_ID9 2101
 
+#define VSAFE_ID_APDS 2121
+#define VSAFE_ID_BLE 2177
+#define VSAFE_ID_ML 2530
+
 #else
 
 #error "Config not defined"
