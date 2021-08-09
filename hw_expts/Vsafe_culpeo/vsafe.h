@@ -141,6 +141,10 @@
 #define VSAFE_ID7 2505
 #define VSAFE_ID8 2885
 #define VSAFE_ID9 3239
+
+#define VSAFE_ID_APDS 2909
+#define VSAFE_ID_BLE 2500
+#define VSAFE_ID_ML 2871
 // Less aggressive, nominal cap
 /*#define VSAFE_ID10 2224
 #define VSAFE_ID11 2390
@@ -311,6 +315,7 @@
 #define VSAFE_ID34 1000 
 #define VSAFE_ID35 1000 
 #define VSAFE_ID36 1000 
+
 #else
 
 #error "No vsafes defined for config"

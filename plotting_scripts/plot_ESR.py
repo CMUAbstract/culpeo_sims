@@ -11,7 +11,7 @@ import esr_data
 
 
 T = 10.0
-duty_cycles = ['99.99','99.9','99','90']
+duty_cycles = ['99.999','99.99','99.9','99','90']
 loads = ['5','10','25','50']
 #caps = [esr_data.BestCapESR,esr_data.kemetESR,esr_data.seikoESR]
 caps = [esr_data.seikoESR]
@@ -39,7 +39,7 @@ def plot_esr():
   ax.set_xscale('log')
   boldness = 300
   # y = A + B log(x)
-  logfit = np.polyfit(np.log(times),esrs,1)
+  logfit = np.polyfit(np.log(times),esrs,2)
   print("Log fit is: ",logfit)
   curve2 = np.poly1d(logfit)
   xp = np.linspace(min(times), max(times), 1000)
