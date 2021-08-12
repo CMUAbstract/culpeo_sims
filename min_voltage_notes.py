@@ -320,7 +320,7 @@ def calc_min(I,time_step,vcap=[]):
   plt.show()
 
 
-def calc_min_forward(I,dt,plot=True):
+def calc_min_forward(I,dt,plot=True,switch_index=-1,esr2=CAP_ESR):
   L = MIN_VOLTAGE
   #L *= 1.05
   #C = .015
