@@ -159,3 +159,21 @@ pacarana_mezzo_tests (it'll need to get ported somewhere real) you build it by j
 compiling with USE_SENSORS=1
 * The apds test is in main_apds_alone.c in pacarana_mezzo_tests and uses the version
 * of libapds in that repo. Build it by setting USE_SENSORS=0 RUN_APDS_SOLO=1
+
+# Extracting ESR and calculating Vsafe for real traces:
+
+* Use esr_estimate.py, it'll run the calculations for a trace and spit return
+ vsafe.h that needs to be parsed out into separate vsafe directories
+
+ * The way it works is the script cuts off in rush current from the sip switches
+ (it's not as bad in real life with incoming energy), then it smoothes out the
+ trace and figures out the peak width. It feeds the width through the esr log
+ fit to produce an esr.
+
+ * The esr and current trace are used to estimate vsafe on the original (albeit
+ clipped) trace.  MAKE SURE YOU DON'T ACCIDENTALLY WRITE OUT THE CALCULATION
+ USING THE FILTERED TRACE-- that'll change the amplitude
+
+* As a warning, there are old Vsafe values running around from before when 1.8
+was accidentally set as the Vmin instead of 1.6. Double check vsafe.h values
+with the new ones.

@@ -8,8 +8,10 @@ import re
 import glob
 
 R_SHUNT = 4.7
-DO_I = False
-
+DO_I = True
+STOP_TIME = 1.1
+START_TIME = .9
+GAIN = 16
 if __name__ == "__main__":
   num_files = len(sys.argv)
   i = 1
@@ -29,22 +31,25 @@ if __name__ == "__main__":
       df = pd.read_csv(filename, mangle_dupe_cols=True,
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals = df.values
-    vals = vals[vals[:,0] < 17]
-    vals = vals[vals[:,0] > 13]
+    vals = vals[vals[:,0] < STOP_TIME]
+    vals = vals[vals[:,0] > START_TIME]
     fig, ax = plt.subplots()
-    ax.plot(vals[:,0],vals[:,1])
+    ax.plot(vals[:,0],vals[:,1],lw=3)
     plt.show()
     fig.savefig(name + '_plot.png',format='png',bbox_inches='tight')
     if DO_I:
       fig, ax = plt.subplots()
       diffs = np.subtract(vals[:,3],vals[:,2])
       numbers = re.findall(r'[0-9]+',filename)
-      gain = int(numbers[-1])
+      if GAIN == 0:
+        gain = int(numbers[-1])
+      else:
+        gain = GAIN
       print(gain)
       I = np.divide(diffs,R_SHUNT*gain)
       ax.plot(vals[:,0],I)
       ax2 = ax.twinx()
       plt.scatter(vals[:,10],vals[:,11],c='k')
       plt.show()
-      fig.savefig(name + '_current_plot.pdf',format='pdf',bbox_inches='tight')
+      fig.savefig(name + '_current_plot.png',format='png',bbox_inches='tight')
 
