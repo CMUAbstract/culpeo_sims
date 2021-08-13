@@ -8,7 +8,7 @@ import re
 import glob
 
 R_SHUNT = 4.7
-DO_I = True
+DO_I = False
 
 if __name__ == "__main__":
   num_files = len(sys.argv)
@@ -29,10 +29,12 @@ if __name__ == "__main__":
       df = pd.read_csv(filename, mangle_dupe_cols=True,
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals = df.values
+    vals = vals[vals[:,0] < 17]
+    vals = vals[vals[:,0] > 13]
     fig, ax = plt.subplots()
     ax.plot(vals[:,0],vals[:,1])
     plt.show()
-    fig.savefig(name + '_plot.pdf',format='pdf',bbox_inches='tight')
+    fig.savefig(name + '_plot.png',format='png',bbox_inches='tight')
     if DO_I:
       fig, ax = plt.subplots()
       diffs = np.subtract(vals[:,3],vals[:,2])

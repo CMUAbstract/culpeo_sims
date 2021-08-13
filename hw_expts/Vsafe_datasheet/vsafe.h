@@ -45,9 +45,9 @@
 #define VSAFE_ID8 2474
 #define VSAFE_ID9 2856
 
-#define VSAFE_ID_APDS 3220
-#define VSAFE_ID_BLE 2501
-#define VSAFE_ID_ML 2906
+#define VSAFE_ID_APDS 2505
+#define VSAFE_ID_BLE 2289
+#define VSAFE_ID_ML 2532
 
 #elif CONFIG == 2
 

@@ -277,7 +277,25 @@ uint16_t times[LOAD_SIZE] = {10,1,100,10}; // Runtimes in ms
 size_t loads[LOAD_SIZE] = {0,5,1,0};
 uint16_t times[LOAD_SIZE] = {10,1,100,10}; // Runtimes in ms
 
+#elif EXPT_ID == 37
+#define VSAFE VSAFE_ID_APDS
+#define RUN_ONBOARD
+#define LOAD_SIZE 1
+size_t loads[LOAD_SIZE] = {0};
+uint16_t times[LOAD_SIZE] = {50}; // Runtimes in ms
 
+#elif EXPT_ID == 38
+#define VSAFE VSAFE_ID_BLE
+#define LOAD_SIZE 1
+size_t loads[LOAD_SIZE] = {0};
+uint16_t times[LOAD_SIZE] = {5000}; // Runtimes in ms
+
+#elif EXPT_ID == 39
+#define VSAFE VSAFE_ID_ML
+#define LOAD_SIZE 1
+#define TEST_EXTERNAL
+size_t loads[LOAD_SIZE] = {0};
+uint16_t times[LOAD_SIZE] = {0}; // Runtimes in ms
 
 #else
 #error "No expt id defined"

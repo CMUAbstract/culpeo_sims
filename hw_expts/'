@@ -127,7 +127,7 @@ int main(void)
     }
     P4OUT |= BIT3;
     P4OUT &= ~BIT3;
-		mcu_delayms( 50 );
+		mcu_delayms( 500 );
     // Put this signal down
     P2OUT &= ~BIT6;
 		// Disable Load and OP Booster
