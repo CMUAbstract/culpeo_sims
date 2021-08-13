@@ -46,12 +46,14 @@
 #define PLLN_VAL 48
 #define FLASH_WAITS FLASH_LATENCY_1
 #define REG_VOLTAGE PWR_REGULATOR_VOLTAGE_SCALE1
+#define LOOP_COUNT 35000
 
 #elif defined(DVFS_SETTING_5)
 #define PLLM_VAL RCC_PLLM_DIV8
 #define PLLN_VAL 64
 #define FLASH_WAITS FLASH_LATENCY_2
 #define REG_VOLTAGE PWR_REGULATOR_VOLTAGE_SCALE1
+#define LOOP_COUNT 46000
 
 #elif defined(DVFS_SETTING_6)
 #define PLLM_VAL RCC_PLLM_DIV4
@@ -64,6 +66,12 @@
 #define PLLN_VAL 85
 #define FLASH_WAITS FLASH_LATENCY_4
 #define REG_VOLTAGE PWR_REGULATOR_VOLTAGE_SCALE1_BOOST
+
+#elif defined(DVFS_SETTING_8)
+#define PLLM_VAL RCC_PLLM_DIV8 
+#define PLLN_VAL 32
+#define FLASH_WAITS FLASH_LATENCY_1
+#define REG_VOLTAGE PWR_REGULATOR_VOLTAGE_SCALE1
 
 #endif
 
@@ -95,6 +103,7 @@ CRC_HandleTypeDef hcrc;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void SystemClock_Decrease(void);
 static void MX_CRC_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -120,8 +129,36 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
+	
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 
   /* USER CODE BEGIN Init */
+  SystemClock_Config();
+  
+
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+
+	GPIO_InitStruct.Pin = GPIO_PIN_8;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	
+	HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 0);
+ 	HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+	SystemClock_Decrease();
+	HAL_SuspendTick();
+
+	// Enter Sleep Mode, wake up is done once User push-button is pressed *
+	HAL_PWR_EnterSLEEPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+    
+	HAL_PWREx_DisableLowPowerRunMode();
+
 
   /* USER CODE END Init */
 
@@ -129,12 +166,12 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	GPIO_InitStruct.Pin = GPIO_PIN_8;
-	GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull  = GPIO_PULLUP;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	//__HAL_RCC_GPIOA_CLK_ENABLE();
+	//GPIO_InitStruct.Pin = GPIO_PIN_8;
+	//GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+	//GPIO_InitStruct.Pull  = GPIO_PULLUP;
+	//GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  	//HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
  	//HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_SYSCLK, RCC_MCODIV_1);
 	
 	GPIO_InitStruct.Pin = GPIO_PIN_9;
@@ -147,20 +184,25 @@ int main(void)
 
   /* Initialize all configured peripherals */
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);	
-  MX_CRC_Init();
-  MX_X_CUBE_AI_Init();
-  /* USER CODE BEGIN 2 */
-	//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);	
-  MX_X_CUBE_AI_Process();
+  //MX_CRC_Init();
+  //MX_X_CUBE_AI_Init();
+  ///* USER CODE BEGIN 2 */
+  //  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);	
+  //MX_X_CUBE_AI_Process();
+	
+	for( uint16_t i = 0; i < LOOP_COUNT; i++ ){
+		volatile int a = 10 * 50;
+		volatile int b = a + 2000;
+	}
+
+	
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);	
-
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
     /* USER CODE END WHILE */
+	//SystemClock_Decrease();
+	//HAL_SuspendTick();
+
+	//// Enter Sleep Mode, wake up is done once User push-button is pressed *
+	//HAL_PWR_EnterSLEEPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
 
     /* USER CODE BEGIN 3 */
   }
@@ -248,6 +290,31 @@ static void MX_CRC_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void SystemClock_Decrease(void)
+{
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+
+  /* Select HSI as system clock source */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  if(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+
+  /* Modify HSI to HSI DIV8 */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+}
 
 /* USER CODE END 4 */
 
