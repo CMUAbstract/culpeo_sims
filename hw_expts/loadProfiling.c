@@ -289,6 +289,21 @@ void dischargingRoutine(){
 	adc_reading = 0;
 }
 
+// Generates an interrupt every period ms,
+// for a total of numInterrupts interrupts.
+void generateInterrupt( uint16_t period, uint16_t numInterrupts ){
+	while(numInterrupts--){
+
+		P3DIR |= BIT;
+		P3OUT |= BIT;
+
+		mcu_delayms( period );
+		
+		P3DIR &= ~BIT;
+		P3OUT &= ~BIT;
+	}
+}
+
 // These routines could be implemented with timers if needed, 
 // but work this way for now
 
