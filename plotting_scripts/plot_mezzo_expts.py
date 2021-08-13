@@ -21,48 +21,42 @@ VMAX = 2.56
 VRANGE = 3.1
 V_HARD_FAIL = 1.6
 bar_width = .2
-LW = 2
-CS = 5
-MS = 4
+LW = 10
+CS = 14
+MS = 6
+FS = 24
 alphas=[1,.6,.4,.2]
+
 
 red = "#b2182b"
 blues = ["#deebf7","#9ecae1","#3182bd"]
 colors = ["#f7f7f7","#ca0020","#f4a582","#92c5de","#0571b0"]
 
 if __name__ == "__main__":
-  open_catnap_vsafe= open('catnap_vsafe.pkl','rb')
-  catnap_vsafes = pickle.load(open_catnap_vsafe)
-  open_catnap_vsafe.close()
+  catnap_vsafes = {37:2121,38:2177,39:2530}
 
-  open_conservative_vsafe= open('conservative_vsafe.pkl','rb')
-  conservative_vsafes = pickle.load(open_conservative_vsafe)
-  open_conservative_vsafe.close()
+  conservative_vsafes = {37:4121,38: 3315, 39:3012}
 
-  open_culpeo_vsafe= open('culpeo_vsafe.pkl','rb')
-  culpeo_vsafes = pickle.load(open_culpeo_vsafe)
-  open_culpeo_vsafe.close()
+  culpeo_vsafes = {37: 2909, 38:3038, 39:2871}
 
-  open_datasheet_vsafe= open('datasheet_vsafe.pkl','rb')
-  datasheet_vsafes = pickle.load(open_datasheet_vsafe)
-  open_datasheet_vsafe.close()
+  datasheet_vsafes = {37:3220,38: 2289,39:2906}
 
 
-  open_catnap_summary= open('catnap_summary.pkl','rb')
+  open_catnap_summary= open('catnap_37-39_summary.pkl','rb')
   catnap_expts = pickle.load(open_catnap_summary)
   open_catnap_summary.close()
 
-  open_conservative_summary= open('conservative_summary.pkl','rb')
+  open_conservative_summary= open('conservative_38-39_summary.pkl','rb')
   conservative_expts = pickle.load(open_conservative_summary)
   open_conservative_summary.close()
   #print("Conservative_summary")
   #print(conservative_expts)
 
-  open_culpeo_summary= open('culpeo_summary.pkl','rb')
+  open_culpeo_summary= open('culpeo_37-39_summary.pkl','rb')
   culpeo_expts = pickle.load(open_culpeo_summary)
   open_culpeo_summary.close()
 
-  open_datasheet_summary= open('datasheet_summary.pkl','rb')
+  open_datasheet_summary= open('datasheet_37-39_summary.pkl','rb')
   datasheet_expts = pickle.load(open_datasheet_summary)
   open_datasheet_summary.close()
 
@@ -92,7 +86,7 @@ if __name__ == "__main__":
     # anyway
     if (expt_id in culpeo_expts.keys()) == False:
       continue
-    if list(culpeo_vsafes[expt_id])[0] < VHIGH or culpeo_expts[expt_id]['avg_min'] > VMIN:
+    if culpeo_vsafes[expt_id] < VHIGH or culpeo_expts[expt_id]['avg_min'] > VMIN:
       labels.append(names[expt_count])
       # Handle catnap
       if (catnap_expts[expt_id]['avg_min'] < V_HARD_FAIL):
@@ -104,13 +98,13 @@ if __name__ == "__main__":
         #catnap_diffs.append((catnap_expts[expt_id]['avg_min'] - VMIN)/(VMAX-VMIN))
         catnap_diffs.append(catnap_expts[expt_id]['avg_min'])
         catnap_colors.append(blues[2])
-        if (list(catnap_vsafes[expt_id])[0] > VHIGH):
+        if (catnap_vsafes[expt_id] > VHIGH):
           catnap_markers.append('no_start')
         else:
           catnap_markers.append('pass')
       # Handle conservative
       if (expt_id in conservative_expts.keys()) == False:
-        conservative_diffs.append(list(conservative_vsafes[expt_id])[0]*VRANGE/4096)
+        conservative_diffs.append(conservative_vsafes[expt_id]*VRANGE/4096)
       else:
         #conservative_diffs.append((conservative_expts[expt_id]['avg_min'] - VMIN)/(VMAX-VMIN))
         conservative_diffs.append(conservative_expts[expt_id]['avg_min'])
@@ -128,8 +122,8 @@ if __name__ == "__main__":
         else:
           #datasheet_diffs.append((datasheet_expts[expt_id]['avg_min'] - VMIN)/(VMAX-VMIN))
           datasheet_colors.append(blues[2])
-          if (list(datasheet_vsafes[expt_id])[0] > VHIGH):
-            datasheet_diffs.append(list(datasheet_vsafes[expt_id])[0])
+          if (datasheet_vsafes[expt_id] > VHIGH):
+            datasheet_diffs.append(datasheet_vsafes[expt_id])
             datasheet_markers.append('no_start')
           else:
             datasheet_diffs.append(datasheet_expts[expt_id]['avg_min'])
@@ -140,10 +134,10 @@ if __name__ == "__main__":
       if (culpeo_expts[expt_id]['avg_min'] < VMIN):
         print("Fail: ",expt_id)
 
-      culpeo_vsafes_used.append(list(culpeo_vsafes[expt_id])[0])
-      catnap_vsafes_used.append(list(catnap_vsafes[expt_id])[0])
-      conservative_vsafes_used.append(list(conservative_vsafes[expt_id])[0])
-      datasheet_vsafes_used.append(list(datasheet_vsafes[expt_id])[0])
+      culpeo_vsafes_used.append(culpeo_vsafes[expt_id])
+      catnap_vsafes_used.append(catnap_vsafes[expt_id])
+      conservative_vsafes_used.append(conservative_vsafes[expt_id])
+      datasheet_vsafes_used.append(datasheet_vsafes[expt_id])
 
   Xs = np.arange(len(labels))
   fig, ax = plt.subplots()
@@ -174,22 +168,20 @@ if __name__ == "__main__":
   plt.errorbar(culpeo_xs,culpeo_vsafes,culpeo_delta,elinewidth=LW,fmt='.', ecolor=colors[4],\
   marker='_',color=colors[4],mfc=colors[4],uplims=True,capsize=CS,label='Culpeo',alpha=1)
 
-  ax.set_ylabel('Diff from Vmin (%)')
-  ax.set_xlabel('Pulse + 100ms low power compute',fontsize=12,fontweight=300)
-  ax.xaxis.set_label_coords(.75, -.12)
-  plt.xticks(Xs,rotation=0,ha='center',fontsize=12)
-  ax.annotate('', xy=(.5,-.11), xycoords='axes fraction', xytext=(1, -0.11),
-arrowprops=dict(arrowstyle="-", color='k',lw=1))
+  #ax.xaxis.set_label_coords(.75, -.12)
+  plt.xticks(Xs,rotation=0,ha='center',fontsize=FS,fontweight=300)
+  #ax.annotate('', xy=(.5,-.11), xycoords='axes fraction', xytext=(1, -0.11),
+#arrowprops=dict(arrowstyle="-", color='k',lw=1))
 
-  plt.axhline(VMIN,color="black",linestyle='dashed',lw=LW)
-  plt.axhline(VMAX,color="#91cf60",linestyle='dashed',lw=LW)
+  plt.axhline(VMIN,color="black",linestyle='dashed',lw=2)
+  plt.axhline(VMAX,color="#91cf60",linestyle='dashed',lw=2)
   for x in Xs:
     plt.axvline(x+2.5*bar_width,color='black',alpha=.5,lw=.5)
   boldness = 300
-  ax.annotate("$V_{high}$",(-1,VMAX + .01),fontsize=14,fontweight=boldness)
-  ax.annotate("$V_{low}$",(-1,VMIN + .01),fontsize=14,fontweight=boldness)
+  ax.annotate("$V_{high}$",(0-1.75*bar_width,VMAX + .01),fontsize=FS,fontweight=boldness)
+  ax.annotate("$V_{low}$",(0-1.75*bar_width,VMIN + .01),fontsize=FS,fontweight=boldness)
   ax.set_xticklabels(labels)
-  ax.legend(ncol=4,fontsize=12,loc='upper right')
+  ax.legend(ncol=2,fontsize=FS-2,loc='upper right')
   # Plot vsafe
   #ax2 = ax.twinx()
   #conservative_vsafes = np.divide(np.multiply(conservative_vsafes_used,VRANGE),4096)
@@ -200,14 +192,14 @@ arrowprops=dict(arrowstyle="-", color='k',lw=1))
   #ax.scatter(x=datasheet_xs - bar_width/2,y=datasheet_vsafes,c=blues[2],  alpha = alphas[2],marker="o",edgecolor="k")
   #ax.scatter(x=conservative_xs - bar_width/2,y=conservative_vsafes,c=blues[2], alpha = alphas[1],marker="o", edgecolor="k")
   #ax.scatter(x=culpeo_xs - bar_width/2,y=culpeo_vsafes,c=blues[2], alpha = alphas[0], marker="o", edgecolor="k")
-  ax.set_ylabel('Voltage',fontsize=12,fontweight=boldness)
+  ax.set_ylabel('Voltage (V)',fontsize=FS,fontweight=boldness)
   #plt.ylim(-.1,. 4)
   ratio = 1/2
   xleft, xright = ax.get_xlim()
   ybottom, ytop = ax.get_ylim()
   ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
   plt.show()
-  fig.savefig('synthetic_loads_plot.pdf',format='pdf',bbox_inches='tight')
+  fig.savefig('mezzos_plot.pdf',format='pdf',bbox_inches='tight')
 
 
 
