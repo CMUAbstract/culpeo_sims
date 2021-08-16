@@ -24,7 +24,7 @@ bar_width = .2
 LW = 10
 CS = 14
 MS = 6
-FS = 24
+FS = 28
 alphas=[1,.6,.4,.2]
 
 
@@ -180,8 +180,9 @@ if __name__ == "__main__":
   boldness = 300
   ax.annotate("$V_{high}$",(0-1.75*bar_width,VMAX + .01),fontsize=FS,fontweight=boldness)
   ax.annotate("$V_{low}$",(0-1.75*bar_width,VMIN + .01),fontsize=FS,fontweight=boldness)
-  ax.set_xticklabels(labels)
+  ax.set_xticklabels(labels,fontsize=FS)
   ax.legend(ncol=2,fontsize=FS-2,loc='upper right')
+  ax.tick_params(labelsize=FS)
   # Plot vsafe
   #ax2 = ax.twinx()
   #conservative_vsafes = np.divide(np.multiply(conservative_vsafes_used,VRANGE),4096)
