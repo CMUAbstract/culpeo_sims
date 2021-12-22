@@ -20,7 +20,8 @@ import platform
 import cmd_maker as cmds
 
 # Arrays
-expt_ids = [3,4,5,6,7,8,9,10,11,12,27,28,29,30,31,32,33,34,35,36]
+#expt_ids = [3,4,5,6,7,8,9,10,11,12,27,28,29,30,31,32,33,34,35,36]
+expt_ids = [39] # 37, 38, 39] # APDS, BLE, ML
 vmin_levels = [1] # Correspond to 1.6
 Vstart_names = ["Vsafe_culpeo","Vsafe_conservative","Vsafe_catnap","Vsafe_datasheet"]#"Vsafe_naive","Vsafe_naive_better"]
 
@@ -110,11 +111,15 @@ def run_vsafe_tests():
         full_cmd = env.clean_cmd() + env.bld_all_cmd() + env.prog_cmd()
         print(full_cmd)
         os.system(full_cmd)
+        if expt_id > 36:
+          output_dir = '/media/abstract/frick/culpeo_results/case_study/'
+        else:
+          output_dir = '/media/abstract/frick/culpeo_results/seiko_expts/'
         for i in range(repeats-1):
           print("Testing  # ",i)
           # Start saleae, add time to name
           time_ID = time.strftime('%m-%d--%H-%M-%S')
-          result = saleae_capture(output=cur_test_str,ID=time_ID,capture_time=3)
+          result = saleae_capture(output_dir=output_dir,output=cur_test_str,ID=time_ID,capture_time=3)
           # repeat
           if result == -1:
             continue

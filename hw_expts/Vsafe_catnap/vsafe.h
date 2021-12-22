@@ -102,7 +102,7 @@
 
 #define VSAFE_ID_APDS 2121
 #define VSAFE_ID_BLE 2177
-#define VSAFE_ID_ML 2530
+#define VSAFE_ID_ML 2271
 
 #else
 

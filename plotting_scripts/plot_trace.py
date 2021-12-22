@@ -49,7 +49,7 @@ if __name__ == "__main__":
     ybottom, ytop = ax.get_ylim()
     ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
     plt.show()
-    fig.savefig(name + '_plot.pdf',format='pdf',bbox_inches='tight')
+    fig.savefig(name + '_plot.png',format='png',bbox_inches='tight')
     if DO_I:
       fig, ax = plt.subplots()
       diffs = np.subtract(vals[:,3],vals[:,2])

@@ -98,9 +98,9 @@
 #define VSAFE_ID8 2946
 #define VSAFE_ID9 3660
 
-#define VSAFE_ID_APDS 3206
-#define VSAFE_ID_BLE 2340
-#define VSAFE_ID_ML 3012
+#define VSAFE_ID_APDS 4387
+#define VSAFE_ID_BLE 3315
+#define VSAFE_ID_ML 2692
 
 #else
 

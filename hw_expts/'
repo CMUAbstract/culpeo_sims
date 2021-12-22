@@ -22,38 +22,15 @@ void dischargingRoutine();
 void mcu_delayms( uint16_t ms );
 void mcu_delayus( uint16_t us );
 void activateLoad( size_t level, uint16_t ms);
-void generateInterrupt( uint16_t, uint16_t );
+
 
 uint16_t adc_reading = 0;	
-uint16_t sampleCount = 0;
 
-
-//#define DO_INTERRUPT_TEST
 int main(void)
 {
     WDTCTL = WDTPW | WDTHOLD;               // Stop WDT
-	  PM5CTL0 &= ~LOCKLPM5;                   // Disable the GPIO power-on default high-impedance mode
-	  clockSetup();
-    
-    // Switches as inputs
-    P5DIR &= ~(BIT5 + BIT6);
-    P5REN |= (BIT5 + BIT6);
-    P5OUT |= (BIT5 + BIT6);
-    P5IFG &= ~(BIT5 + BIT6);
-    P5IE |=  (BIT5 + BIT6);                            // P5.6 interrupt enable
-    P5IES |= (BIT5 + BIT6);                            // P5.6 interrupt on falling edge	
 
-#ifdef DO_INTERRUPT_TEST
-    while(1){
-      // Wait for Button Press on P5.6
-      __bis_SR_register(LPM3_bits+GIE);
     
-      sampleCount = 0;
-     
-      generateInterrupt( 100, 10000 );  
-    }
-
-#else
 	// Configure GPIO
     P1OUT |= BIT0;                         // Clear P1.0 output latch for a defined power-on state
     P1DIR |= BIT0;                          // Set P1.0 to output direction
@@ -150,7 +127,7 @@ int main(void)
     }
     P4OUT |= BIT3;
     P4OUT &= ~BIT3;
-		mcu_delayms( 50 );
+		mcu_delayms( 500 );
     // Put this signal down
     P2OUT &= ~BIT6;
 		// Disable Load and OP Booster
@@ -164,7 +141,6 @@ int main(void)
     P2OUT &= ~BIT5;
 #endif
 	}
-#endif
 }
 
 void __attribute__ ((interrupt(PORT5_VECTOR))) port_5 (void) {
@@ -311,22 +287,6 @@ void dischargingRoutine(){
 	//REFCTL0 &= ~REFON;
   uart_write("Exit discharge");
 	adc_reading = 0;
-}
-
-// Generates an interrupt every period ms,
-// for a total of numInterrupts interrupts.
-void generateInterrupt( uint16_t period, uint16_t numInterrupts ){
-	P3DIR |= BIT1;
-	while(numInterrupts--){
-
-		P3OUT |= BIT1;
-
-		mcu_delayms( 1 );
-		
-		P3OUT &= ~BIT1;
-		
-    mcu_delayms( period - 1 );
-	}
 }
 
 // These routines could be implemented with timers if needed, 
