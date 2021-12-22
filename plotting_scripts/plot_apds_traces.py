@@ -10,6 +10,8 @@ import glob
 R_SHUNT = 4.7
 STOP_TIME = [30,30,45]
 START_TIME = [0,0,15]
+STOP_TIME = [1.05,1.05,1.05]
+START_TIME = [0.95,0.95,0.95]
 GAIN = 16
 titles = ['Charge-to-Full', 'Catnap','Culpeo']
 DO_HIST = False
@@ -50,13 +52,13 @@ if __name__ == "__main__":
       axarr[count].set_title(titles[count])
       axarr[count].set_ylim([1.5,2.7])
       axarr[count].axhline(1.6,c='k',ls='--')
-      axarr[count].text(-3,1.63,"$V_{off}$")
+      #axarr[count].text(-3,1.63,"$V_{off}$")
       axarr[count].axhline(2.5,c='k',ls='--')
-      axarr[count].text(-3,2.35,"$V_{high}$")
-      axarr[count].set_xlim(-3,30)
+      #axarr[count].text(-3,2.35,"$V_{high}$")
+      #axarr[count].set_xlim(-3,30)
       if count == 2:
         axarr[count].axhline(2.06,c='k',ls='--')
-        axarr[count].text(-3,2.1,"$V_{safe}$")
+       # axarr[count].text(-3,2.1,"$V_{safe}$")
 
     #axnew = axarr[count].twinx()
     #axnew.scatter(bit_flips[:,0],bit_flips[:,1])
@@ -88,8 +90,8 @@ if __name__ == "__main__":
       interarrival.append(flip - flip_arrivals[i - 1])
     if DO_HIST == False:
       axarr[count].scatter(flip_arrivals,len(flip_arrivals)*[2.6],lw=1,marker='|',color='#ef8a62')
-      axarr[count].annotate("Sense",xy=(1,2.55),xytext=(-3,2.55),color='#ef8a62',
-      size='8')#,arrowprops=dict(arrowstyle='->'))#arrowprops=dict(facecolor='#ef8a62', shrink=0.05))
+      #axarr[count].annotate("Sense",xy=(1,2.55),xytext=(-3,2.55),color='#ef8a62',
+      #size='8')#,arrowprops=dict(arrowstyle='->'))#arrowprops=dict(facecolor='#ef8a62', shrink=0.05))
     print(len(flip_arrivals))
     print(flip_arrivals)
     #print(len(interarrival))
