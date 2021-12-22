@@ -33,27 +33,27 @@ def plot_esr():
             esrs.append(float(cap[duty_cycle][load]))
             times.append(time_on)
             scatter_colors.append(colors[load_count])
-  plt.scatter(x=times,y=esrs, s=50,c=scatter_colors,alpha=1,edgecolors='k')
-  plt.xticks(fontsize=12)
-  plt.yticks(fontsize=16)
+  plt.scatter(x=times,y=esrs, s=200,c=scatter_colors,alpha=1,edgecolors='k')
+  plt.xticks(fontsize=20)
+  plt.yticks(fontsize=24)
   ax.set_xscale('log')
-  boldness = 300
+  boldness = 600
   # y = A + B log(x)
   logfit = np.polyfit(np.log(times),esrs,2)
   print("Log fit is: ",logfit)
   curve2 = np.poly1d(logfit)
   xp = np.linspace(min(times), max(times), 1000)
   #ax.plot(xp,curve(xp),'r')
-  ax.plot(xp,curve2(np.log(xp)),colors[-1])
+  ax.plot(xp,curve2(np.log(xp)),colors[-1],linewidth=8,alpha=.5)
   plt.grid(True,which="both")
-  ax.set_xlabel('Pulse Time (s)', fontsize=16,fontweight=boldness)
-  ax.set_ylabel('ESR ($\Omega$)', fontsize=16,fontweight=boldness)
+  ax.set_xlabel('Pulse Time (s)', fontsize=24,fontweight=boldness)
+  ax.set_ylabel('ESR ($\Omega$)', fontsize=24,fontweight=boldness)
   ratio = 1
   legs = []
   for i,label in enumerate(labels):
     legs.append(patches.Patch(fc=colors[i],lw=1,alpha=1,label=label,ec='k'))
   fig.legend(handles=legs,loc='upper center',
-  ncol=len(labels),fontsize=12,bbox_to_anchor=(.5,.75))
+  ncol=len(labels),fontsize=20,bbox_to_anchor=(.5,.75))
   xleft, xright = ax.get_xlim()
   ybottom, ytop = ax.get_ylim()
   ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)

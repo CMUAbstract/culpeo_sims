@@ -104,7 +104,8 @@ output is 2.56!
 of the file) with the esrs calculated in the last step.
 
 * Run the script twice, once with VMIN=1.6 and once with VMIN=1.8, on the
-expt_<id>.csv files
+expt_<id>.csv files These live on the google drive in the shared folder
+Culpeo--ESR problems/hw_expts/expt_baselines
 
 `python3 esrs.py expt_*`
 
@@ -177,3 +178,15 @@ compiling with USE_SENSORS=1
 * As a warning, there are old Vsafe values running around from before when 1.8
 was accidentally set as the Vmin instead of 1.6. Double check vsafe.h values
 with the new ones.
+
+
+# Running scheduler tests
+
+* Run the following from vogar:~/culpeo_sims/plotting_scripts
+
+python3 plot_apds_traces.py results/case_study/apds_30s_clean_charge-to-full.csv \
+results/case_study/apds_30s_clean_catnap.csv \
+results/case_study/apds_60s_clean_culpeo.csv \
+
+
+

@@ -28,6 +28,16 @@ esrs = {
 1: 3.226
 }
 
+times = {
+  1000: 1,
+  100: .1,
+  10: .01,
+  1: .001,
+  200: .2,
+  110: .11,
+  101: .101,
+}
+
 #1 5mA for 1s
 #2 10mA for 1s
 #3 5mA for 100ms
@@ -120,6 +130,46 @@ esrs_by_id = {
 36: esrs[1],
 };
 
+
+time_by_id = {
+1: times[1000],
+2: times[1000],
+3: times[100],
+4: times[100],
+5: times[100],
+6: times[10],
+7: times[10],
+8: times[10],
+9: times[10],
+10: times[1],
+11: times[1],
+12: times[1],
+13: times[1000],
+14: times[1000],
+15: times[200],
+16: times[200],
+17: times[200],
+18: times[110],
+19: times[110],
+20: times[110],
+21: times[110],
+22: times[101],
+23: times[101],
+24: times[101],
+25: times[1000],
+26: times[1000],
+27: times[200],
+28: times[200],
+29: times[200],
+30: times[110],
+31: times[110],
+32: times[110],
+33: times[110],
+34: times[101],
+35: times[101],
+36: times[101],
+}
+
 def make_adc_file_str(expt_id, val):
   adc = np.ceil(4096*val/V_RANGE)
   adc_val = int(adc)
@@ -184,8 +234,10 @@ if __name__ == "__main__":
     # Drop time before 1s
     # Not needed for new version
     if (expt_id < 13):
-      vals = vals[vals[:,0]>1]
-      vals = vals[vals[:,0]<2.5]
+      vals = vals[vals[:,0]>1.2]
+      vals = vals[vals[:,0]<1.3 + time_by_id[expt_id]+.025]
+    else:
+      vals = vals[vals[:,0]< time_by_id[expt_id]+.010+.025]
     diffs = np.subtract(vals[:,3],vals[:,2])
     I = np.divide(diffs,minV.gain*minV.shunt)
     start_avg = np.average(vals[0:100,1])
@@ -199,7 +251,7 @@ if __name__ == "__main__":
     #I = np.add(I,500e-6)
     # Various Vsafe calcs
     print("max I is:", max(I))
-    dt = vals[1,0] - vals[0,0] 
+    dt = vals[1,0] - vals[0,0]
     # Catnap
     catnap_E = .5*CAP_VAL*(start_avg**2 - stop_avg**2)
     catnap_Vsafe = np.sqrt(2*catnap_E/CAP_VAL + V_MIN**2)

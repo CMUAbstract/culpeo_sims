@@ -7,14 +7,10 @@ import matplotlib.pyplot as plt
 import re
 import glob
 
-R_SHUNT = 4.7
-DO_I = False
 START_TIME = 0
-STOP_TIME = 10
+STOP_V = 2.503
 GAIN = 16
 DO_TWIN = 0
-
-plt.rcParams['font.size'] = '16'
 
 if __name__ == "__main__":
   num_files = len(sys.argv)
@@ -35,10 +31,18 @@ if __name__ == "__main__":
       df = pd.read_csv(filename, mangle_dupe_cols=True,
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals = df.values
+    for time_tic, volt in enumerate(vals[:,1]):
+      #print(volt > 2.5)
+      if volt > 2.5:
+        print("Inside")
+        STOP_TIME = vals[time_tic,0]
+        print(STOP_TIME)
+        break
     vals = vals[vals[:,0] < STOP_TIME]
     vals = vals[vals[:,0] > START_TIME]
     vals[:,0] = vals[:,0] - START_TIME
-    print(max(vals[:,0]))
+    new_df = pd.DataFrame(vals)
+    new_df.to_csv('clean_vals.csv',index=False)
     fig, ax = plt.subplots()
     ax.set_ylim(1.2,2.5)
     plt.ylabel("$V_{cap}$ (V)",fontsize=20)
@@ -49,23 +53,5 @@ if __name__ == "__main__":
     ybottom, ytop = ax.get_ylim()
     ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
     plt.show()
-    fig.savefig(name + '_plot.pdf',format='pdf',bbox_inches='tight')
-    if DO_I:
-      fig, ax = plt.subplots()
-      diffs = np.subtract(vals[:,3],vals[:,2])
-      numbers = re.findall(r'[0-9]+',filename)
-      if GAIN == 0:
-        gain = int(numbers[-1])
-      else:
-        gain = GAIN
-      print(gain)
-      I = 1000*np.divide(diffs,R_SHUNT*gain)
-      ax.plot(vals[:,0],I)
-      plt.ylabel("Current (mA)",fontsize=20)
-      plt.xlabel("Time (s)",fontsize=20)
-      if DO_TWIN:
-        ax2 = ax.twinx()
-        plt.scatter(vals[:,10],vals[:,11],c='k')
-      plt.show()
-      fig.savefig(name + '_current_plot.pdf',format='pdf',bbox_inches='tight')
+
 
