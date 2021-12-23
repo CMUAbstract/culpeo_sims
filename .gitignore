@@ -9,3 +9,4 @@ expt_baseline_traces/*.csv
 __pycache__
 */__pycache__
 results_disk
+tags

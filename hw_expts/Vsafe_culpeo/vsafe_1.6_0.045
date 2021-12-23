@@ -1,8 +1,8 @@
 #define VSAFE_ID13 3047
-#define VSAFE_ID14 3947 //gooof
+#define VSAFE_ID14 3947
 #define VSAFE_ID15 2547
 #define VSAFE_ID16 3073
-#define VSAFE_ID17 3931 //goof
+#define VSAFE_ID17 3931
 #define VSAFE_ID18 2283
 #define VSAFE_ID19 2498
 #define VSAFE_ID20 2901
@@ -11,7 +11,7 @@
 #define VSAFE_ID23 2379
 #define VSAFE_ID24 2585
 #define VSAFE_ID25 3035
-#define VSAFE_ID26 3726// goof
+#define VSAFE_ID26 3726
 #define VSAFE_ID27 2594
 #define VSAFE_ID28 3156
 #define VSAFE_ID29 3867
@@ -25,11 +25,11 @@
 #define VSAFE_ID10 2219
 #define VSAFE_ID11 2386
 #define VSAFE_ID12 2637
-#define VSAFE_ID1  3124
-#define VSAFE_ID1  3053
-#define VSAFE_ID3  2577
-#define VSAFE_ID4  3131
-#define VSAFE_ID6  2279
-#define VSAFE_ID7  2501
-#define VSAFE_ID8  2882
-#define VSAFE_ID9  3236
+#define VSAFE_ID1 3124
+#define VSAFE_ID1 3053
+#define VSAFE_ID3 2577
+#define VSAFE_ID4 3131
+#define VSAFE_ID6 2279
+#define VSAFE_ID7 2501
+#define VSAFE_ID8 2882
+#define VSAFE_ID9 3236

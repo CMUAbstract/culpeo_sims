@@ -235,9 +235,9 @@ if __name__ == "__main__":
     # Not needed for new version
     if (expt_id < 13):
       vals = vals[vals[:,0]>1.2]
-      vals = vals[vals[:,0]<1.3 + time_by_id[expt_id]+.025]
+      vals = vals[vals[:,0]<1.3 + time_by_id[expt_id]+.002]
     else:
-      vals = vals[vals[:,0]< time_by_id[expt_id]+.010+.025]
+      vals = vals[vals[:,0]< time_by_id[expt_id]+.010+.002]
     diffs = np.subtract(vals[:,3],vals[:,2])
     I = np.divide(diffs,minV.gain*minV.shunt)
     start_avg = np.average(vals[0:100,1])

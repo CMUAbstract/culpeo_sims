@@ -133,16 +133,16 @@ if __name__ == "__main__":
   app_name =  re.findall(r'[a-z]+',filename)[0]
   print(app_name)
   if app_name == 'apds':
-    vals = vals[vals[:,0] < .6]
+    vals = vals[vals[:,0] < .585]
     vals = vals[vals[:,0] > .5144]
     cutoff = 2e3
   elif  app_name == 'ml':
     cutoff = 5e1
-    vals = vals[vals[:,0] < 1.5]
+    vals = vals[vals[:,0] < 1.025]
     vals = vals[vals[:,0] > .026]
   elif app_name == 'ble':
     cutoff = 5e1
-    vals = vals[vals[:,0] < 1.5]
+    vals = vals[vals[:,0] < 1.025]
     vals = vals[vals[:,0] > .0]
   elif app_name == 'fast':
     cutoff = 5e1
@@ -167,7 +167,8 @@ if __name__ == "__main__":
       df = pd.read_csv(filename, mangle_dupe_cols=True,
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals_V = df.values
-    vals_V = vals_V[vals_V[:,0] > .45]
+    vals_V = vals_V[vals_V[:,0] < .585]
+    vals_V = vals_V[vals_V[:,0] > .514]
     V = vals_V[:,1]
     times = vals_V[:,0]
   #elif app_name == 'fast': #TODO this needs its own cap trace
