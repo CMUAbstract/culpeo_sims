@@ -3,7 +3,9 @@
 # Software setup instructions:
 #   run from hw_expts/ directory
 #   ENABLE SCRIPTING IN YOUR SALEAE GUI
-#   Open Saleae in another window
+#   Open Saleae in another window, also at this point you need to run it with
+#   the --override flag:
+#   Logic --override
 # Tips:
 #   If you accidentally press the space bar when the triggering window pops up,
 #   it kills the trigger wait
@@ -20,10 +22,13 @@ import platform
 import cmd_maker as cmds
 
 # Arrays
-#expt_ids = [3,4,5,6,7,8,9,10,11,12,27,28,29,30,31,32,33,34,35,36]
-expt_ids = [39] # 37, 38, 39] # APDS, BLE, ML
+expt_ids = [3,4,5,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
+#expt_ids = [39] # 37, 38, 39] # APDS, BLE, ML
+#expt_ids = [9] # 37, 38, 39] # APDS, BLE, ML
 vmin_levels = [1] # Correspond to 1.6
-Vstart_names = ["Vsafe_culpeo","Vsafe_conservative","Vsafe_catnap","Vsafe_datasheet"]#"Vsafe_naive","Vsafe_naive_better"]
+#Vstart_names = ["Vsafe_culpeo","Vsafe_conservative","Vsafe_catnap","Vsafe_datasheet"]#"Vsafe_naive","Vsafe_naive_better"]
+
+Vstart_names = ["Vsafe_catnap"]#"Vsafe_naive","Vsafe_naive_better"]
 
 # Scalar macros
 # Actual repeats + 1 (for all but catnap)
