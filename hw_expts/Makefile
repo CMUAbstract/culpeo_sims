@@ -3,9 +3,9 @@ TARGET := main
 
 EXPT_ID ?= 0
 
-# Conversion: V = 4096*adc_val/3.3
+# Conversion: V = 4096*adc_val/3.17 (3228) 
 # Converted down to V = 4096*adc_val/2.5
-VHIGH ?= 3228
+VHIGH ?= 4046
 
 VSAFE_PATH ?= ./Vsafe_culpeo/
 
