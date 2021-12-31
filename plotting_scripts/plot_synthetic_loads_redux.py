@@ -25,6 +25,9 @@ alphas=[1,.6,.4,.2]
 labels = ["5mA\n100ms","10mA\n100ms","5mA\n10ms","10mA\n10ms","25mA\n10ms",
 "50mA\n10ms","10mA\n1ms","25mA\n1ms","50mA\n1ms","5mA\n100ms","10mA\n100ms","5mA\n10ms",
 "10mA\n10ms","25mA\n10ms","50mA\n10ms","10mA\n1ms","25mA\n1ms","50mA\n1ms"]
+labels_pop = ["5mA\n100ms","10mA\n100ms","5mA\n10ms","10mA\n10ms","25mA\n10ms",
+"50mA\n10ms","10mA\n1ms","25mA\n1ms","50mA\n1ms","5mA\n100ms","10mA\n100ms","5mA\n10ms",
+"10mA\n10ms","25mA\n10ms","50mA\n10ms","10mA\n1ms","25mA\n1ms","50mA\n1ms"]
 
 colors = ["#f7f7f7","#ca0020","#f4a582","#92c5de","#0571b0"]
 
@@ -34,6 +37,7 @@ blues = ["#deebf7","#9ecae1","#3182bd"]
 if __name__ == "__main__":
   open_catnap_vsafe= open('catnap_vsafe.pkl','rb')
   catnap_vsafes = pickle.load(open_catnap_vsafe)
+  print(catnap_vsafes)
   open_catnap_vsafe.close()
 
   open_conservative_vsafe= open('conservative_vsafe.pkl','rb')
@@ -49,9 +53,11 @@ if __name__ == "__main__":
   open_datasheet_vsafe.close()
 
 
-  open_catnap_summary= open('catnap_summary.pkl','rb')
+  open_catnap_summary= open('catnap_2ms_summary.pkl','rb')
   catnap_expts = pickle.load(open_catnap_summary)
   open_catnap_summary.close()
+  print("Catnap summary:")
+  print(catnap_expts)
 
   open_conservative_summary= open('conservative_summary.pkl','rb')
   conservative_expts = pickle.load(open_conservative_summary)
@@ -88,14 +94,21 @@ if __name__ == "__main__":
   catnap_colors = []
   datasheet_colors = []
   arrs = [catnap_expts,datasheet_expts,conservative_expts,culpeo_expts]
+  count = 0
   for expt_count,expt_id in enumerate(expts_to_use):
     # check if culpeo's vsafe is above Vhigh, if it is, check if we finished
     # anyway
-    if (expt_id in culpeo_expts.keys()) == False:
+    if (expt_id in culpeo_expts.keys()) == False or (expt_id in catnap_expts.keys()) == False:
+      print("Skipping ",expt_id,expt_id in culpeo_expts.keys(),expt_id in catnap_expts.keys())
       continue
     if list(culpeo_vsafes[expt_id])[0] < VHIGH or culpeo_expts[expt_id]['avg_min'] > VMIN:
       #labels.append(expt_id)
       # Handle catnap
+      count = count + 1
+      print("Expt id: ",expt_id, labels_pop[count],count,
+      "vsafe ",list(catnap_vsafes[expt_id])[0],
+      "Vmin ",catnap_expts[expt_id]['avg_min'],"Std ",
+      catnap_expts[expt_id]['std'])
       if (catnap_expts[expt_id]['avg_min'] < V_HARD_FAIL):
         catnap_diffs.append(catnap_expts[expt_id]['avg_min'])
         #catnap_diffs.append(0)
@@ -151,6 +164,7 @@ if __name__ == "__main__":
   catnap_xs = Xs - 1.5*bar_width
   catnap_vsafes = np.divide(np.multiply(catnap_vsafes_used,VRANGE),4096)
   catnap_delta = np.subtract(catnap_vsafes,catnap_diffs)
+  print("Sizes: ",len(catnap_xs),len(catnap_vsafes),len(catnap_vsafes_used))
   plt.errorbar(catnap_xs,catnap_vsafes,catnap_delta,fmt='.', markersize=MS,
   linewidth=10,ecolor=colors[1],barsabove=False,\
   marker='_',color = colors[1],mfc=colors[1],elinewidth=LW,uplims=True,capsize=CS,label='Catnap',alpha=1)
