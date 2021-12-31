@@ -13,12 +13,13 @@ import glob
 import pickle
 
 DO_PLOT = False
-V_RANGE = 3.17
+V_RANGE = 2.485
 V_MIN = 1.6
 CAP_VAL = 45e-3
 EFF_VMIN = .5
 #CAP_VAL = 63e-3
-
+#Offset in seconds:
+TIME_OFFSET = .002 
 datasheet_esr = 25/6
 
 esrs = {
@@ -235,9 +236,9 @@ if __name__ == "__main__":
     # Not needed for new version
     if (expt_id < 13):
       vals = vals[vals[:,0]>1.2]
-      vals = vals[vals[:,0]<1.3 + time_by_id[expt_id]+.002]
+      vals = vals[vals[:,0]<1.3 + time_by_id[expt_id]+TIME_OFFSET]
     else:
-      vals = vals[vals[:,0]< time_by_id[expt_id]+.010+.002]
+      vals = vals[vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET]
     diffs = np.subtract(vals[:,3],vals[:,2])
     I = np.divide(diffs,minV.gain*minV.shunt)
     start_avg = np.average(vals[0:100,1])
@@ -255,6 +256,7 @@ if __name__ == "__main__":
     # Catnap
     catnap_E = .5*CAP_VAL*(start_avg**2 - stop_avg**2)
     catnap_Vsafe = np.sqrt(2*catnap_E/CAP_VAL + V_MIN**2)
+    print("\tCatnap vsafe is: ",catnap_Vsafe)
     catnap_vals[expt_id] = {make_adc_val(catnap_Vsafe)}
     catnap_file_str = make_adc_file_str(expt_id,catnap_Vsafe)
     ##----------------------------------------------------------

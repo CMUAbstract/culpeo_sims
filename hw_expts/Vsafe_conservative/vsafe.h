@@ -51,53 +51,8 @@
 #define VSAFE_ID9 3931
 
 #elif CONFIG == 1
-/*
-#define VSAFE_ID10 2207
-#define VSAFE_ID11 2319
-#define VSAFE_ID12 2494
-#define VSAFE_ID1 2950
-#define VSAFE_ID3 2503
-#define VSAFE_ID4 3036
-#define VSAFE_ID6 2244
-#define VSAFE_ID7 2402
-#define VSAFE_ID8 2768
-#define VSAFE_ID9 3675
-*/
-#define VSAFE_ID13 3058
-#define VSAFE_ID14 4998
-#define VSAFE_ID15 2861
-#define VSAFE_ID16 3666
-#define VSAFE_ID17 5407
-#define VSAFE_ID18 2404
-#define VSAFE_ID19 2707
-#define VSAFE_ID20 3239
-#define VSAFE_ID21 4075
-#define VSAFE_ID22 2321
-#define VSAFE_ID23 2491
-#define VSAFE_ID24 2731
-#define VSAFE_ID25 3047
-#define VSAFE_ID26 4993
-#define VSAFE_ID27 2705
-#define VSAFE_ID28 3320
-#define VSAFE_ID29 5394
-#define VSAFE_ID30 2338
-#define VSAFE_ID31 2563
-#define VSAFE_ID32 2974
-#define VSAFE_ID33 3601
-#define VSAFE_ID34 2294
-#define VSAFE_ID35 2439
-#define VSAFE_ID36 2643
-#define VSAFE_ID10 2273
-#define VSAFE_ID11 2478
-#define VSAFE_ID12 2769
-#define VSAFE_ID1 3587
-#define VSAFE_ID1 3080
-#define VSAFE_ID3 2875
-#define VSAFE_ID4 3679
-#define VSAFE_ID6 2379
-#define VSAFE_ID7 2691
-#define VSAFE_ID8 3296
-#define VSAFE_ID9 4263
+
+#include "grey_hat_culpeo_1.6_0.045"
 
 #define VSAFE_ID_APDS 4387
 #define VSAFE_ID_BLE 3315
