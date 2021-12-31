@@ -279,8 +279,8 @@ void dischargingRoutine(){
   ADC12CTL0 = ADC12SHT0_2 | ADC12ON;      // Sampling time, S&H=16, ADC12 on
   ADC12CTL1 = ADC12SHP;                   // Use sampling timer
   ADC12CTL2 = ADC12RES_2;                // 12-bit conversion results
-  //ADC12MCTL0 = ADC12VRSEL_1 | ADC12INCH_2; // A2 ADC input select; VR=Vref
-  ADC12MCTL0 = ADC12INCH_2; // A2 ADC input select; VR=Vref
+  ADC12MCTL0 = ADC12VRSEL_1 | ADC12INCH_2; // A2 ADC input select; VR=Vref
+  //ADC12MCTL0 = ADC12INCH_2; // A2 ADC input select; VR=Vref
   ADC12IER0 &= ~ADC12IE0;                  // Disable ADC conv complete interrupt
   while(!(REFCTL0 & REFGENRDY)); // Settle
 

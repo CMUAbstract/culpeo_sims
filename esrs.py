@@ -239,6 +239,9 @@ if __name__ == "__main__":
     else:
       vals = vals[vals[:,0]< time_by_id[expt_id]+.010+.002]
     diffs = np.subtract(vals[:,3],vals[:,2])
+    if any(diff < 0 for diff in diffs):
+      print("Upside down!")
+      diffs = np.subtract(vals[:,2],vals[:,3])
     I = np.divide(diffs,minV.gain*minV.shunt)
     start_avg = np.average(vals[0:100,1])
     stop_avg = np.average(vals[-100:,1])
