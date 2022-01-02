@@ -13,7 +13,8 @@ import glob
 import pickle
 
 DO_PLOT = False
-V_RANGE = 2.485
+#V_RANGE = 2.485
+V_RANGE = 3.3
 V_MIN = 1.6
 CAP_VAL = 45e-3
 EFF_VMIN = .5
