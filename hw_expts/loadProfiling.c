@@ -227,12 +227,15 @@ void chargingRoutine(){
 	P1SEL0 |= BIT2;
 
 	ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
+  while(REFCTL0 & REFGENBUSY);            // If ref generator busy, WAIT
+  REFCTL0 |= REFVSEL_2 | REFON;           // Select internal ref = 2.5V
+                                            // Internal Reference ON
 	ADC12CTL0 = ADC12SHT0_2 | ADC12ON;      // Sampling time, S&H=16, ADC12 on
 	ADC12CTL1 = ADC12SHP;                   // Use sampling timer
 	ADC12CTL2 = ADC12RES_2;                // 12-bit conversion results
-	ADC12MCTL0 = ADC12INCH_2;              // A2 ADC input select; Vref=AVCC
+	ADC12MCTL0 = ADC12INCH_2 | ADC12VRSEL_1; // A2 ADC input select; VR=VeRef buff
 	ADC12IER0 &= ~ADC12IE0;                  // Disable ADC conv complete interrupt
-
+  while(!(REFCTL0 & REFGENRDY)); // Settle
 	__delay_cycles(10000);
 
 	while( adc_reading < VHIGH ){
@@ -270,16 +273,17 @@ void dischargingRoutine(){
   P1SEL0 |= BIT2;
 
   ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
+  while(!(REFCTL0 & REFGENRDY));
+  REFCTL0 |= REFVSEL_2 | REFON;           // Select internal ref = 2.5V
+
   ADC12CTL0 = ADC12SHT0_2 | ADC12ON;      // Sampling time, S&H=16, ADC12 on
   ADC12CTL1 = ADC12SHP;                   // Use sampling timer
   ADC12CTL2 = ADC12RES_2;                // 12-bit conversion results
-  //ADC12MCTL0 = ADC12VRSEL_1 | ADC12INCH_2; // A2 ADC input select; VR=Vref
-  ADC12MCTL0 = ADC12INCH_2; // A2 ADC input select; VR=Vref
+  ADC12MCTL0 = ADC12VRSEL_1 | ADC12INCH_2; // A2 ADC input select; VR=Vref
+  //ADC12MCTL0 = ADC12INCH_2; // A2 ADC input select; VR=Vref
   ADC12IER0 &= ~ADC12IE0;                  // Disable ADC conv complete interrupt
-	
-  //while( REFCTL0 & REFGENBUSY );
+  while(!(REFCTL0 & REFGENRDY)); // Settle
 
-	//REFCTL0 = REFVSEL_3 | REFON;            //Set reference voltage(VR+) to 1.2
 
   __delay_cycles(10000);
   adc_reading = 0xfff;
