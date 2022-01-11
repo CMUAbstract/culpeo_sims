@@ -10,12 +10,12 @@ import glob
 import esr_data
 import pickle
 
-expts_to_use = [3,4,5,6,7,8,9,10,11,12,27,28,29,30,31,32,33,34,35,36]
+expts_to_use = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
 GRP_CNT = 4
-VHIGH = 3228
+VHIGH = 4046
 VMIN = 1.6
-VMAX = 2.56
-VRANGE = 3.1
+VMAX = 2.5
+VRANGE = 3.3
 V_HARD_FAIL = 1.6
 bar_width = .2
 LW = 1
@@ -53,23 +53,23 @@ if __name__ == "__main__":
   open_datasheet_vsafe.close()
 
 
-  open_catnap_summary= open('catnap_2ms_summary.pkl','rb')
+  open_catnap_summary= open('catnap_summary_volt_match.pkl','rb')
   catnap_expts = pickle.load(open_catnap_summary)
   open_catnap_summary.close()
   print("Catnap summary:")
   print(catnap_expts)
 
-  open_conservative_summary= open('conservative_summary.pkl','rb')
+  open_conservative_summary= open('conservative_summary_volt_match.pkl','rb')
   conservative_expts = pickle.load(open_conservative_summary)
   open_conservative_summary.close()
   print("Conservative_summary")
   print(conservative_expts)
 
-  open_culpeo_summary= open('culpeo_summary.pkl','rb')
+  open_culpeo_summary= open('culpeo_summary_volt_match.pkl','rb')
   culpeo_expts = pickle.load(open_culpeo_summary)
   open_culpeo_summary.close()
 
-  open_datasheet_summary= open('datasheet_summary.pkl','rb')
+  open_datasheet_summary= open('datasheet_summary_volt_match.pkl','rb')
   datasheet_expts = pickle.load(open_datasheet_summary)
   open_datasheet_summary.close()
 
@@ -101,14 +101,15 @@ if __name__ == "__main__":
     if (expt_id in culpeo_expts.keys()) == False or (expt_id in catnap_expts.keys()) == False:
       print("Skipping ",expt_id,expt_id in culpeo_expts.keys(),expt_id in catnap_expts.keys())
       continue
+    print(expt_id, list(culpeo_vsafes[expt_id])[0])
     if list(culpeo_vsafes[expt_id])[0] < VHIGH or culpeo_expts[expt_id]['avg_min'] > VMIN:
       #labels.append(expt_id)
       # Handle catnap
       count = count + 1
-      print("Expt id: ",expt_id, labels_pop[count],count,
-      "vsafe ",list(catnap_vsafes[expt_id])[0],
-      "Vmin ",catnap_expts[expt_id]['avg_min'],"Std ",
-      catnap_expts[expt_id]['std'])
+      #print("Expt id: ",expt_id, labels_pop[count],count,
+      #"vsafe ",list(catnap_vsafes[expt_id])[0],
+      #"Vmin ",catnap_expts[expt_id]['avg_min'],"Std ",
+      #catnap_expts[expt_id]['std'])
       if (catnap_expts[expt_id]['avg_min'] < V_HARD_FAIL):
         catnap_diffs.append(catnap_expts[expt_id]['avg_min'])
         #catnap_diffs.append(0)

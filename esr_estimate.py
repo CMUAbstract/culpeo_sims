@@ -130,24 +130,29 @@ if __name__ == "__main__":
     df = pd.read_csv(filename, mangle_dupe_cols=True,
          dtype=np.float64, skipinitialspace=True,skiprows=[0])
   vals = df.values
+  # Prune filename
+  print(filename)
+  pos = re.search('/',filename).end()
+  print(pos)
+  filename = filename[pos:]
   app_name =  re.findall(r'[a-z]+',filename)[0]
   print(app_name)
   if app_name == 'apds':
-    vals = vals[vals[:,0] < .585]
+    vals = vals[vals[:,0] < .56]
     vals = vals[vals[:,0] > .5144]
     cutoff = 2e3
   elif  app_name == 'ml':
     cutoff = 5e1
-    vals = vals[vals[:,0] < 1.025]
-    vals = vals[vals[:,0] > .026]
+    vals = vals[vals[:,0] < 1.103]
+    vals = vals[vals[:,0] > .0026]
   elif app_name == 'ble':
     cutoff = 5e1
-    vals = vals[vals[:,0] < 1.025]
+    vals = vals[vals[:,0] < 1.002]
     vals = vals[vals[:,0] > .0]
   elif app_name == 'fast':
     cutoff = 5e1
     vals = vals[vals[:,0] < .126]
-    vals = vals[vals[:,0] > .026]
+    vals = vals[vals[:,0] > .0026]
 
   diffs = np.subtract(vals[:,3],vals[:,2])
   numbers = re.findall(r'[0-9]+',filename)
@@ -167,8 +172,11 @@ if __name__ == "__main__":
       df = pd.read_csv(filename, mangle_dupe_cols=True,
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals_V = df.values
-    vals_V = vals_V[vals_V[:,0] < .585]
-    vals_V = vals_V[vals_V[:,0] > .514]
+    vals_V = vals_V[vals_V[:,0] < .56]
+    # We scoot this a little further away so we don't artifically get the up
+    # swing after releasing the cap... despite the fact that Catnap would end up
+    # seeing that
+    vals_V = vals_V[vals_V[:,0] > .515]
     V = vals_V[:,1]
     times = vals_V[:,0]
   #elif app_name == 'fast': #TODO this needs its own cap trace
@@ -190,7 +198,7 @@ if __name__ == "__main__":
   ax.plot(times,V)
   plt.show()
   calc_vsafes(I,V,dt,esr,app_name)
-  sys.exit(1)
+  sys.exit(0)
   filtered_I = butter_lowpass_filter(I,1e2,(1/dt)*.5,2)
   fig, ax = plt.subplots()
   ax.plot(I,'r.')
