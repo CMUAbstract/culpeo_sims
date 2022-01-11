@@ -7,6 +7,9 @@ EXPT_ID ?= 0
 # Converted down to V = 4096*adc_val/2.5
 VHIGH ?= 4046
 
+# TODO add a rounding thing here so we don't have to round up manually
+VREF ?= 4
+
 VSAFE_PATH ?= ./Vsafe_culpeo/
 
 USE_VSAFE ?= 0
@@ -40,7 +43,9 @@ MCU := msp430fr5994
 endif
 
 CFLAGS += -D __$(DEVICE)__ -DTLOAD=$(TLOAD) -DVHIGH=$(VHIGH) -mmcu=$(MCU) \
--O2 -static -DEXPT_ID=$(EXPT_ID) -DREPEAT_COUNT=$(REPEATS) -DCONFIG=$(CONFIG)
+-O2 -static -DEXPT_ID=$(EXPT_ID) -DREPEAT_COUNT=$(REPEATS) -DCONFIG=$(CONFIG)\
+-DVREF=$(VREF)
+
 IFLAGS := -I $(MSP430_INC_PATH) -I$(VSAFE_PATH)
 LFLAGS := -T $(MCU).ld -L $(MSP430_LD_PATH) -mmcu=$(MCU)
 

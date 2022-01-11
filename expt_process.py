@@ -24,7 +24,9 @@ if __name__ == "__main__":
   i = 1
   all_files = []
   while i < num_files:
-    numbers = re.findall(r'[0-9]+',sys.argv[i])
+    pos = re.search('EXPT',sys.argv[i]).start()
+    base_name = sys.argv[i][pos:]
+    numbers = re.findall(r'[0-9]+',base_name)
     expt_id = int(numbers[0])
     config =int(numbers[1])
     if expt_id in file_dict:
@@ -38,7 +40,9 @@ if __name__ == "__main__":
     mins = []
     fail_count = 0
     for filename in file_dict[expt_id]:
-      numbers = re.findall(r'[0-9]+',filename)
+      pos = re.search('EXPT',filename).start()
+      base_filename = filename[pos:]
+      numbers = re.findall(r'[0-9]+',base_filename)
       expt_id = int(numbers[0])
       config =int(numbers[1])
       try:
@@ -50,7 +54,7 @@ if __name__ == "__main__":
       #print("File name is: ",filename)
       vals = df.values
       start_vcap = np.average(vals[0:100,1])
-      #print("Start cap is: ",start_vcap)
+      print("Expt is ",expt_id,"Start cap is: ",start_vcap)
       Vmin = np.amin(vals[:,1])
       mins.append(Vmin)
       #print("Vmin is ",Vmin)
