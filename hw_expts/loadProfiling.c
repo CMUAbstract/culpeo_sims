@@ -227,30 +227,38 @@ void chargingRoutine(){
 	P1SEL0 |= BIT2;
 
 	ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
+#if VREF < 3
   while(REFCTL0 & REFGENBUSY);            // If ref generator busy, WAIT
   REFCTL0 |= REFVSEL_2 | REFON;           // Select internal ref = 2.5V
                                             // Internal Reference ON
+#endif
 	ADC12CTL0 = ADC12SHT0_2 | ADC12ON;      // Sampling time, S&H=16, ADC12 on
 	ADC12CTL1 = ADC12SHP;                   // Use sampling timer
 	ADC12CTL2 = ADC12RES_2;                // 12-bit conversion results
+#if VREF < 3
 	ADC12MCTL0 = ADC12INCH_2 | ADC12VRSEL_1; // A2 ADC input select; VR=VeRef buff
+#else
+	ADC12MCTL0 = ADC12INCH_2; // A2 ADC input select; VR=Vdd
+#endif
 	ADC12IER0 &= ~ADC12IE0;                  // Disable ADC conv complete interrupt
+#if VREF < 3
   while(!(REFCTL0 & REFGENRDY)); // Settle
+#endif
 	__delay_cycles(10000);
 
 	while( adc_reading < VHIGH ){
 		// ======== Configure ADC ========
 		// Take single sample when timer triggers and compare with threshold
-		
+
 		ADC12IFGR0 &= ~ADC12IFG0;
 		ADC12CTL1 |= ADC12SHP | ADC12SHS_0 | ADC12CONSEQ_0 ;      // Use ADC12SC to trigger and single-channel
 		ADC12CTL0 |= (ADC12ON + ADC12ENC + ADC12SC); 			// Trigger ADC conversion
-		
-		while(!(ADC12IFGR0 & ADC12IFG0)); 			// Wait till conversion over	
+
+		while(!(ADC12IFGR0 & ADC12IFG0)); // Wait till conversion over
 		adc_reading = ADC12MEM0; 					// Read ADC value
-		
+
 		ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
-		
+
 		 uart_write("ADC Reading:");
 		 sprintf( str, "%d V\r\n", adc_reading );
 		 uart_write( str );
@@ -273,16 +281,23 @@ void dischargingRoutine(){
   P1SEL0 |= BIT2;
 
   ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
+#if VREF < 3
   while(!(REFCTL0 & REFGENRDY));
   REFCTL0 |= REFVSEL_2 | REFON;           // Select internal ref = 2.5V
-
+#endif
   ADC12CTL0 = ADC12SHT0_2 | ADC12ON;      // Sampling time, S&H=16, ADC12 on
   ADC12CTL1 = ADC12SHP;                   // Use sampling timer
   ADC12CTL2 = ADC12RES_2;                // 12-bit conversion results
+#if VREF < 3
   ADC12MCTL0 = ADC12VRSEL_1 | ADC12INCH_2; // A2 ADC input select; VR=Vref
+#else
+  ADC12MCTL0 = ADC12INCH_2; // A2 ADC input select; VR=Vdd
+#endif
   //ADC12MCTL0 = ADC12INCH_2; // A2 ADC input select; VR=Vref
   ADC12IER0 &= ~ADC12IE0;                  // Disable ADC conv complete interrupt
+#if VREF < 3
   while(!(REFCTL0 & REFGENRDY)); // Settle
+#endif
 
 
   __delay_cycles(10000);

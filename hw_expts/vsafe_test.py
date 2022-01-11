@@ -22,17 +22,30 @@ import platform
 import cmd_maker as cmds
 
 # Arrays
-expt_ids = [3,4,5,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
+expt_ids = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
 #expt_ids = [39] # 37, 38, 39] # APDS, BLE, ML
 #expt_ids = [9] # 37, 38, 39] # APDS, BLE, ML
 vmin_levels = [1] # Correspond to 1.6
 #Vstart_names = ["Vsafe_culpeo","Vsafe_conservative","Vsafe_catnap","Vsafe_datasheet"]#"Vsafe_naive","Vsafe_naive_better"]
+Vstart_names = ["Vsafe_conservative"]#"Vsafe_naive","Vsafe_naive_better"]
 
-Vstart_names = ["Vsafe_catnap"]#"Vsafe_naive","Vsafe_naive_better"]
+
+expt_lists = {
+  "Vsafe_culpeo": [33],
+  "Vsafe_conservative": [8,28,27],
+  "Vsafe_datasheet": [27,28,33],
+  "Vsafe_catnap": [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
+}
+#Vstart_names = ["Vsafe_catnap"]#"Vsafe_naive","Vsafe_naive_better"]
 
 # Scalar macros
 # Actual repeats + 1 (for all but catnap)
 REPEATS = 6
+
+raw_vhigh = 2.6
+vrange = 3.3
+
+VHIGH = np.ceil(raw_vhigh*4096/vrange)
 
 def saleae_capture(host='localhost', port=10429, \
 output_dir='/media/abstract/frick/culpeo_results/seiko_expts/', output='outputs', ID='1234', \
@@ -107,12 +120,14 @@ def run_vsafe_tests():
     for Vmin in vmin_levels:
       for expt_id in expt_ids:
         if Vstart_name == "Vsafe_catnap":
-          repeats = 4
+          repeats = REPEATS
+        if expt_lists[Vstart_name].count(expt_id) < 1:
+          continue
         # Set output file name
         cur_test_str = "EXPT_" + str(expt_id) + "_"+str(Vmin) + "_" + Vstart_name + "_"
         # program ctrl mcu
         env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(repeats),\
-        "CONFIG=",str(Vmin),"EXPT_ID=",str(expt_id),"VSAFE_PATH=./",Vstart_name)
+        "CONFIG=",str(Vmin),"EXPT_ID=",str(expt_id),"VSAFE_PATH=./",Vstart_name,"VHIGH=",str(VHIGH))
         full_cmd = env.clean_cmd() + env.bld_all_cmd() + env.prog_cmd()
         print(full_cmd)
         os.system(full_cmd)
