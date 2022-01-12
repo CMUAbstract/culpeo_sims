@@ -119,8 +119,6 @@ def run_vsafe_tests():
   for Vstart_name in Vstart_names:
     for Vmin in vmin_levels:
       for expt_id in expt_ids:
-        if Vstart_name == "Vsafe_catnap":
-          repeats = REPEATS
         if expt_lists[Vstart_name].count(expt_id) < 1:
           continue
         # Set output file name

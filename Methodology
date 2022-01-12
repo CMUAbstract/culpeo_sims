@@ -151,6 +151,13 @@ conditions. For instance:
 
 # Application tests
 
+* An important thing to keep in mind is that you program a Capybara/M4 with the
+program under test before queuing up the launchpad to run the harness around
+it. The harness will just keep the system on for the correct number of a
+seconds-- a program that actually does the workload needs to be programmed on
+separately.
+* For apps tested externally, (TEST_EXTERNAL) a sip switch will be flipped and
+activate the other board.
 * The M4 tests use the application in the digitTest directory
 * The LoRa test uses the application in camaroptera/src/loraTest.c from the
 Abstract github, you compile
@@ -159,7 +166,7 @@ it with the Makefile in that directory.
 pacarana_mezzo_tests (it'll need to get ported somewhere real) you build it by just
 compiling with USE_SENSORS=1
 * The apds test is in main_apds_alone.c in pacarana_mezzo_tests and uses the version
-* of libapds in that repo. Build it by setting USE_SENSORS=0 RUN_APDS_SOLO=1
+of libapds in that repo. Build it by setting USE_SENSORS=0 RUN_APDS_SOLO=1
 
 # Extracting ESR and calculating Vsafe for real traces:
 
