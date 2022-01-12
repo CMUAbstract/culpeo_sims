@@ -54,9 +54,9 @@
 
 #include "grey_hat_culpeo_1.6_0.045"
 
-#define VSAFE_ID_APDS 4387
-#define VSAFE_ID_BLE 3315
-#define VSAFE_ID_ML 2692
+#include "conservative_APDS_1.6"
+#include "conservative_BLE_1.6"
+#include "conservative_ML_1.6"
 
 #else
 

@@ -54,9 +54,9 @@
 
 #include "catnap_1.6_0.045"
 
-#define VSAFE_ID_APDS 2121
-#define VSAFE_ID_BLE 2177
-#define VSAFE_ID_ML 2271
+#include "catnap_APDS_1.6"
+#include "catnap_BLE_1.6"
+#include "catnap_ML_1.6"
 
 #else
 

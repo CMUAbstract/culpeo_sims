@@ -109,9 +109,9 @@
 
 #include "vsafe_1.6_0.045"
 
-#define VSAFE_ID_APDS 2725
-#define VSAFE_ID_BLE 3038
-#define VSAFE_ID_ML 2988
+#include "culpeo_APDS_1.6"
+#include "culpeo_BLE_1.6"
+#include "culpeo_ML_1.6"
 
 #else
 
