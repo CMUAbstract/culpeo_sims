@@ -11,9 +11,9 @@
 // Min voltage 1.6
 #include "datasheet_esr_culpeo_1.6_0.045"
 
-#define VSAFE_ID_APDS 2505
-#define VSAFE_ID_BLE 2289
-#define VSAFE_ID_ML 2532
+#include "datasheet_APDS_1.6"
+#include "datasheet_BLE_1.6"
+#include "datasheet_ML_1.6"
 
 #else
 

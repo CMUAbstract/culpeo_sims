@@ -15,7 +15,7 @@ import pickle
 
 
 R_SHUNT = 4.7
-V_RANGE = 3.17
+V_RANGE = 3.3
 V_MIN = 1.6
 CAP_VAL = 45e-3
 EFF_VMIN = .5
@@ -31,7 +31,7 @@ curve = np.poly1d(fits)
 def make_adc_file_str(expt_id, val):
   adc = np.ceil(4096*val/V_RANGE)
   adc_val = int(adc)
-  file_str = "#define VSAFE_" + str(expt_id) + " " + str(adc_val) + "\n"
+  file_str = "#define VSAFE_ID_" + str(expt_id) + " " + str(adc_val) + "\n"
   return file_str
 
 def make_adc_val(val):
@@ -89,6 +89,7 @@ def extract_esr(I,vals,cutoff=1e3):
   return y
 
 def calc_vsafes(I,V,dt,esr,name):
+  name = name.upper()
   # Catnap
   start_avg = np.average(V[0:100])
   stop_avg = np.average(V[-100:])
@@ -96,27 +97,32 @@ def calc_vsafes(I,V,dt,esr,name):
   catnap_E = .5*CAP_VAL*(start_avg**2 - stop_avg**2)
   catnap_Vsafe = np.sqrt(2*catnap_E/CAP_VAL + V_MIN**2)
   catnap_file_str = make_adc_file_str(name,catnap_Vsafe)
+  catnap_vsafe = open("catnap_"+name+"_"+str(V_MIN),"w")
+  catnap_vsafe.write(catnap_file_str)
+  catnap_vsafe.close()
   # Point estimate
   n = EFF_VMIN
   max_i = np.amax(I)*2.56/(n*V_MIN)
   conservative_Vsafe = np.sqrt(2*catnap_E/CAP_VAL + (V_MIN + max_i*minV.CAP_ESR)**2)
   conservative_file_str = make_adc_file_str(name,conservative_Vsafe)
+  cons_vsafe = open("conservative_"+name+"_"+str(V_MIN),"w")
+  cons_vsafe.write(conservative_file_str)
+  cons_vsafe.close()
   # Culpeo
   minV.CAP_ESR = esr
   minV.MIN_VOLTAGE = V_MIN
   Vsafe = minV.calc_min_forward(I,dt,DO_PLOT)
   culpeo_file_str = make_adc_file_str(name,Vsafe)
+  culpeo_vsafe = open("culpeo_"+name+"_"+str(V_MIN),"w")
+  culpeo_vsafe.write(culpeo_file_str)
+  culpeo_vsafe.close()
   # Datasheet
   minV.CAP_ESR = datasheet_esr
   datasheet_vsafe = minV.calc_min_forward(I,dt,DO_PLOT)
   datasheet_file_str = make_adc_file_str(name,datasheet_vsafe)
-  safe_vals = open(name+"_vsafe.h","w")
-  out_str = catnap_file_str+"\n"+ \
-  conservative_file_str+"\n"+culpeo_file_str+"\n"+datasheet_file_str+"\n"
-  print(out_str)
-  safe_vals.write(out_str)
-  safe_vals.close()
-
+  datasheet_vsafe = open("datasheet_"+name+"_"+str(V_MIN),"w")
+  datasheet_vsafe.write(datasheet_file_str)
+  datasheet_vsafe.close()
 
 if __name__ == "__main__":
   if (len(sys.argv) < 2):
@@ -130,24 +136,29 @@ if __name__ == "__main__":
     df = pd.read_csv(filename, mangle_dupe_cols=True,
          dtype=np.float64, skipinitialspace=True,skiprows=[0])
   vals = df.values
+  # Prune filename
+  print(filename)
+  pos = re.search('/',filename).end()
+  print(pos)
+  filename = filename[pos:]
   app_name =  re.findall(r'[a-z]+',filename)[0]
   print(app_name)
   if app_name == 'apds':
-    vals = vals[vals[:,0] < .585]
+    vals = vals[vals[:,0] < .56]
     vals = vals[vals[:,0] > .5144]
     cutoff = 2e3
   elif  app_name == 'ml':
     cutoff = 5e1
-    vals = vals[vals[:,0] < 1.025]
-    vals = vals[vals[:,0] > .026]
+    vals = vals[vals[:,0] < 1.103]
+    vals = vals[vals[:,0] > .0026]
   elif app_name == 'ble':
     cutoff = 5e1
-    vals = vals[vals[:,0] < 1.025]
+    vals = vals[vals[:,0] < 1.002]
     vals = vals[vals[:,0] > .0]
   elif app_name == 'fast':
     cutoff = 5e1
     vals = vals[vals[:,0] < .126]
-    vals = vals[vals[:,0] > .026]
+    vals = vals[vals[:,0] > .0026]
 
   diffs = np.subtract(vals[:,3],vals[:,2])
   numbers = re.findall(r'[0-9]+',filename)
@@ -167,8 +178,11 @@ if __name__ == "__main__":
       df = pd.read_csv(filename, mangle_dupe_cols=True,
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals_V = df.values
-    vals_V = vals_V[vals_V[:,0] < .585]
-    vals_V = vals_V[vals_V[:,0] > .514]
+    vals_V = vals_V[vals_V[:,0] < .56]
+    # We scoot this a little further away so we don't artifically get the up
+    # swing after releasing the cap... despite the fact that Catnap would end up
+    # seeing that
+    vals_V = vals_V[vals_V[:,0] > .515]
     V = vals_V[:,1]
     times = vals_V[:,0]
   #elif app_name == 'fast': #TODO this needs its own cap trace
@@ -190,7 +204,7 @@ if __name__ == "__main__":
   ax.plot(times,V)
   plt.show()
   calc_vsafes(I,V,dt,esr,app_name)
-  sys.exit(1)
+  sys.exit(0)
   filtered_I = butter_lowpass_filter(I,1e2,(1/dt)*.5,2)
   fig, ax = plt.subplots()
   ax.plot(I,'r.')
