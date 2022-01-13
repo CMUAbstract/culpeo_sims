@@ -15,9 +15,10 @@ expts_to_use = [37,38,39]
 names = ['Gesture','BLE', 'MNIST']
 
 GRP_CNT = 3
-VHIGH = 3228
+#VHIGH = 3228
 VMIN = 1.6
 VMAX = 2.56
+VHIGH = VMAX
 VRANGE = 3.1
 V_HARD_FAIL = 1.6
 bar_width = .2
@@ -27,20 +28,44 @@ MS = 6
 FS = 28
 alphas=[1,.6,.4,.2]
 
+def convert(adc):
+  return adc*VRANGE/4096 
 
 red = "#b2182b"
 blues = ["#deebf7","#9ecae1","#3182bd"]
 colors = ["#f7f7f7","#ca0020","#f4a582","#92c5de","#0571b0"]
 
 if __name__ == "__main__":
-  catnap_vsafes = {37:2121,38:2177,39:2530}
+  if len(sys.argv) < 2:
+    catnap_vsafes = {37:2121,38:2177,39:2530}
+    conservative_vsafes = {37:4121,38: 3315, 39:3012}
 
-  conservative_vsafes = {37:4121,38: 3315, 39:3012}
+    culpeo_vsafes = {37: 2909, 38:3038, 39:2871}
 
-  culpeo_vsafes = {37: 2909, 38:3038, 39:2871}
-
-  datasheet_vsafes = {37:3220,38: 2289,39:2906}
-
+    datasheet_vsafes = {37:3220,38: 2289,39:2906}
+    for vsafes in [catnap_vsafes, conservative_vsafes, culpeo_vsafes,
+      datasheet_vsafes]:
+      for key in vsafes:
+        vsafes[key] = convert(vsafes[key])
+    print(culpeo_vsafes)
+  else:
+    catnap = open(sys.argv[1],'rb')
+    catnap_vsafes = pickle.load(catnap)
+    catnap.close()
+    print(catnap_vsafes)
+    culpeo = open(sys.argv[2],'rb')
+    culpeo_vsafes = pickle.load(culpeo)
+    culpeo.close()
+    print(culpeo_vsafes)
+    cons = open(sys.argv[3],'rb')
+    conservative_vsafes = pickle.load(cons)
+    cons.close()
+    print(conservative_vsafes)
+    datasheet = open(sys.argv[4],'rb')
+    datasheet_vsafes = pickle.load(datasheet)
+    datasheet.close()
+    print(datasheet_vsafes)
+    
 
   open_catnap_summary= open('catnap_37-39_summary.pkl','rb')
   catnap_expts = pickle.load(open_catnap_summary)
@@ -81,6 +106,8 @@ if __name__ == "__main__":
   catnap_colors = []
   datasheet_colors = []
   arrs = [catnap_expts,datasheet_expts,conservative_expts,culpeo_expts]
+  print("Culpeo outputs:")
+  print(culpeo_expts)
   for expt_count,expt_id in enumerate(expts_to_use):
     # check if culpeo's vsafe is above Vhigh, if it is, check if we finished
     # anyway
@@ -104,7 +131,7 @@ if __name__ == "__main__":
           catnap_markers.append('pass')
       # Handle conservative
       if (expt_id in conservative_expts.keys()) == False:
-        conservative_diffs.append(conservative_vsafes[expt_id]*VRANGE/4096)
+        conservative_diffs.append(conservative_vsafes[expt_id])
       else:
         #conservative_diffs.append((conservative_expts[expt_id]['avg_min'] - VMIN)/(VMAX-VMIN))
         conservative_diffs.append(conservative_expts[expt_id]['avg_min'])
@@ -131,6 +158,7 @@ if __name__ == "__main__":
       # Handle culpeo
       #culpeo_diffs.append((culpeo_expts[expt_id]['avg_min'] - VMIN)/(VMAX-VMIN))
       culpeo_diffs.append(culpeo_expts[expt_id]['avg_min'])
+      print(culpeo_diffs)
       if (culpeo_expts[expt_id]['avg_min'] < VMIN):
         print("Fail: ",expt_id)
 
@@ -142,28 +170,32 @@ if __name__ == "__main__":
   Xs = np.arange(len(labels))
   fig, ax = plt.subplots()
   catnap_xs = Xs - 1.5*bar_width
-  catnap_vsafes = np.divide(np.multiply(catnap_vsafes_used,VRANGE),4096)
+  #catnap_vsafes = np.divide(np.multiply(catnap_vsafes_used,VRANGE),4096)
+  catnap_vsafes = catnap_vsafes_used
   catnap_delta = np.subtract(catnap_vsafes,catnap_diffs)
   plt.errorbar(catnap_xs,catnap_vsafes,catnap_delta,fmt='.', markersize=MS,
   linewidth=10,ecolor=colors[1],barsabove=False,\
   marker='_',color = colors[1],mfc=colors[1],elinewidth=LW,uplims=True,capsize=CS,label='Catnap',alpha=1)
 
   datasheet_xs = Xs - .5*bar_width
-  datasheet_vsafes = np.divide(np.multiply(datasheet_vsafes_used,VRANGE),4096)
+  #datasheet_vsafes = np.divide(np.multiply(datasheet_vsafes_used,VRANGE),4096)
+  datasheet_vsafes = datasheet_vsafes_used
   datasheet_delta = np.subtract(datasheet_vsafes,datasheet_diffs)
   plt.errorbar(datasheet_xs,datasheet_vsafes,datasheet_delta,fmt='.',elinewidth=LW,
   ecolor=colors[2],\
   marker='_',color=colors[2],mfc=colors[2],uplims=True,capsize=CS,label='Datasheet',alpha=1)
 
   conservative_xs = Xs + .5*bar_width
-  conservative_vsafes = np.divide(np.multiply(conservative_vsafes_used,VRANGE),4096)
+  #conservative_vsafes = np.divide(np.multiply(conservative_vsafes_used,VRANGE),4096)
+  conservative_vsafes = conservative_vsafes_used
   conservative_delta = np.subtract(conservative_vsafes,conservative_diffs)
   plt.errorbar(conservative_xs,conservative_vsafes,conservative_delta,elinewidth=LW,fmt='.',
   ecolor=colors[3],color=colors[3],\
   marker='_',mfc=colors[3],uplims=True,capsize=CS,label='Culpeo-PE',alpha=1)
 
   culpeo_xs = Xs + 1.5*bar_width
-  culpeo_vsafes = np.divide(np.multiply(culpeo_vsafes_used,VRANGE),4096)
+  #culpeo_vsafes = np.divide(np.multiply(culpeo_vsafes_used,VRANGE),4096)
+  culpeo_vsafes = culpeo_vsafes_used
   culpeo_delta = np.subtract(culpeo_vsafes,culpeo_diffs)
   plt.errorbar(culpeo_xs,culpeo_vsafes,culpeo_delta,elinewidth=LW,fmt='.', ecolor=colors[4],\
   marker='_',color=colors[4],mfc=colors[4],uplims=True,capsize=CS,label='Culpeo',alpha=1)
