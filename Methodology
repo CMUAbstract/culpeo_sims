@@ -151,7 +151,15 @@ conditions. For instance:
 
 # Application tests
 
-* The M4 tests use the application in the digitTest directory
+* An important thing to keep in mind is that you program a Capybara/M4 with the
+program under test before queuing up the launchpad to run the harness around
+it. The harness will just keep the system on for the correct number of a
+seconds-- a program that actually does the workload needs to be programmed on
+separately.
+* For apps tested externally, (TEST_EXTERNAL) a sip switch will be flipped and
+activate the other board.
+* The ML on M4 tests use the application in the
+camaroptera/src/arm-dnn-accelerator directory set the DVFS setting to 3 (24MHz)
 * The LoRa test uses the application in camaroptera/src/loraTest.c from the
 Abstract github, you compile
 it with the Makefile in that directory. 
@@ -159,7 +167,11 @@ it with the Makefile in that directory.
 pacarana_mezzo_tests (it'll need to get ported somewhere real) you build it by just
 compiling with USE_SENSORS=1
 * The apds test is in main_apds_alone.c in pacarana_mezzo_tests and uses the version
-* of libapds in that repo. Build it by setting USE_SENSORS=0 RUN_APDS_SOLO=1
+of libapds in that repo. Build it by setting USE_SENSORS=0 RUN_APDS_SOLO=1 The
+apds needs to be run twice to get the Vcap and current curves because you can't
+put the anmeter setup in there with harvested energy and still maintain a high
+enough voltage for the apds i2c to work.  So run it once on harvested energy and
+measure Vcap, then run it on continuous power to get the current trace.
 
 # Extracting ESR and calculating Vsafe for real traces:
 
@@ -182,7 +194,23 @@ with the new ones.
 
 # Running scheduler tests
 
-* Run the following from vogar:~/culpeo_sims/plotting_scripts
+* For the scheduler test with the M4:
+  * Disconnect the op-amp (I think)
+  * Program the harness launchpad with code in: culpeo_sims/hw_expts
+  DO_INTERRUPT_TEST , press button on P5.6 to start the interrupts, they'll
+  run forever
+  * Program a capybara that will act as the front end AND back endwith:
+  pacarana_mezzo_tests/main_culpeo.c, USE_SENSORS=0 RUN_CULPEO=1 DO_INTERRUPT=1 APP=2 SCHEDULER=0/1
+  * then w/ and w/out #define FULL_RECHARGE
+  * Program the m4 with: culpeo_sims/digitTest/ , set the DVFS setting in digitTest/Core/Src/main.c to DVFS_5
+  * Then attach the power pins between the capybara and the m4: Vdd --> SIP input, SIP output --> M4 JP6, IDD side
+  * Then attach the control pins between the launchpad and capybara: launchpad P3.1 --> capybara P1.4
+  * Then attach the pins between the capybara front end and the m4: P1.1 to sip enable, P1.3 --> M4 D7
+  * Watch P1.0 on the front end capybara as an indicator of captured interrupts
+  * To make this work we powered an op-amp connected to vcap with the launchpad
+  to measure vcap
+
+* to plot: run the following from vogar:~/culpeo_sims/plotting_scripts
 
 python3 plot_apds_traces.py results/case_study/apds_30s_clean_charge-to-full.csv \
 results/case_study/apds_30s_clean_catnap.csv \

@@ -126,13 +126,13 @@ int main(void)
 
 		mcu_delayms( 300 );
 #ifdef TEST_EXTERNAL
-    P2OUT |= BIT5;
+    P2OUT |= BIT5; // Flip SIP
 #endif
     // Discharge down to Vsafe
 #ifdef USE_VSAFE
     dischargingRoutine(); // Only removed for now
 #endif
-    P2OUT |= BIT6;
+    P2OUT |= BIT6; // Start bit
     // P2.5 is for enabling the sip switch, this lets the booster rebound
     // before we turn on power to anything external
 #ifdef TEST_EXTERNAL

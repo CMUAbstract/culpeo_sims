@@ -9,9 +9,18 @@ import glob
 
 R_SHUNT = 4.7
 STOP_TIME = [40,40,40]
-START_TIME = [0,0,0]
+START_TIME = [-0.00001,-0.00001,-0.00001]
 GAIN = 16
 titles = ['Charge-to-Full', 'Catnap','Culpeo']
+
+#EN_index = 5
+#GND_Truth_index = 13
+#Resp_index = 7
+
+EN_index = 14
+GND_Truth_index = 12
+Resp_index = 6
+
 DO_HIST = False
 if __name__ == "__main__":
   num_files = len(sys.argv)
@@ -33,22 +42,24 @@ if __name__ == "__main__":
       df = pd.read_csv(filename, mangle_dupe_cols=True,
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals = df.values
-    enables = vals[:,5:7]
-    print(enables)
+    print("Size is: ",vals.shape)
+    enables = vals[:,EN_index : EN_index + 2]
     enables = enables[enables[:,0]<STOP_TIME[count]]
     enables = enables[enables[:,0] > START_TIME[count]]
-    bit_flips = vals[:,7:9]
+    bit_flips = vals[:,Resp_index : Resp_index + 2]
     bit_flips = bit_flips[bit_flips[:,0]<STOP_TIME[count]]
     bit_flips = bit_flips[bit_flips[:,0] > START_TIME[count]]
     bit_flips = bit_flips[bit_flips[:,1] > 0]
-    gnd_truth = vals[:,13:15]
+    gnd_truth = vals[:,GND_Truth_index : GND_Truth_index + 2]
     gnd_truth = gnd_truth[gnd_truth[:,0]<STOP_TIME[count]]
     gnd_truth = gnd_truth[gnd_truth[:,0] > START_TIME[count]]
-    real_count = 0;
+    real_count = np.nansum(gnd_truth[:,1]);
+    print(enables)
+    print("enable flips: ", len(enables))
     captured_count = 0;
     up_time = 0
     for i,time in enumerate(enables[:,0]):
-      if enables[i,1] == 1:
+      if enables[i,1] == 1 and i < len(enables[:,0]) - 1:
         # get next one
         if enables[i+1,1] == 1:
           print("Shit")
@@ -60,6 +71,7 @@ if __name__ == "__main__":
         temp = temp[temp[:,0] > start]
         captured_count += np.nansum(temp[:,1])
     print("Captured is: ",captured_count)
+    print("Real is: ", real_count)
     print("Up time is: ",up_time)
     print("unexpected failures: ",np.nansum(vals[:,4]))
     vals = vals[vals[:,0] < STOP_TIME[count]]
