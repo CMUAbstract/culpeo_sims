@@ -27,14 +27,14 @@ expt_ids = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
 #expt_ids = [9] # 37, 38, 39] # APDS, BLE, ML
 vmin_levels = [1] # Correspond to 1.6
 #Vstart_names = ["Vsafe_culpeo","Vsafe_conservative","Vsafe_catnap","Vsafe_datasheet"]#"Vsafe_naive","Vsafe_naive_better"]
-Vstart_names = ["Vsafe_conservative"]#"Vsafe_naive","Vsafe_naive_better"]
+Vstart_names = ["Vsafe_catnap"]#,"Vsafe_conservative","Vsafe_naive","Vsafe_naive_better"]
 
 
 expt_lists = {
   "Vsafe_culpeo": [33],
-  "Vsafe_conservative": [8,28,27],
+  "Vsafe_conservative": [8,28,27,39],
   "Vsafe_datasheet": [27,28,33],
-  "Vsafe_catnap": [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
+  "Vsafe_catnap": [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36,39]
 }
 #Vstart_names = ["Vsafe_catnap"]#"Vsafe_naive","Vsafe_naive_better"]
 
@@ -60,8 +60,8 @@ capture_time=1,analogRate=125e3):
     if s.get_active_device().type == 'LOGIC_4_DEVICE':
             print("Logic 4 does not support setting active channels; skipping")
     else:
-            digital = [2,5,6,7]
-            analog = [0,1,3,4]
+            digital = [3,5,6,7]
+            analog = [0,1,2,4]
             print("Setting active channels (digital={}, \
                     analog={})".format(digital, analog))
             s.set_active_channels(digital, analog)
