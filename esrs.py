@@ -33,8 +33,8 @@ esrs = {
 times = {
   1000: 1,
   100: .1,
-  10: .01,
-  1: .001,
+  10: .01087,
+  1: .00187,
   200: .2,
   110: .11,
   101: .101,
@@ -238,8 +238,10 @@ if __name__ == "__main__":
     if (expt_id < 13):
       vals = vals[vals[:,0]>1.2]
       vals = vals[vals[:,0]<1.3 + time_by_id[expt_id]+TIME_OFFSET]
+      print("End = ",1.3 + time_by_id[expt_id] + TIME_OFFSET)
     else:
       vals = vals[vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET]
+      print("End = ",time_by_id[expt_id] + .010 + TIME_OFFSET)
     diffs = np.subtract(vals[:,3],vals[:,2])
     if any(diff < 0 for diff in diffs):
       print("Upside down!")
