@@ -20,7 +20,7 @@ CAP_VAL = 45e-3
 EFF_VMIN = .5
 #CAP_VAL = 63e-3
 #Offset in seconds:
-TIME_OFFSET = .002 
+TIME_OFFSET = .000263
 datasheet_esr = 25/6
 
 esrs = {
