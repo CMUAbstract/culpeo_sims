@@ -9,6 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import re
 import glob
+import os
 import min_voltage_notes as minV
 from scipy.signal import butter,filtfilt
 import pickle
@@ -21,6 +22,8 @@ CAP_VAL = 45e-3
 EFF_VMIN = .5
 DO_PLOT = False
 datasheet_esr = 25/6
+
+name_map = {"APDS": 37,'BLE':38,'ML':39,'FAST':40}
 
 # Fit polynomial, we currently assume y = A + B log(x) format
 #fits = [4.67905365, 32.95741414]
@@ -88,6 +91,20 @@ def extract_esr(I,vals,cutoff=1e3):
   # Return expected ESR
   return y
 
+
+def append_to_dict(sys,app,vsafe):
+  filename = sys +"_multi_vsafes_" + str(V_MIN) + ".pkl"
+  if os.path.exists(filename):
+    fr = open(filename,"rb")
+    mv = pickle.load(fr)
+    fr.close()
+  else:
+    mv = {}
+  fw = open(filename,"wb")
+  mv[name_map[app]] = vsafe
+  pickle.dump(mv,fw)
+  fw.close()
+
 def calc_vsafes(I,V,dt,esr,name):
   name = name.upper()
   # Catnap
@@ -100,6 +117,8 @@ def calc_vsafes(I,V,dt,esr,name):
   catnap_vsafe = open("catnap_"+name+"_"+str(V_MIN),"w")
   catnap_vsafe.write(catnap_file_str)
   catnap_vsafe.close()
+  append_to_dict("catnap",name,catnap_Vsafe)
+  
   # Point estimate
   n = EFF_VMIN
   max_i = np.amax(I)*2.56/(n*V_MIN)
@@ -108,6 +127,7 @@ def calc_vsafes(I,V,dt,esr,name):
   cons_vsafe = open("conservative_"+name+"_"+str(V_MIN),"w")
   cons_vsafe.write(conservative_file_str)
   cons_vsafe.close()
+  append_to_dict("conservative",name,conservative_Vsafe)
   # Culpeo
   minV.CAP_ESR = esr
   minV.MIN_VOLTAGE = V_MIN
@@ -116,13 +136,15 @@ def calc_vsafes(I,V,dt,esr,name):
   culpeo_vsafe = open("culpeo_"+name+"_"+str(V_MIN),"w")
   culpeo_vsafe.write(culpeo_file_str)
   culpeo_vsafe.close()
+  append_to_dict("culpeo",name,Vsafe)
   # Datasheet
   minV.CAP_ESR = datasheet_esr
-  datasheet_vsafe = minV.calc_min_forward(I,dt,DO_PLOT)
-  datasheet_file_str = make_adc_file_str(name,datasheet_vsafe)
+  datasheet_Vsafe = minV.calc_min_forward(I,dt,DO_PLOT)
+  datasheet_file_str = make_adc_file_str(name,datasheet_Vsafe)
   datasheet_vsafe = open("datasheet_"+name+"_"+str(V_MIN),"w")
   datasheet_vsafe.write(datasheet_file_str)
   datasheet_vsafe.close()
+  append_to_dict("datasheet",name,datasheet_Vsafe)
 
 if __name__ == "__main__":
   if (len(sys.argv) < 2):
@@ -168,7 +190,7 @@ if __name__ == "__main__":
   esr = extract_esr(I,vals,cutoff)
   print("use esr: ",esr)
   dt = vals[1,0] - vals[0,0]
-  if app_name == 'apds':
+  if app_name == 'apds' or app_name == 'fast':
     # Need second file
     filename = sys.argv[2]
     try:
@@ -178,13 +200,23 @@ if __name__ == "__main__":
       df = pd.read_csv(filename, mangle_dupe_cols=True,
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals_V = df.values
-    vals_V = vals_V[vals_V[:,0] < .56]
-    # We scoot this a little further away so we don't artifically get the up
-    # swing after releasing the cap... despite the fact that Catnap would end up
-    # seeing that
-    vals_V = vals_V[vals_V[:,0] > .515]
-    V = vals_V[:,1]
-    times = vals_V[:,0]
+    if app_name == 'apds':
+      vals_V = vals_V[vals_V[:,0] < .56]
+      # We scoot this a little further away so we don't artifically get the up
+      # swing after releasing the cap... despite the fact that Catnap would end up
+      # seeing that
+      vals_V = vals_V[vals_V[:,0] > .515]
+      V = vals_V[:,1]
+      times = vals_V[:,0]
+    if app_name == 'fast':
+      vals_V = vals_V[vals_V[:,0] < .138]
+      # We scoot this a little further away so we don't artifically get the up
+      # swing after releasing the cap... despite the fact that Catnap would end up
+      # seeing that
+      vals_V = vals_V[vals_V[:,0] > .026]
+      V = vals_V[:,1]
+      times = vals_V[:,0]
+
   #elif app_name == 'fast': #TODO this needs its own cap trace
   #  filename = sys.argv[2]
   #  try:
