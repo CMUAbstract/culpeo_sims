@@ -4,7 +4,7 @@ BASELINES_PATH = ../culpeo_measurements/hw_expts/e_load_tests/expt_baselines
 
 MEZZOS_PATH = expt_baseline_traces
 
-RESULTS_PATH = results_disk/seiko_expts/microbenchmarks_volt_match_2ms
+RESULTS_PATH = results_disk/seiko_expts/
 
 EXPTS_PATH = hw_expts
 
@@ -31,12 +31,12 @@ mezzo_vsafes:
 
 
 process_synthetic:
-	python3 expt_process.py $(RESULTS_PATH)/catnap/EXPT_*
+	python3 expt_process.py $(RESULTS_PATH)/microbenchmarks_test_dir/catnap/EXPT_*
 	mv expt_process_summary.pkl catnap_summary_volt_match.pkl
-	python3 expt_process.py $(RESULTS_PATH)/culpeo/EXPT_*
+	python3 expt_process.py $(RESULTS_PATH)/microbenchmarks_volt_match_2ms/culpeo/EXPT_*
 	mv expt_process_summary.pkl culpeo_summary_volt_match.pkl
-	python3 expt_process.py $(RESULTS_PATH)/conservative/EXPT_*
+	python3 expt_process.py $(RESULTS_PATH)/microbenchmarks_test_dir/conservative/EXPT_*
 	mv expt_process_summary.pkl conservative_summary_volt_match.pkl
-	python3 expt_process.py $(RESULTS_PATH)/datasheet/EXPT_*
+	python3 expt_process.py $(RESULTS_PATH)/microbenchmarks_volt_match_2ms/datasheet/EXPT_*
 	mv expt_process_summary.pkl datasheet_summary_volt_match.pkl
 
