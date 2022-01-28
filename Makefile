@@ -4,9 +4,11 @@ BASELINES_PATH = ../culpeo_measurements/hw_expts/e_load_tests/expt_baselines
 
 MEZZOS_PATH = expt_baseline_traces
 
-RESULTS_PATH = results_disk/seiko_expts
+RESULTS_PATH = results_disk/seiko_expts/
 
 EXPTS_PATH = hw_expts
+
+CASE_STUDY_PATH = results_disk/case_study/
 
 synthetic_vsafes:
 	python3 esrs.py $(BASELINES_PATH)/expt_*
@@ -40,4 +42,13 @@ process_synthetic:
 	python3 expt_process.py $(RESULTS_PATH)/microbenchmarks_volt_match_2ms/datasheet/EXPT_*
 	mv expt_process_summary.pkl datasheet_summary_volt_match.pkl
 
+process_mezzos:
+	python3 expt_process.py $(CASE_STUDY_PATH)/catnap_mezzos_263us/EXPT_*
+	mv expt_process_summary.pkl catnap_37-39.pkl
+	python3 expt_process.py $(CASE_STUDY_PATH)/old_mezzos/culpeo_mezzos/EXPT_*
+	mv expt_process_summary.pkl culpeo_37-39.pkl
+	python3 expt_process.py $(CASE_STUDY_PATH)/conservative_mezzos_263us/EXPT_*
+	mv expt_process_summary.pkl conservative_37-39.pkl
+	python3 expt_process.py $(CASE_STUDY_PATH)/old_mezzos/datasheet_mezzos/EXPT_*
+	mv expt_process_summary.pkl datasheet_37-39.pkl
 

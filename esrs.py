@@ -20,6 +20,7 @@ CAP_VAL = 45e-3
 EFF_VMIN = .5
 #CAP_VAL = 63e-3
 #Offset in seconds:
+#TIME_OFFSET = .002
 TIME_OFFSET = .000263
 datasheet_esr = 25/6
 
@@ -302,6 +303,7 @@ if __name__ == "__main__":
     datasheet_vsafe = minV.calc_min_forward(I,dt,DO_PLOT)
     datasheet_vals[expt_id] = {make_adc_val(datasheet_vsafe)}
     datasheet_str = make_adc_file_str(expt_id,datasheet_vsafe)
+    print("Datasheet ",expt_id," Vsafe is ",datasheet_vsafe)
 
     if DO_PLOT == True:
       minV.calc_sim_starting_point(I,dt,Vsafe)
