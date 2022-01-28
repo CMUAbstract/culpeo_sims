@@ -21,7 +21,7 @@
 #include "main.h"
 #include "app_x-cube-ai.h"
 
-#define DVFS_SETTING_5
+#define DVFS_SETTING_3
 
 #ifdef DVFS_SETTING_1
 #define PLLM_VAL RCC_PLLM_DIV8 
@@ -95,6 +95,8 @@ CRC_HandleTypeDef hcrc;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void SystemClock_Decrease(void);
+
 static void MX_CRC_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -112,6 +114,7 @@ static GPIO_InitTypeDef  GPIO_InitStruct;
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -127,6 +130,34 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
+  
+
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+  GPIO_InitStruct.Pin = GPIO_PIN_8;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	
+	HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 0);
+ 	HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+	SystemClock_Decrease();
+	HAL_SuspendTick();
+
+	// Enter Sleep Mode, wake up is done once User push-button is pressed *
+	HAL_PWR_EnterSLEEPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+    
+	HAL_PWREx_DisableLowPowerRunMode();
+
+  // Let's do this again
+  HAL_Init();
+	
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /* USER CODE BEGIN Init */
+  SystemClock_Config();
+
+
 
   /* USER CODE BEGIN SysInit */
 	__HAL_RCC_GPIOA_CLK_ENABLE();
@@ -215,6 +246,33 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
+void SystemClock_Decrease(void)
+{
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+
+  /* Select HSI as system clock source */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  if(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+
+  /* Modify HSI to HSI DIV8 */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+}
+
 
 /**
   * @brief CRC Initialization Function

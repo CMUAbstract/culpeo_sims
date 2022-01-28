@@ -130,6 +130,7 @@ int main(void)
 #endif
     // Discharge down to Vsafe
 #ifdef USE_VSAFE
+    chargingRoutine(); // If below again, charge up
     dischargingRoutine(); // Only removed for now
 #endif
     P2OUT |= BIT6; // Start bit
