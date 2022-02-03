@@ -17,7 +17,7 @@ names = ['Gesture','BLE', 'MNIST']
 GRP_CNT = 3
 #VHIGH = 3228
 VMIN = 1.6
-VMAX = 2.56
+VMAX = 2.45
 VHIGH = VMAX
 VRANGE = 3.1
 V_HARD_FAIL = 1.6
@@ -67,21 +67,21 @@ if __name__ == "__main__":
     print(datasheet_vsafes)
     
 
-  open_catnap_summary= open('catnap_37-39_summary.pkl','rb')
+  open_catnap_summary= open('catnap_37-39.pkl','rb')
   catnap_expts = pickle.load(open_catnap_summary)
   open_catnap_summary.close()
 
-  open_conservative_summary= open('conservative_38-39_summary.pkl','rb')
+  open_conservative_summary= open('conservative_37-39.pkl','rb')
   conservative_expts = pickle.load(open_conservative_summary)
   open_conservative_summary.close()
   #print("Conservative_summary")
   #print(conservative_expts)
 
-  open_culpeo_summary= open('culpeo_37-39_summary.pkl','rb')
+  open_culpeo_summary= open('culpeo_37-39.pkl','rb')
   culpeo_expts = pickle.load(open_culpeo_summary)
   open_culpeo_summary.close()
 
-  open_datasheet_summary= open('datasheet_37-39_summary.pkl','rb')
+  open_datasheet_summary= open('datasheet_37-39.pkl','rb')
   datasheet_expts = pickle.load(open_datasheet_summary)
   open_datasheet_summary.close()
 
