@@ -19,7 +19,7 @@ GRP_CNT = 3
 VMIN = 1.6
 VMAX = 2.45
 VHIGH = VMAX
-VRANGE = 3.1
+VRANGE = 3.3
 V_HARD_FAIL = 1.6
 bar_width = .2
 LW = 10
@@ -37,6 +37,7 @@ colors = ["#f7f7f7","#ca0020","#f4a582","#92c5de","#0571b0"]
 
 if __name__ == "__main__":
   if len(sys.argv) < 2:
+    print("here!")
     catnap_vsafes = {37:2121,38:2177,39:2530}
     conservative_vsafes = {37:4121,38: 3315, 39:3012}
 
@@ -52,18 +53,22 @@ if __name__ == "__main__":
     catnap = open(sys.argv[1],'rb')
     catnap_vsafes = pickle.load(catnap)
     catnap.close()
+    print("Catnap:")
     print(catnap_vsafes)
     culpeo = open(sys.argv[2],'rb')
     culpeo_vsafes = pickle.load(culpeo)
     culpeo.close()
+    print("Culpeo:")
     print(culpeo_vsafes)
     cons = open(sys.argv[3],'rb')
     conservative_vsafes = pickle.load(cons)
     cons.close()
+    print("Cons:")
     print(conservative_vsafes)
     datasheet = open(sys.argv[4],'rb')
     datasheet_vsafes = pickle.load(datasheet)
     datasheet.close()
+    print("DS:")
     print(datasheet_vsafes)
     
 

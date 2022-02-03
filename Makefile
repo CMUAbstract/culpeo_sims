@@ -19,7 +19,7 @@ synthetic_vsafes:
 
 mezzo_vsafes:
 	rm -f *_multi_vsafes_1.6.pkl
-	python3 esr_estimate.py $(MEZZOS_PATH)/ble_1kB_6seiko_caps_gain16.csv
+	python3 esr_estimate.py $(MEZZOS_PATH)/ble_1kb_new_gain16.csv
 	python3 esr_estimate.py $(MEZZOS_PATH)/ml_g47r3_24MHz_6seiko_caps_gain8.csv
 	python3 esr_estimate.py $(MEZZOS_PATH)/apds_cont_pwrd_trace_gain8.csv \
 	$(MEZZOS_PATH)/apds_6seiko_noI.csv
