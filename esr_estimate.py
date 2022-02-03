@@ -181,14 +181,17 @@ if __name__ == "__main__":
     #vals = vals[vals[:,0] < 1.103]
     vals = vals[vals[:,0] > .0026]
   elif app_name == 'ble':
-    cutoff = 5e1
-    vals = vals[vals[:,0] < 1.001212]
+    cutoff = 2e3
+    vals = vals[vals[:,0] < 1.41717608]
     #vals = vals[vals[:,0] < 1.002]
-    vals = vals[vals[:,0] > .0]
+    vals = vals[vals[:,0] > .417]
   elif app_name == 'fast':
     cutoff = 5e1
     vals = vals[vals[:,0] < .126]
     vals = vals[vals[:,0] > .0026]
+  else:
+    print("App name not found:",app_name)
+    sys.exit(1)
 
   diffs = np.subtract(vals[:,3],vals[:,2])
   numbers = re.findall(r'[0-9]+',filename)

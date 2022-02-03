@@ -3,10 +3,7 @@ plot_synthetic:
 	python3 plot_synthetic_loads_redux.py
 
 plot_mezzos:
-	python3 plot_mezzo_expts.py catnap_multi_vsafes_1.6.pkl \
-	culpeo_multi_vsafes_1.6.pkl \
-	conservative_multi_vsafes_1.6.pkl \
-	datasheet_multi_vsafes_1.6.pkl
+	python3 plot_mezzo_expts.py catnap_multi_vsafes_1.6.pkl culpeo_multi_vsafes_1.6.pkl conservative_multi_vsafes_1.6.pkl datasheet_multi_vsafes_1.6.pkl
 
 
 plot_9way:
