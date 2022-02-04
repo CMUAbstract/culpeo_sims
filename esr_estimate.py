@@ -181,7 +181,7 @@ if __name__ == "__main__":
     #vals = vals[vals[:,0] < 1.103]
     vals = vals[vals[:,0] > .0026]
   elif app_name == 'ble':
-    cutoff = 2e3
+    cutoff = 5e2
     vals = vals[vals[:,0] < 1.41717608]
     #vals = vals[vals[:,0] < 1.002]
     vals = vals[vals[:,0] > .417]
