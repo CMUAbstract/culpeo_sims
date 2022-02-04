@@ -11,7 +11,7 @@ from matplotlib.ticker import AutoMinorLocator
 
 
 START_TIME = 0
-STOP_TIME = 40
+STOP_TIME = 20
 
 
 GAIN = 16
@@ -47,9 +47,9 @@ if __name__ == "__main__":
   minor_locator = AutoMinorLocator(10)
   ax.xaxis.set_minor_locator(minor_locator)
   plt.grid(which='minor')
-  fig.savefig('temp_plot.pdf',format='pdf',bbox_inches='tight')
+  fig.savefig('tempV_plot.pdf',format='pdf',bbox_inches='tight')
   print(vals[:,0])
-  plt.show()
+  #plt.show()
   if DO_I:
     fig, ax = plt.subplots()
     if DO_HALF:
@@ -60,6 +60,7 @@ if __name__ == "__main__":
     print(diffs)
     if any(diff < 0 for diff in diffs):
       print("Upside down!")
+      diffs = np.subtract(vals[:,2],vals[:,3])
       if DO_HALF:
         diffs = 2*np.subtract(2.5,vals[:,2])
       else:
@@ -76,4 +77,5 @@ if __name__ == "__main__":
     ax.plot(vals[:,0],I)
     plt.ylabel("Current (mA)",fontsize=20)
     plt.xlabel("Time (s)",fontsize=20)
-    plt.show()
+    fig.savefig('tempI_plot.pdf',format='pdf',bbox_inches='tight')
+    #plt.show()

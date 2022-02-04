@@ -205,6 +205,7 @@ arrowprops=dict(arrowstyle="-", color='k',lw=1))
   ax.annotate("$V_{high}$",(-1,VMAX + .03),fontsize=12,fontweight=boldness)
   ax.annotate("$V_{off}$",(-1,VMIN + .03),fontsize=12,fontweight=boldness)
   ax.set_xticklabels(labels,fontsize="5")
+  ax.set_ylim(.1,2.8)
   ax.legend(ncol=4,fontsize=5,loc="upper right")
   # Plot vsafe
   #ax2 = ax.twinx()
@@ -218,7 +219,7 @@ arrowprops=dict(arrowstyle="-", color='k',lw=1))
   #ax.scatter(x=culpeo_xs - bar_width/2,y=culpeo_vsafes,c=blues[2], alpha = alphas[0], marker="o", edgecolor="k")
   ax.set_ylabel('Voltage',fontsize=10,fontweight=boldness)
   #plt.ylim(-.1,. 4)
-  ratio = 1/3
+  ratio = 1/2
   xleft, xright = ax.get_xlim()
   ybottom, ytop = ax.get_ylim()
   #ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
