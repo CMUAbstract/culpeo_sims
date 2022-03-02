@@ -10,6 +10,8 @@ VHIGH ?= 4046
 # TODO add a rounding thing here so we don't have to round up manually
 VREF ?= 4
 
+MIN_VREF ?= 2
+
 VSAFE_PATH ?= ./Vsafe_culpeo/
 
 USE_VSAFE ?= 0
@@ -17,6 +19,12 @@ USE_VSAFE ?= 0
 REPEATS ?= 0
 
 TEST_EXTERNAL ?= 0
+
+MEAS_MIN ?=1
+
+ifeq ($(MEAS_MIN),1)
+CFLAGS += -DMEAS_MIN
+endif
 
 ifeq ($(TEST_EXTERNAL),1)
 CFLAGS += -DTEST_EXTERNAL
@@ -44,7 +52,7 @@ endif
 
 CFLAGS += -D __$(DEVICE)__ -DTLOAD=$(TLOAD) -DVHIGH=$(VHIGH) -mmcu=$(MCU) \
 -O2 -static -DEXPT_ID=$(EXPT_ID) -DREPEAT_COUNT=$(REPEATS) -DCONFIG=$(CONFIG)\
--DVREF=$(VREF)
+-DVREF=$(VREF) -DMIN_REF=$(MIN_VREF)
 
 IFLAGS := -I $(MSP430_INC_PATH) -I$(VSAFE_PATH)
 LFLAGS := -T $(MCU).ld -L $(MSP430_LD_PATH) -mmcu=$(MCU)

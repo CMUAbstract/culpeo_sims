@@ -19,6 +19,8 @@
 void clockSetup();
 void chargingRoutine();
 void dischargingRoutine();
+void measure_min_adc();
+void measure_vcap_adc();
 void mcu_delayms( uint16_t ms );
 void mcu_delayus( uint16_t us );
 void activateLoad( size_t level, uint16_t ms);
@@ -145,9 +147,24 @@ int main(void)
     // Tap out load profile here
     P4OUT |= BIT2;
     P4OUT &= ~BIT2;
+#ifdef MEAS_MIN
+    P7OUT |= BIT1;
+    P7DIR |= BIT1;
+    mcu_delayms(300);
+    P7OUT &= ~BIT1;
+    mcu_delayms(100);
+#endif
     for (int i = 0; i < LOAD_SIZE; i++) {
       activateLoad(loads[i],times[i]); // turns on and then off a given load 
     }
+#ifdef MEAS_MIN
+    mcu_delayms(50);
+    P4OUT |= BIT2;
+    P4OUT &= ~BIT2;
+    measure_min_adc(); 
+    P4OUT |= BIT2;
+    P4OUT &= ~BIT2;
+#endif
     P4OUT |= BIT3;
     P4OUT &= ~BIT3;
 		mcu_delayms( 50 );
@@ -267,6 +284,105 @@ void chargingRoutine(){
 	}
 	adc_reading = 0;
   uart_write("exit charge!");
+}
+
+
+void measure_min_adc() {
+  //Configure P1.4 for ADC
+  P1SEL1 |= BIT4;
+  P1SEL0 |= BIT4;
+
+  ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
+#if MIN_VREF < 3
+  while(REFCTL0 & REFGENBUSY);
+  REFCTL0 |= REFVSEL_2 | REFON;           // Select internal ref = 2.5V
+  P4OUT |= BIT2;
+  P4OUT &= ~BIT2;
+#endif
+  ADC12CTL0 = ADC12SHT0_2 | ADC12ON;      // Sampling time, S&H=16, ADC12 on
+  ADC12CTL1 = ADC12SHP;                   // Use sampling timer
+  ADC12CTL2 = ADC12RES_2;                // 12-bit conversion results
+#if MIN_VREF < 3
+  ADC12MCTL0 = ADC12VRSEL_1 | ADC12INCH_4; // A2 ADC input select; VR=Vref
+#else
+  ADC12MCTL0 = ADC12INCH_4; // A2 ADC input select; VR=Vdd
+#endif
+  ADC12IER0 &= ~ADC12IE0;                  // Disable ADC conv complete interrupt
+#if MIN_VREF < 3
+  while(!(REFCTL0 & REFGENRDY)); // Settle
+#endif
+  __delay_cycles(1000);
+  adc_reading = 0xfff;
+  uint32_t sum = 0;
+	for(int i = 0; i < 32; i++) {
+		// ======== Configure ADC ========
+		// Take single sample when timer triggers and compare with threshold
+		
+		ADC12IFGR0 &= ~ADC12IFG0;
+		ADC12CTL1 |= ADC12SHP | ADC12SHS_0 | ADC12CONSEQ_0 ;      // Use ADC12SC to trigger and single-channel
+		ADC12CTL0 |= (ADC12ON + ADC12ENC + ADC12SC); 			// Trigger ADC conversion
+		
+		while(!(ADC12IFGR0 & ADC12IFG0)); 			// Wait till conversion over	
+		adc_reading = ADC12MEM0; 					// Read ADC value
+    sum += adc_reading;
+		
+		ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
+	}
+    ADC12CTL0 &= ~(ADC12ON);
+	  char str[100];
+#if MIN_VREF < 3
+		 uart_write("Minimum Reading:");
+		 sprintf( str, "%d V / 2.5V \r\n", sum >> 5);
+#else
+		 uart_write("Minimum Reading:");
+		 sprintf( str, "%d V / 3.2V \r\n", sum >> 5);
+#endif
+		 uart_write( str );
+}
+
+
+void measure_vcap_adc() {
+  //Configure P1.2 for ADC
+  P1SEL1 |= BIT2;
+  P1SEL0 |= BIT2;
+
+  ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
+#if VREF < 3
+  while(!(REFCTL0 & REFGENRDY));
+  REFCTL0 |= REFVSEL_2 | REFON;           // Select internal ref = 2.5V
+#endif
+  ADC12CTL0 = ADC12SHT0_2 | ADC12ON;      // Sampling time, S&H=16, ADC12 on
+  ADC12CTL1 = ADC12SHP;                   // Use sampling timer
+  ADC12CTL2 = ADC12RES_2;                // 12-bit conversion results
+#if VREF < 3
+  ADC12MCTL0 = ADC12VRSEL_1 | ADC12INCH_2; // A2 ADC input select; VR=Vref
+#else
+  ADC12MCTL0 = ADC12INCH_2; // A2 ADC input select; VR=Vdd
+#endif
+  //ADC12MCTL0 = ADC12INCH_2; // A2 ADC input select; VR=Vref
+  ADC12IER0 &= ~ADC12IE0;                  // Disable ADC conv complete interrupt
+#if VREF < 3
+  while(!(REFCTL0 & REFGENRDY)); // Settle
+#endif
+  __delay_cycles(1000);
+  adc_reading = 0xfff;
+		// ======== Configure ADC ========
+		// Take single sample when timer triggers and compare with threshold
+		
+		ADC12IFGR0 &= ~ADC12IFG0;
+		ADC12CTL1 |= ADC12SHP | ADC12SHS_0 | ADC12CONSEQ_0 ;      // Use ADC12SC to trigger and single-channel
+		ADC12CTL0 |= (ADC12ON + ADC12ENC + ADC12SC); 			// Trigger ADC conversion
+		
+		while(!(ADC12IFGR0 & ADC12IFG0)); 			// Wait till conversion over	
+		adc_reading = ADC12MEM0; 					// Read ADC value
+		
+		ADC12CTL0 &= ~ADC12ENC; 					// Disable ADC
+    ADC12CTL0 &= ~(ADC12ON);
+		
+	  char str[100];
+		 uart_write("ADC Reading:");
+		 sprintf( str, "%d V\r\n", adc_reading );
+		 uart_write( str );
 }
 
 // Alternates between discharging and reading adc pin

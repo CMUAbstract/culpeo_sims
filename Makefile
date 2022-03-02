@@ -45,10 +45,10 @@ process_synthetic:
 process_mezzos:
 	python3 expt_process.py $(CASE_STUDY_PATH)/catnap_mezzos_263us/EXPT_*
 	mv expt_process_summary.pkl catnap_37-39.pkl
-	python3 expt_process.py $(CASE_STUDY_PATH)/old_mezzos/culpeo_mezzos/EXPT_*
+	python3 expt_process.py $(CASE_STUDY_PATH)/culpeo_mezzos_263us/EXPT_*
 	mv expt_process_summary.pkl culpeo_37-39.pkl
 	python3 expt_process.py $(CASE_STUDY_PATH)/conservative_mezzos_263us/EXPT_*
 	mv expt_process_summary.pkl conservative_37-39.pkl
-	python3 expt_process.py $(CASE_STUDY_PATH)/old_mezzos/datasheet_mezzos/EXPT_*
+	python3 expt_process.py $(CASE_STUDY_PATH)/datasheet_mezzos_263us/EXPT_*
 	mv expt_process_summary.pkl datasheet_37-39.pkl
 
