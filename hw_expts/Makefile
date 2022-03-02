@@ -20,7 +20,7 @@ REPEATS ?= 0
 
 TEST_EXTERNAL ?= 0
 
-MEAS_MIN ?=1
+MEAS_MIN ?= 0
 
 ifeq ($(MEAS_MIN),1)
 CFLAGS += -DMEAS_MIN
