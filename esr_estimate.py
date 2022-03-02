@@ -111,7 +111,7 @@ def calc_vsafes(I,V,dt,esr,name):
   # Catnap
   start_avg = np.average(V[0:100])
   stop_avg = np.average(V[-100:])
-  print("Start: ",start_avg," Stop: ",stop_avg)
+  print("Start: ",start_avg," Stop: ",stop_avg,"Min: ",min(V))
   catnap_E = .5*CAP_VAL*(start_avg**2 - stop_avg**2)
   catnap_Vsafe = np.sqrt(2*catnap_E/CAP_VAL + V_MIN**2)
   print("Catnap vsafe: ", catnap_Vsafe)
@@ -119,8 +119,7 @@ def calc_vsafes(I,V,dt,esr,name):
   catnap_vsafe = open("catnap_"+name+"_"+str(V_MIN),"w")
   catnap_vsafe.write(catnap_file_str)
   catnap_vsafe.close()
-  append_to_dict("catnap",name,catnap_Vsafe)
-  
+  append_to_dict("catnap",name,catnap_Vsafe) 
   # Point estimate
   n = EFF_VMIN
   max_i = np.amax(I)*2.56/(n*V_MIN)
@@ -150,6 +149,11 @@ def calc_vsafes(I,V,dt,esr,name):
   datasheet_vsafe.write(datasheet_file_str)
   datasheet_vsafe.close()
   append_to_dict("datasheet",name,datasheet_Vsafe)
+  # Extra
+  V_low = min(V)
+  V_drop = stop_avg - V_low
+  new_vsafe = catnap_Vsafe + V_drop*(V_low/V_MIN) # assumes n(V_low) = n(V_off)
+  print("New vsafe estimate: ",new_vsafe)
 
 if __name__ == "__main__":
   if (len(sys.argv) < 2):
