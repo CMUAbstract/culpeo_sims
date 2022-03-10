@@ -1,4 +1,4 @@
-INPUTS := loadProfiling.c uart.c
+INPUTS = loadProfiling.c uart.c
 TARGET := main
 
 EXPT_ID ?= 0
@@ -12,7 +12,7 @@ VREF ?= 4
 
 MIN_VREF ?= 2
 
-VSAFE_PATH ?= ./Vsafe_culpeo/
+VSAFE_PATH ?= ./
 
 USE_VSAFE ?= 0
 
@@ -21,6 +21,8 @@ REPEATS ?= 0
 TEST_EXTERNAL ?= 0
 
 MEAS_MIN ?= 0
+
+#VSAFE_ID_ARG = VSAFE_ID3=2000
 
 ifeq ($(MEAS_MIN),1)
 CFLAGS += -DMEAS_MIN
@@ -34,7 +36,13 @@ ifeq ($(USE_VSAFE),1)
 CFLAGS += -DUSE_VSAFE
 endif
 
-CONFIG ?= 1
+ifneq ($(VSAFE_ID_ARG),)
+CFLAGS += -DEXTERN_VSAFE -D${VSAFE_ID_ARG}
+$(info $$VSAFE_ID_ARG is [${VSAFE_ID_ARG}])
+$(info inputs are [${INPUTS}])
+endif
+
+CONFIG ?= 0
 
 MSPGCC_PATH := /opt/ti/mspgcc/bin
 MSP430_INC_PATH := /opt/ti/mspgcc/include/
@@ -57,14 +65,16 @@ CFLAGS += -D __$(DEVICE)__ -DTLOAD=$(TLOAD) -DVHIGH=$(VHIGH) -mmcu=$(MCU) \
 IFLAGS := -I $(MSP430_INC_PATH) -I$(VSAFE_PATH)
 LFLAGS := -T $(MCU).ld -L $(MSP430_LD_PATH) -mmcu=$(MCU)
 
-COMPILE := $(patsubst %.c, %.o, $(INPUTS))
+OBJECTS := $(patsubst %.c, %.o, $(INPUTS))
+COMPILE := $(OBJECTS)
 LINK := $(TARGET).out
-ECHO := $(info $$VSAFE_PATH is [${VSAFE_PATH}])
+ECHO := $(info $$VSAFE_PATH is [${OBJECTS}])
 
 
 all: $(ECHO) $(COMPILE) $(LINK) $(BINARY)
 
 %.o: %.c
+	$(info first val: ${<})
 	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
 
 %.out: $(COMPILE)
