@@ -24,7 +24,7 @@ DEGREE = 1
 SEC_PER_SAMPLE = .05
 
 
-def culpeo_rt_vsafe(Vs,Vmin,Vf):
+def culpeo_rt_vsafe(Vs,Vmin,Vf,opt=0):
   m,b= np.polyfit(vi,eff,1)
   const = (m*Vs**3)/3 + (b*Vs**2)/2 - (m*Vf**3)/3 - (b*Vf**2)/2 + \
     (m*Voff**3)/3 + (b*Voff**2)/2
@@ -35,7 +35,12 @@ def culpeo_rt_vsafe(Vs,Vmin,Vf):
   Vd_new = Vd*scale
   reals = V_e[np.isreal(V_e)][0]
   Vsafe = reals.real + Vd_new
-  return Vsafe
+  if opt == 0:
+    return Vsafe
+  elif opt == 1:
+    return Vd_new
+  elif opt == 2:
+    return reals.real
 
 
 def catnap_vsafe(Vs,Vmin,Vf):
@@ -63,6 +68,10 @@ def get_vals(filename,secs_per_sample):
   vcaps = vals[vals[:,0] > 0]
   vstart = np.average(vals[0:100,1])
   stop_times = vals[:,9:11]
+  catnap_stops = stop_times[stop_times[:,1] == 1]
+  catnap_stop = stop_times[1,0]
+  vcaps_catnap = vals[vals[:,0] > catnap_stop]
+  catnap_final = np.average(vals[0:100,1])
   stop_time = stop_times[stop_times[:,1] == 0]
   stop_time = stop_time[-1,0]
   vcaps_temp = vals[vals[:,0] < stop_time]
@@ -76,7 +85,7 @@ def get_vals(filename,secs_per_sample):
   clipped_min = np.average(clipped[0:100,4])
   meas_mins = vals[vals[:,0] < time]
   meas_min = np.min(meas_mins[::step,4])
-  return [expt_id,meas_min,vcap_min,vstart,vfinal]
+  return [expt_id,meas_min,vcap_min,vstart,vfinal,catnap_final]
 
 def get_est_min(mm,degree,secs):
   if degree == 2:
@@ -152,8 +161,9 @@ def run_compare_online(all_files):
       vcap_min = results[2]
       vstart = results[3]
       vfinal = results[4]
+      vfinal_short = results[5]
       # TODO this doesn't change with sampling, move it outside
-      estimates["catnap"][expt][secs].append(catnap_vsafe(vstart,vcap_min,vfinal))
+      estimates["catnap"][expt][secs].append(catnap_vsafe(vstart,vcap_min,vfinal_short))
       estimates["vcap"][expt][secs].append(culpeo_rt_vsafe(vstart,vcap_min,vfinal))
       est_min = get_est_min(meas_min,DEGREE,secs)
       estimates["vmeas_min"][expt][secs].append(culpeo_rt_vsafe(vstart,est_min,vfinal))
@@ -163,6 +173,50 @@ def run_compare_online(all_files):
   ".pkl","wb")
   pickle.dump(estimates,results_file)
   results_file.close()
+
+class event:
+  def __init__(self,vstart,vsafe,vdrop,V_final_catnap=0):
+    self.Vstart = vstart
+    self.Vsafe = vsafe
+    self.Vdrop = vdrop
+    self.Vfc = V_final_catnap
+  def transfer_vsafe(self,Vb):
+    vb_sq =  self.Vstart**2 -self.Vsafe**2 + Voff**2
+    return vb_sq**(1/2)
+  def transfer_catnap(self,Vcb):
+    vbc_sq = Vcb**2 + self.Vsafe**2 - self.Vfc**2
+    return vbc_sq**(1/2)
+
+# Returns culpeo vbucket, then catnap vbucket
+def calc_vbucket(events):
+  #Vb = events[-1].Vsafe # start vbucket
+  Vb = 0
+  Vcb = Voff
+  events = np.flip(events)
+  for i, ev in enumerate(events):
+    if (Vb - ev.Vdrop > Voff):
+      Vb = Voff + ev.Vdrop
+    Vb = ev.transfer_vsafe(Vb) # tranfser with drop
+    Vcb = ev.transfer_catnap(Vcb) # transfer w/out drop
+  return [Vb,Vcb]
+
+
+# Assumes that you've fed in files for events that need to happen in order with
+# no incoming energy
+def process_event_bucket(files):
+  events = []
+  for filename in all_files:
+    results = get_vals(filename,.001)
+    print("Vsafe is: ",real_vsafes[results[0]])
+    vcap_min = results[2]
+    vfinal = results[4]
+    vstart = results[3]
+    vdrop = vfinal - vcap_min
+    vsafe = culpeo_rt_vsafe(vstart,vcap_min,vfinal,opt=2)
+    vdrop = culpeo_rt_vsafe(vstart,vcap_min,vfinal,opt=1)
+    events.append(event(vstart,vsafe,vdrop))
+  Vb = calc_vbucket(events)
+  print("Bucket level is: ",Vb)
 
 
 
@@ -178,6 +232,9 @@ if __name__ == "__main__":
     all_files.append(sys.argv[i])
     i += 1
   fit_files = glob.glob("./fit_*.pkl")
+  if num_files < 5:
+    process_event_bucket(all_files)
+    sys.exit(0)
   for filename in fit_files:
     print(filename)
     MEAS_MIN_MODEL = filename
