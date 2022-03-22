@@ -27,20 +27,20 @@ expt_ids = [38] # 37, 38, 39] # APDS, BLE, ML
 #expt_ids = [9] # 37, 38, 39] # APDS, BLE, ML
 vmin_levels = [1] # Correspond to 1.6
 #Vstart_names = ["Vsafe_culpeo","Vsafe_conservative","Vsafe_catnap","Vsafe_datasheet"]#"Vsafe_naive","Vsafe_naive_better"]
-Vstart_names = ["Vsafe_culpeo","Vsafe_catnap","Vsafe_datasheet"]#"Vsafe_catnap","Vsafe_conservative","Vsafe_naive","Vsafe_naive_better"]
+Vstart_names = ["Vsafe_conservative"]#"Vsafe_catnap","Vsafe_conservative","Vsafe_naive","Vsafe_naive_better"]
 
 
 expt_lists = {
-  "Vsafe_culpeo": [33,39],
-  "Vsafe_conservative": [3,6,7,8,10,11,12,38,39],
-  "Vsafe_datasheet": [27,28,33],
+  "Vsafe_culpeo": [33,38,39],
+  "Vsafe_conservative": [1,3,6,7,8,10,11,12,38,39],
+  "Vsafe_datasheet": [27,28,33,38],
   "Vsafe_catnap": [6,7,8,9,10,11,12,38,39]
 }
 #Vstart_names = ["Vsafe_catnap"]#"Vsafe_naive","Vsafe_naive_better"]
 
 # Scalar macros
 # Actual repeats + 1 (for all but catnap)
-REPEATS = 6
+REPEATS = 2
 
 FORCE_EXPORT = False
 
@@ -65,8 +65,8 @@ capture_time=1,analogRate=125e3,trigger=7, do_export=True):
     if s.get_active_device().type == 'LOGIC_4_DEVICE':
             print("Logic 4 does not support setting active channels; skipping")
     else:
-            digital = [3,5,6,7]
-            analog = [0,1,2,4]
+            digital = [3,5,6,7] # used to be 3,5,6,7
+            analog = [0,1,2,4]# used to be 0,1,2,4
             print("Setting active channels (digital={}, \
                     analog={})".format(digital, analog))
             s.set_active_channels(digital, analog)
@@ -148,7 +148,7 @@ def run_vsafe_tests():
             ID=time_ID, capture_time=3, trigger=6,do_export=DO_EXPORT)
           else:
             result = saleae_capture(output_dir=output_dir, output=cur_test_str,
-            ID=time_ID,capture_time=3, do_export=DO_EXPORT)
+            ID=time_ID,capture_time=3, trigger=6,do_export=DO_EXPORT)
           # repeat
           if result == -1:
             continue

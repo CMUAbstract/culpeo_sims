@@ -36,6 +36,11 @@ import pickle
 
 # Arrays
 expt_ids = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
+#expt_ids = [3,4,27,28] #100ms
+#expt_ids = [6,7,8,9,30,31,32,33] #10ms
+#expt_ids = [10,11,12,34,35,36] #1ms
+#expt_ids = [35,36] #1ms
+#expt_ids = [3,4,27,28,6,7,8,9,30,31,32,33]
 #expt_ids = [8,9,10,11,12,27,28,30,31,32,33,34,35,36]
 #expt_ids = [1] # 37, 38, 39] # APDS, BLE, ML
 #expt_ids = [9] # 37, 38, 39] # APDS, BLE, ML
@@ -45,7 +50,7 @@ vmin_levels = [1] # Correspond to 1.6
 
 # Scalar macros
 # Actual repeats + 1 (for all but catnap)
-REPEATS = 6
+REPEATS = 5
 
 FORCE_EXPORT = False
 
@@ -62,7 +67,7 @@ def adc_encode(num):
 def adc_decode(adc):
   return adc*vrange/4096
 
-VHIGH = np.ceil(adc_encode(2.35))
+VHIGH = np.ceil(adc_encode(2.6))
 
 AVG_VSTART = 0
 
@@ -137,26 +142,27 @@ def run_meas_min_tests():
   print(full_cmd)
   os.system(full_cmd)
   for expt_id in expt_ids:
-    vstart_level = VHIGH
-    # Set output file name
-    cur_test_str = "EXT_" + str(expt_id) + "_meas_min"
-    # program ctrl mcu
-    vsafe_str = "VSAFE_ID" + str(expt_id) + "=" + str(vstart_level)
-    env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
-    "VSAFE_ID_ARG=",vsafe_str,"EXPT_ID=",str(expt_id),\
-    "MEAS_MIN=",str(1),"VHIGH=",str(VHIGH))
-    full_cmd = env.clean_cmd() + env.bld_all_cmd() + env.prog_cmd()
-    print("Full command is: ", full_cmd)
-    os.system(full_cmd)
-    output_dir = '/media/abstract/frick/culpeo_results/seiko_expts/meas_min/'
-    print("Testing  # ",expt_id," vsafe: ",vstart_level)
-    # Start saleae, add time to name
-    time_ID = time.strftime('%m-%d--%H-%M-%S')
-    result = saleae_capture(output_dir=output_dir, output=cur_test_str,
-    ID=time_ID,capture_time=4, trigger=6,do_export=DO_EXPORT)
-    # repeat
-    if result == -1:
-      continue
+    for repeat in range(REPEATS - 1):
+      vstart_level = np.ceil(adc_encode(2.3))
+      # Set output file name
+      cur_test_str = "EXT_" + str(expt_id) + "_meas_min"
+      # program ctrl mcu
+      vsafe_str = "VSAFE_ID" + str(expt_id) + "=" + str(vstart_level)
+      env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
+      "VSAFE_ID_ARG=",vsafe_str,"EXPT_ID=",str(expt_id),\
+      "MEAS_MIN=",str(1),"VHIGH=",str(VHIGH))
+      full_cmd = env.clean_cmd() + env.bld_all_cmd() + env.prog_cmd()
+      print("Full command is: ", full_cmd)
+      os.system(full_cmd)
+      output_dir = '/media/abstract/frick/culpeo_results/seiko_expts/meas_min/'
+      print("Testing  # ",expt_id," vsafe: ",vstart_level)
+      # Start saleae, add time to name
+      time_ID = time.strftime('%m-%d--%H-%M-%S')
+      result = saleae_capture(output_dir=output_dir, output=cur_test_str,
+      ID=time_ID,capture_time=4, trigger=6,do_export=DO_EXPORT)
+      # repeat
+      if result == -1:
+        continue
 
 
 

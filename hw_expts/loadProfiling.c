@@ -392,6 +392,12 @@ void measure_vcap_adc() {
 
 // Alternates between discharging and reading adc pin
 void dischargingRoutine(){
+    P4OUT |= BIT3;
+    P4DIR |= BIT3;
+    P4OUT &= ~BIT3;
+    P4OUT |= BIT3;
+    P4DIR |= BIT3;
+    P4OUT &= ~BIT3;
 	uart_write("Discharge: ADC Reading: ");
 	char str[100];
 	sprintf( str, "%d V\r\n", adc_reading );
@@ -424,6 +430,9 @@ void dischargingRoutine(){
   __delay_cycles(10000);
   adc_reading = 0xfff;
 	while( adc_reading > VSAFE ){
+    P4OUT |= BIT3;
+    P4DIR |= BIT3;
+    P4OUT &= ~BIT3;
 		// ======== Configure ADC ========
 		// Take single sample when timer triggers and compare with threshold
 		

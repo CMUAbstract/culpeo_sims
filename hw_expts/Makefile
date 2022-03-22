@@ -12,7 +12,7 @@ VREF ?= 4
 
 MIN_VREF ?= 2
 
-VSAFE_PATH ?= ./
+VSAFE_PATH ?= ./Vsafe_meas_min/
 
 USE_VSAFE ?= 0
 
@@ -42,7 +42,7 @@ $(info $$VSAFE_ID_ARG is [${VSAFE_ID_ARG}])
 $(info inputs are [${INPUTS}])
 endif
 
-CONFIG ?= 0
+CONFIG ?= 1
 
 MSPGCC_PATH := /opt/ti/mspgcc/bin
 MSP430_INC_PATH := /opt/ti/mspgcc/include/

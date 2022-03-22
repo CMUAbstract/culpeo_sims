@@ -9,6 +9,7 @@ import matplotlib
 import pickle
 import re
 import math
+import glob
 
 all_files = []
 real_mins = []
@@ -19,7 +20,11 @@ vi = [2.4,1.8,.9]
 Voff = 1.6
 Vrange = 3.3
 
-USE_REAL = 1
+USE_REAL = 0
+DEGREE = 1
+SEC_PER_SAMPLE = .05
+
+mv_off = []
 
 def calc_vsafe(Vs,Vmin,Vf):
   m,b= np.polyfit(vi,eff,1)
@@ -57,8 +62,42 @@ def process_file(filename):
   meas_times = meas_times[meas_times[:,1] > 0]
   time = meas_times[-2,0]
   clipped = vals[vals[:,0] > time]
-  meas_min = np.average(clipped[0:100,4])
+  clipped_min = np.average(clipped[0:100,4])
+  meas_mins = vals[vals[:,0] < time]
+  step = int(np.floor(SEC_PER_SAMPLE/(vals[1,0] - vals[0,0])))
+  print("Step is: ",step,vals[1,0] - vals[0,0])
+  meas_min = np.min(meas_mins[::step,4])
+  print("True meas min vs clipped",meas_min,clipped_min)
   return [meas_min,real_min,vstart,vfinal]
+
+def phase_process(filename):
+  try:
+    df = pd.read_csv(filename, mangle_dupe_cols=True,
+         dtype=np.float64, skipinitialspace=True)#skiprows=[0])
+  except:
+    df = pd.read_csv(filename, mangle_dupe_cols=True,
+         dtype=np.float64, skipinitialspace=True,skiprows=[0])
+  vals = df.values
+  vcaps = vals[vals[:,0] > 0]
+  vstart = np.average(vals[0:100,1])
+  stop_times = vals[:,9:11]
+  stop_time = stop_times[stop_times[:,1] == 0]
+  stop_time = stop_time[-1,0]
+  #print("Stop_time ",stop_time)
+  real_min = min(vcaps[:,1])
+  vcaps = vals[vals[:,0] > (stop_time)]
+  vfinal = np.average(vcaps[0:100,1])
+  meas_times = vals[:,5:7]
+  meas_times = meas_times[meas_times[:,1] > 0]
+  time = meas_times[-2,0]
+  clipped = vals[vals[:,0] > time]
+  clipped_min = np.average(clipped[0:100,4])
+  meas_mins = vals[vals[:,0] < time]
+  step = int(np.floor(SEC_PER_SAMPLE/(vals[1,0] - vals[0,0])))
+  mins = []
+  for phase in np.arange(0,step,int(step/100)):
+    mins.append(np.min(meas_mins[phase::step,4]))
+  print("\tStd dev is:",np.std(mins))
 
 
 if __name__ == "__main__":
@@ -71,36 +110,59 @@ if __name__ == "__main__":
     all_files.append(sys.argv[i])
     i += 1
   for filename in all_files:
+    print(filename)
+    phase_process(filename)
+    continue
     [mm, rm, vs,vf] = process_file(filename)
     # Goofy switcheroo, not sure if we need it yet
     real_mins.append(rm)
     meas_mins.append(mm)
+  sys.exit(0)
   #print(real_mins)
   #print(meas_mins)
-  fit = np.polyfit(meas_mins,real_mins,1,full=True)
+  if DEGREE == 2:
+    fit = np.polyfit(meas_mins,real_mins,2,full=True)
+  else:
+    fit = np.polyfit(meas_mins,real_mins,1,full=True)
+  results_file = open("fit_"+ str(DEGREE) +"_"+str(SEC_PER_SAMPLE)+".pkl","wb")
+  pickle.dump(fit,results_file)
+  results_file.close()
   sse = fit[1][0]
   diff = np.subtract(real_mins,np.mean(real_mins))
   diff = diff**2
   sst = np.sum(diff)
   r2 = 1 - sse/sst
-  #print("Fit is: ",r2,"m,b are",fit[0][0],fit[0][1])
+  if DEGREE == 2:
+    print("Fit is: ",r2,"m^2, m, b are",fit[0][0],fit[0][1],fit[0][2])
+  else:
+    print("Fit is: ",r2,"m,b are",fit[0][0],fit[0][1])
+  sys.exit(0)
   for filename in all_files:
+    print(filename)
     pos = re.search('EXT',filename).start()
     base_name = filename[pos:]
     numbers = re.findall(r'[0-9]+',base_name)
     expt_id = int(numbers[0])
     #print("Expt id: ",expt_id)
     [mm, rm, vs, vf] = process_file(filename)
-    est_m = mm*fit[0][0] + fit[0][1]
+    if DEGREE == 2:
+      est_m = (mm**2)*fit[0][0] + mm*fit[0][1] + fit[0][2]
+    else:
+      est_m = mm*fit[0][0] + fit[0][1]
+    expt_range = vs - rm
+    print("Range is:",expt_range,vs,rm,mm,"Min diff is: ",\
+    math.trunc(100*(est_m - rm)/expt_range),est_m,rm)
+    print("full diff: ",est_m-rm,math.trunc(100*(est_m - rm)/(2.5-1.6)))
     #print("Vf is: ",vf,"Est m is", est_m)
     if USE_REAL:
       vsafe = calc_vsafe(vs,rm,vf)
     else:
       vsafe = calc_vsafe(vs,est_m,vf)
     if expt_id in real_vsafes:
-      print(expt_id,"Est:",vsafe,"Real:",real_vsafes[expt_id])
-      print("\t",math.trunc(100*(vsafe - real_vsafes[expt_id])/(2.5-1.6)))
+      print(expt_id,"Vsafes: Est:",vsafe,"Real:",real_vsafes[expt_id])
+      print("\t\t",math.trunc(100*(vsafe - real_vsafes[expt_id])/(2.5-1.6)))
+      mv_off.append(vsafe - real_vsafes[expt_id])
     else:
       print("No id match:",expt_id,"Est:",vsafe)
 
-
+  print("Average mm off: ",np.average(mv_off))
