@@ -6,7 +6,7 @@
 # 2 - I+
 # 4 - Minimum measurement
 # 3 - P4.2
-# 5 - sip connect (7.1)
+# 5 - 4.3
 # 6 - P2.6
 # 7 - (enable) P6.2
 
@@ -46,7 +46,7 @@ expt_ids = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
 #expt_ids = [9] # 37, 38, 39] # APDS, BLE, ML
 vmin_levels = [1] # Correspond to 1.6
 
-
+SAMPLE_MIN = True
 
 # Scalar macros
 # Actual repeats + 1 (for all but catnap)
@@ -143,14 +143,22 @@ def run_meas_min_tests():
   os.system(full_cmd)
   for expt_id in expt_ids:
     for repeat in range(REPEATS - 1):
-      vstart_level = np.ceil(adc_encode(2.3))
+      vstart_level = np.ceil(adc_encode(2.4))
       # Set output file name
-      cur_test_str = "EXT_" + str(expt_id) + "_meas_min"
+      if SAMPLE_MIN:
+        cur_test_str = "EXT_" + str(expt_id) + "_sample_min"
+      else:
+        cur_test_str = "EXT_" + str(expt_id) + "_meas_min"
       # program ctrl mcu
       vsafe_str = "VSAFE_ID" + str(expt_id) + "=" + str(vstart_level)
-      env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
-      "VSAFE_ID_ARG=",vsafe_str,"EXPT_ID=",str(expt_id),\
-      "MEAS_MIN=",str(1),"VHIGH=",str(VHIGH))
+      if SAMPLE_MIN:
+        env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
+        "VSAFE_ID_ARG=",vsafe_str,"EXPT_ID=",str(expt_id),\
+        "VHIGH=",str(VHIGH))
+      else:
+        env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
+        "VSAFE_ID_ARG=",vsafe_str,"EXPT_ID=",str(expt_id),\
+        "MEAS_MIN=",str(1),"VHIGH=",str(VHIGH))
       full_cmd = env.clean_cmd() + env.bld_all_cmd() + env.prog_cmd()
       print("Full command is: ", full_cmd)
       os.system(full_cmd)
