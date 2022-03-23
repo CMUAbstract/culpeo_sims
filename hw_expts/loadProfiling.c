@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "loadProfiling.h"
 #include "uart.h"
+#include "loadProfiling.h"
 
 //#define VSAFE 2381
 //#define TLOAD 296
@@ -130,6 +130,14 @@ int main(void)
 #ifdef TEST_EXTERNAL
     P2OUT |= BIT5; // Flip SIP
 #endif
+
+#ifdef MEAS_MIN
+    P7OUT |= BIT1;
+    P7DIR |= BIT1;
+    mcu_delayms(300);
+    P7OUT &= ~BIT1;
+    mcu_delayms(100);
+#endif
     // Discharge down to Vsafe
 #ifdef USE_VSAFE
     dischargingRoutine(); // Only removed for now
@@ -147,13 +155,6 @@ int main(void)
     // Tap out load profile here
     P4OUT |= BIT2;
     P4OUT &= ~BIT2;
-#ifdef MEAS_MIN
-    P7OUT |= BIT1;
-    P7DIR |= BIT1;
-    mcu_delayms(300);
-    P7OUT &= ~BIT1;
-    mcu_delayms(100);
-#endif
     for (int i = 0; i < LOAD_SIZE; i++) {
       activateLoad(loads[i],times[i]); // turns on and then off a given load 
     }
@@ -169,6 +170,10 @@ int main(void)
     P4OUT &= ~BIT3;
 		mcu_delayms( 50 );
     // Put this signal down
+#ifdef MEAS_MIN
+    // Added to get reasonable Vfinal calculation
+    mcu_delayms(1000);
+#endif
     P2OUT &= ~BIT6;
 		// Disable Load and OP Booster
 		P7OUT &= ~BIT0; 
@@ -387,6 +392,12 @@ void measure_vcap_adc() {
 
 // Alternates between discharging and reading adc pin
 void dischargingRoutine(){
+    P4OUT |= BIT3;
+    P4DIR |= BIT3;
+    P4OUT &= ~BIT3;
+    P4OUT |= BIT3;
+    P4DIR |= BIT3;
+    P4OUT &= ~BIT3;
 	uart_write("Discharge: ADC Reading: ");
 	char str[100];
 	sprintf( str, "%d V\r\n", adc_reading );
@@ -419,6 +430,9 @@ void dischargingRoutine(){
   __delay_cycles(10000);
   adc_reading = 0xfff;
 	while( adc_reading > VSAFE ){
+    P4OUT |= BIT3;
+    P4DIR |= BIT3;
+    P4OUT &= ~BIT3;
 		// ======== Configure ADC ========
 		// Take single sample when timer triggers and compare with threshold
 		

@@ -28,8 +28,9 @@ import cmd_maker as cmds
 import pickle
 
 # Arrays
-#expt_ids = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
-expt_ids = [3] # 37, 38, 39] # APDS, BLE, ML
+expt_ids = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
+#expt_ids = [7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
+#expt_ids = [3] # 37, 38, 39] # APDS, BLE, ML
 #expt_ids = [9] # 37, 38, 39] # APDS, BLE, ML
 vmin_levels = [1] # Correspond to 1.6
 
@@ -44,7 +45,7 @@ FORCE_EXPORT = False
 DO_EXPORT = REPEATS > 2 or FORCE_EXPORT
 #DO_EXPORT = False
 
-
+RUN_REAL = 1
 
 raw_vhigh = 2.6
 vrange = 3.3
@@ -59,34 +60,42 @@ def adc_decode(adc):
 
 VHIGH = np.ceil(raw_vhigh*4096/vrange)
 
+AVG_VSTART = 0
 
-
-def calc_new_delta(delta,cur_dir,last_dir):
+def calc_new_delta(delta,cur_dir,last_dir,cur_min):
+  delta = np.abs(delta)
   if last_dir != cur_dir:
     delta = np.floor(delta*.5)
-  delta = delta*cur_dir
+  if cur_min > Voff:
+    print("above voff!")
+    delta *= -1
   return delta
 
 
-def get_vcap_min(filename):
-  try:
-    df = pd.read_csv(filename, mangle_dupe_cols=True,
-         dtype=np.float64, skipinitialspace=True)#skiprows=[0])
-  except:
-    df = pd.read_csv(filename, mangle_dupe_cols=True,
-         dtype=np.float64, skipinitialspace=True,skiprows=[0])
-  vals = df.values
-  return min(vals[:,1]) # vcap lives in column 1
+if RUN_REAL:
+  def get_vcap_min(filename):
+    try:
+      df = pd.read_csv(filename, mangle_dupe_cols=True,
+           dtype=np.float64, skipinitialspace=True)#skiprows=[0])
+    except:
+      df = pd.read_csv(filename, mangle_dupe_cols=True,
+           dtype=np.float64, skipinitialspace=True,skiprows=[0])
+    vals = df.values
+    vals = vals[vals[:,0] > 0]
+    AVG_VSTART = np.average(vals[0:100,1])
+    print("AVG_VSTART ",AVG_VSTART)
+    return [min(vals[:,1]),AVG_VSTART] # vcap lives in column 1
+else:
+  vmin_vals = [1.72, 1.61, 1.605,1.601]
+  def get_vcap_min(filename):
+    AVG_VSTART = 0
+    get_vcap_min.counter = vars(get_vcap_min).setdefault('counter',-1)
+    get_vcap_min.counter += 1
+    if get_vcap_min.counter < len(vmin_vals):
+      return [vmin_vals[get_vcap_min.counter], 1.9]
+    else:
+      return [1.6, 1.9]
 
-#vmin_vals = [1.8, 1.7, 1.55, 1.57, 1.65, 1.65, 1.6001, 1.6001, 1.6001, 1.6001]
-#def get_vcap_min(filename):
-#  get_vcap_min.counter = vars(get_vcap_min).setdefault('counter',-1)
-#  get_vcap_min.counter += 1
-#  if get_vcap_min.counter < len(vmin_vals):
-#    return vmin_vals[get_vcap_min.counter]
-#  else:
-#    return 1.6
-#
 
 def saleae_capture(host='localhost', port=10429, \
 output_dir='/media/abstract/frick/culpeo_results/seiko_expts/', output='outputs', ID='1234', \
@@ -168,36 +177,44 @@ def run_brute_force_tests(vstarts):
         # Set output file name
         cur_test_str = "EXT_temp"
         # program ctrl mcu
-        vsafe_str = "VSAFE_ID" + str(expt_id) + "="
+        vsafe_str = "VSAFE_ID" + str(expt_id) + "=" + str(vstart_level)
         env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
-        "CONFIG=",str(Vmin),"EXPT_ID=",str(expt_id),"VHIGH=",str(VHIGH),\
-        vsafe_str,str(vstart_level))
+        "CONFIG=",str(Vmin),"VSAFE_ID_ARG=",vsafe_str,"EXPT_ID=",str(expt_id),"VHIGH=",str(VHIGH))
         full_cmd = env.clean_cmd() + env.bld_all_cmd() + env.prog_cmd()
-        print(full_cmd)
-        # TODO remove the next two comments
-        #os.system(full_cmd)
-        #output_dir = '/media/abstract/frick/culpeo_results/seiko_expts/brute_force/'
-        output_dir = 'temp'
+        print("Full command is: ", full_cmd)
+        if RUN_REAL:
+          os.system(full_cmd)
+        output_dir = '/media/abstract/frick/culpeo_results/seiko_expts/brute_force/temp/'
         print("Testing  # ",expt_id," vsafe: ",vstart_level)
         # Start saleae, add time to name
-        # TODO remove this commend, and swap out the dummy cost
-        #result = saleae_capture(output_dir=output_dir, output=cur_test_str,
-        #ID=00,capture_time=3, do_export=DO_EXPORT)
-        result = 1
+        if RUN_REAL:
+          result = saleae_capture(output_dir=output_dir, output=cur_test_str,
+          ID="00",capture_time=3, trigger=6,do_export=DO_EXPORT)
+        else:
+          result = 1
         # repeat
         if result == -1:
           continue
-        filename = cur_test_str + "_00.csv"
-        new_min = get_vcap_min(filename)
+        filename = output_dir + cur_test_str + "_00.csv"
+        new_min,AVG_VSTART = get_vcap_min(filename)
+        print("Avgs start =",AVG_VSTART)
         # if done condition
         print("Min is : ",new_min)
         if ((new_min < Voff  + .0045) and (new_min > Voff - .0045)):
           print("Good count up!")
-          if good_count > 2:
-            real_vsafes[expt_id] = adc_decode(vstart_level)
-            break
-          else:
-            good_count = good_count + 1
+          real_vsafes['expt_id'] = expt_id
+          real_vsafes['vsafe'] = adc_decode(vstart_level)
+          real_vsafes['vstart'] = AVG_VSTART
+          real_vsafes['vmin'] = new_min
+          break
+          #if good_count > 1:
+          #  real_vsafes['expt_id'] = expt_id
+          #  real_vsafes['vsafe'] = adc_decode(vstart_level)
+          #  real_vsafes['vstart'] = AVG_VSTART
+          #  real_vsafes['vmin'] = new_min
+          #  break
+          #else:
+          #  good_count = good_count + 1
         else:
           good_count = 0
           # set cur dir
@@ -205,13 +222,15 @@ def run_brute_force_tests(vstarts):
             cur_dir = 1
           else:
             cur_dir = -1
-          delta = calc_new_delta(delta,cur_dir,last_dir)
+          delta = calc_new_delta(delta,cur_dir,last_dir,new_min)
           vstart_level = vstart_level + delta
+          print("Delta is : ",delta, "vstart level is: ",vstart_level)
           last_dir = cur_dir
-  time_str = time.strftime('%m-%d--%H-%M-%S')
-  results_file = open('vsafes_true' + time_str + ".py", 'wb')
-  pickle.dump(real_vsafes,results_file)
-  results_file.close()
+      # Print out for each expt
+      time_str = time.strftime('%m-%d--%H-%M-%S')
+      results_file = open('vsafes_true_' +  str(expt_id) + "_"+ time_str + ".pkl", 'wb')
+      pickle.dump(real_vsafes,results_file)
+      results_file.close()
 
 
 

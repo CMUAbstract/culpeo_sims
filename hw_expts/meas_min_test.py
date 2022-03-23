@@ -1,5 +1,17 @@
-# Script for testing different Vsafes on experiments specified in
-# loadProfiling.h
+# Script for gathering and calculating the min-measure technique.
+# This script needs the adc n'at for the min measurement set up configured
+# Saleae - harness MCU Pin out:
+# 0 - Vcap
+# 1 - I-
+# 2 - I+
+# 4 - Minimum measurement
+# 3 - P4.2
+# 5 - sip connect (7.1)
+# 6 - P2.6
+# 7 - (enable) P6.2
+
+
+
 # Software setup instructions:
 #   run from hw_expts/ directory
 #   ENABLE SCRIPTING IN YOUR SALEAE GUI
@@ -20,37 +32,46 @@ import glob
 import re
 import platform
 import cmd_maker as cmds
+import pickle
 
 # Arrays
-#expt_ids = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
-expt_ids = [38] # 37, 38, 39] # APDS, BLE, ML
+expt_ids = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
+#expt_ids = [3,4,27,28] #100ms
+#expt_ids = [6,7,8,9,30,31,32,33] #10ms
+#expt_ids = [10,11,12,34,35,36] #1ms
+#expt_ids = [35,36] #1ms
+#expt_ids = [3,4,27,28,6,7,8,9,30,31,32,33]
+#expt_ids = [8,9,10,11,12,27,28,30,31,32,33,34,35,36]
+#expt_ids = [1] # 37, 38, 39] # APDS, BLE, ML
 #expt_ids = [9] # 37, 38, 39] # APDS, BLE, ML
 vmin_levels = [1] # Correspond to 1.6
-#Vstart_names = ["Vsafe_culpeo","Vsafe_conservative","Vsafe_catnap","Vsafe_datasheet"]#"Vsafe_naive","Vsafe_naive_better"]
-Vstart_names = ["Vsafe_conservative"]#"Vsafe_catnap","Vsafe_conservative","Vsafe_naive","Vsafe_naive_better"]
 
 
-expt_lists = {
-  "Vsafe_culpeo": [33,38,39],
-  "Vsafe_conservative": [1,3,6,7,8,10,11,12,38,39],
-  "Vsafe_datasheet": [27,28,33,38],
-  "Vsafe_catnap": [6,7,8,9,10,11,12,38,39]
-}
-#Vstart_names = ["Vsafe_catnap"]#"Vsafe_naive","Vsafe_naive_better"]
 
 # Scalar macros
 # Actual repeats + 1 (for all but catnap)
-REPEATS = 2
+REPEATS = 5
 
 FORCE_EXPORT = False
 
 DO_EXPORT = REPEATS > 2 or FORCE_EXPORT
-#DO_EXPORT = False
 
 raw_vhigh = 2.6
 vrange = 3.3
+Voff = 1.6
+real_vsafes = {}
 
-VHIGH = np.ceil(raw_vhigh*4096/vrange)
+def adc_encode(num):
+  return num*4096/vrange
+
+def adc_decode(adc):
+  return adc*vrange/4096
+
+VHIGH = np.ceil(adc_encode(2.6))
+
+AVG_VSTART = 0
+
+
 
 def saleae_capture(host='localhost', port=10429, \
 output_dir='/media/abstract/frick/culpeo_results/seiko_expts/', output='outputs', ID='1234', \
@@ -65,8 +86,8 @@ capture_time=1,analogRate=125e3,trigger=7, do_export=True):
     if s.get_active_device().type == 'LOGIC_4_DEVICE':
             print("Logic 4 does not support setting active channels; skipping")
     else:
-            digital = [3,5,6,7] # used to be 3,5,6,7
-            analog = [0,1,2,4]# used to be 0,1,2,4
+            digital = [3,5,6,7]
+            analog = [0,1,2,4]
             print("Setting active channels (digital={}, \
                     analog={})".format(digital, analog))
             s.set_active_channels(digital, analog)
@@ -112,49 +133,39 @@ capture_time=1,analogRate=125e3,trigger=7, do_export=True):
     s.close_all_tabs()
     return 0
 
-
 # Must be run from hw_expts directory!!
-def run_vsafe_tests():
+def run_meas_min_tests():
   # cd and clean, we assume you run this from the directory where all the files
   # live
   env = cmds.make_cmd(".","."," ")
   full_cmd = env.cd_cmd() + env.clean_cmd()
   print(full_cmd)
   os.system(full_cmd)
-  repeats = REPEATS
-  for Vstart_name in Vstart_names:
-    for Vmin in vmin_levels:
-      for expt_id in expt_ids:
-        if expt_lists[Vstart_name].count(expt_id) < 1:
-          continue
-        # Set output file name
-        cur_test_str = "EXPT_" + str(expt_id) + "_"+str(Vmin) + "_" + Vstart_name + "_"
-        # program ctrl mcu
-        env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(repeats),\
-        "CONFIG=",str(Vmin),"EXPT_ID=",str(expt_id),"VSAFE_PATH=./",Vstart_name,"VHIGH=",str(VHIGH))
-        full_cmd = env.clean_cmd() + env.bld_all_cmd() + env.prog_cmd()
-        print(full_cmd)
-        os.system(full_cmd)
-        if expt_id > 36:
-          output_dir = '/media/abstract/frick/culpeo_results/case_study/'
-        else:
-          output_dir = '/media/abstract/frick/culpeo_results/seiko_expts/'
-        for i in range(repeats-1):
-          print("Testing  # ",i)
-          # Start saleae, add time to name
-          time_ID = time.strftime('%m-%d--%H-%M-%S')
-          if expt_id == 38 or expt_id == 39:
-            result = saleae_capture(output_dir=output_dir, output=cur_test_str,\
-            ID=time_ID, capture_time=3, trigger=6,do_export=DO_EXPORT)
-          else:
-            result = saleae_capture(output_dir=output_dir, output=cur_test_str,
-            ID=time_ID,capture_time=3, trigger=6,do_export=DO_EXPORT)
-          # repeat
-          if result == -1:
-            continue
+  for expt_id in expt_ids:
+    for repeat in range(REPEATS - 1):
+      vstart_level = np.ceil(adc_encode(2.3))
+      # Set output file name
+      cur_test_str = "EXT_" + str(expt_id) + "_meas_min"
+      # program ctrl mcu
+      vsafe_str = "VSAFE_ID" + str(expt_id) + "=" + str(vstart_level)
+      env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
+      "VSAFE_ID_ARG=",vsafe_str,"EXPT_ID=",str(expt_id),\
+      "MEAS_MIN=",str(1),"VHIGH=",str(VHIGH))
+      full_cmd = env.clean_cmd() + env.bld_all_cmd() + env.prog_cmd()
+      print("Full command is: ", full_cmd)
+      os.system(full_cmd)
+      output_dir = '/media/abstract/frick/culpeo_results/seiko_expts/meas_min/'
+      print("Testing  # ",expt_id," vsafe: ",vstart_level)
+      # Start saleae, add time to name
+      time_ID = time.strftime('%m-%d--%H-%M-%S')
+      result = saleae_capture(output_dir=output_dir, output=cur_test_str,
+      ID=time_ID,capture_time=4, trigger=6,do_export=DO_EXPORT)
+      # repeat
+      if result == -1:
+        continue
 
 
 
 
 if __name__ == "__main__":
-  run_vsafe_tests()
+  run_meas_min_tests()

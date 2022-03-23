@@ -107,11 +107,11 @@
 #elif CONFIG == 1
 // Min voltage 1.6
 
-#include "meas_min_1.6_0.045"
+/*#include "meas_min_1.6_0.045"
 
 #include "meas_min_APDS_1.6"
 #include "meas_min_BLE_1.6"
-#include "meas_min_ML_1.6"
+#include "meas_min_ML_1.6"*/
 
 #else
 
