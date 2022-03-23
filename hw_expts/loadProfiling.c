@@ -168,7 +168,7 @@ int main(void)
 #endif
     P4OUT |= BIT3;
     P4OUT &= ~BIT3;
-		mcu_delayms( 50 );
+		//mcu_delayms( 50 );
     // Put this signal down
 #ifdef MEAS_MIN
     // Added to get reasonable Vfinal calculation

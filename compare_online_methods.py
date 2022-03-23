@@ -14,6 +14,9 @@ eff = [.8,.73,.56]
 vi = [2.4,1.8,.9]
 Voff = 1.6
 Vrange = 3.3
+R_SHUNT = 4.7
+GAIN = 16
+Vdd = 2.56
 
 BRUTE_FORCE_PATH = "brute_force_vstarts.pkl"
 # We generated the model with runs from 03-17 *after* 21:00, so use something
@@ -51,9 +54,34 @@ def catnap_vsafe(Vs,Vmin,Vf):
 estimates = {}
 sampling_times = [.1, .05, .01, .005, .001]
 
+# Needs to already be pruned
+def calc_energy(vals):
+  Is = vals[vals[:,0] > 0]
+  stops = vals[:,5:7]
+  stops = stops[stops[:,1] == 1]
+  print(stops)
+  stop = stops[0,0]
+  print(stop)
+  Is = Is[Is[:,0] < stop]
+  diffs = np.subtract(Is[:,1],Is[:,2])
+  if any(diff < 0 for diff in diffs):
+    print("flipping!\r\n");
+    diffs = np.subtract(Is[:,2],Is[:,1])
+  new_I = np.divide(diffs,R_SHUNT*GAIN)
+  print(new_I)
+  P = np.multiply(new_I,Vdd)
+  E_deltas = np.multiply(P,vals[1,0] - vals[0,0])
+  E = np.sum(E_deltas)
+  return(E)
+
+  
 
 def get_vals(filename,secs_per_sample):
-  pos = re.search('EXT',filename).start()
+  pos = re.search('EXT',filename)
+  if pos != None:
+    pos = pos.start()
+  else:
+    pos = re.search('EXPT',filename).start()
   base_name = filename[pos:]
   numbers = re.findall(r'[0-9]+',base_name)
   expt_id = int(numbers[0])
@@ -70,6 +98,9 @@ def get_vals(filename,secs_per_sample):
   stop_times = vals[:,9:11]
   catnap_stops = stop_times[stop_times[:,1] == 1]
   catnap_stop = stop_times[1,0]
+  energy = calc_energy(vals)
+  print("Energy is: ",energy)
+  return [0,0,0,0,0,0]  #TODO take this out
   vcaps_catnap = vals[vals[:,0] > catnap_stop]
   catnap_final = np.average(vals[0:100,1])
   stop_time = stop_times[stop_times[:,1] == 0]
@@ -234,6 +265,11 @@ if __name__ == "__main__":
   fit_files = glob.glob("./fit_*.pkl")
   if num_files < 5:
     process_event_bucket(all_files)
+    sys.exit(0)
+  if num_files < 10:
+    for filename in all_files:
+      print(filename)
+      get_vals(filename,.001)
     sys.exit(0)
   for filename in fit_files:
     print(filename)
