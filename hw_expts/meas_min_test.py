@@ -39,20 +39,22 @@ expt_ids = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
 #expt_ids = [3,4,27,28] #100ms
 #expt_ids = [6,7,8,9,30,31,32,33] #10ms
 #expt_ids = [10,11,12,34,35,36] #1ms
-#expt_ids = [35,36] #1ms
+#expt_ids = [3,4]
 #expt_ids = [3,4,27,28,6,7,8,9,30,31,32,33]
 #expt_ids = [8,9,10,11,12,27,28,30,31,32,33,34,35,36]
 #expt_ids = [1] # 37, 38, 39] # APDS, BLE, ML
 #expt_ids = [9] # 37, 38, 39] # APDS, BLE, ML
 vmin_levels = [1] # Correspond to 1.6
 
-SAMPLE_MIN = True
+SAMPLE_MIN = False
+
+CONT_CHARGING = True
 
 # Scalar macros
 # Actual repeats + 1 (for all but catnap)
-REPEATS = 5
+REPEATS = 2
 
-FORCE_EXPORT = False
+FORCE_EXPORT = True
 
 DO_EXPORT = REPEATS > 2 or FORCE_EXPORT
 
@@ -143,10 +145,12 @@ def run_meas_min_tests():
   os.system(full_cmd)
   for expt_id in expt_ids:
     for repeat in range(REPEATS - 1):
-      vstart_level = np.ceil(adc_encode(2.4))
+      vstart_level = np.ceil(adc_encode(2.3))
       # Set output file name
       if SAMPLE_MIN:
         cur_test_str = "EXT_" + str(expt_id) + "_sample_min"
+      elif CONT_CHARGING:
+        cur_test_str = "EXT_" + str(expt_id) + "_cont_charging"
       else:
         cur_test_str = "EXT_" + str(expt_id) + "_meas_min"
       # program ctrl mcu
@@ -154,7 +158,11 @@ def run_meas_min_tests():
       if SAMPLE_MIN:
         env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
         "VSAFE_ID_ARG=",vsafe_str,"EXPT_ID=",str(expt_id),\
-        "VHIGH=",str(VHIGH))
+        "VHIGH=",str(VHIGH), "RUN_SAMPLING=",str(1))
+      elif CONT_CHARGING:
+        env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
+        "VSAFE_ID_ARG=",vsafe_str,"EXPT_ID=",str(expt_id),\
+        "CONT_CHARGING=",str(1),"VHIGH=",str(VHIGH))
       else:
         env.flags = cmds.gen_flags("USE_VSAFE=",str(1),"REPEATS=",str(REPEATS),\
         "VSAFE_ID_ARG=",vsafe_str,"EXPT_ID=",str(expt_id),\
@@ -166,8 +174,12 @@ def run_meas_min_tests():
       print("Testing  # ",expt_id," vsafe: ",vstart_level)
       # Start saleae, add time to name
       time_ID = time.strftime('%m-%d--%H-%M-%S')
-      result = saleae_capture(output_dir=output_dir, output=cur_test_str,
-      ID=time_ID,capture_time=4, trigger=6,do_export=DO_EXPORT)
+      if CONT_CHARGING:
+        result = saleae_capture(output_dir=output_dir, output=cur_test_str,
+        ID=time_ID,capture_time=10, trigger=6,do_export=DO_EXPORT)
+      else:
+        result = saleae_capture(output_dir=output_dir, output=cur_test_str,
+        ID=time_ID,capture_time=4, trigger=6,do_export=DO_EXPORT)
       # repeat
       if result == -1:
         continue

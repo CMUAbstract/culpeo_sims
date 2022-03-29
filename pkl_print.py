@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import re
 import glob
 import pickle
+import time
 
 vstarts = []
 vsafes = []
@@ -32,7 +33,8 @@ if __name__ == "__main__":
     vstarts.append(vals['vstart'])
     all_vstarts[vals['expt_id']] = vals['vstart']
     fs.close()
-  new_fs = open("brute_force_vstarts.pkl","wb")
+  time_str = time.strftime('%m-%d--%H-%M-%S')
+  new_fs = open("brute_force_vstarts"+time_str+".pkl","wb")
   pickle.dump(all_vstarts,new_fs)
   new_fs.close()
   m,b = np.polyfit(vsafes,vstarts,1)
