@@ -14,7 +14,7 @@ START_TIME = .99
 STOP_TIME = 1.100
 GAIN = 16
 DO_TWIN = 0
-DO_PLOTS = False
+DO_PLOTS = True
 
 def convert(adc_val):
   return adc_val*2.485/4096
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     i += 1
   for filename in all_files:
     pos = re.search(".csv",filename).start()
-    pos2 = re.search("EXPT",filename).end()
+    pos2 = re.search("EXPT",filename,re.IGNORECASE).end()
     name = filename[:pos]
     name = name[pos2:]
     numbers = re.findall(r'[0-9]+',name)
@@ -55,9 +55,12 @@ if __name__ == "__main__":
     if expt_id < 13:
       START_TIME = 0.99
       STOP_TIME = 1.100
-    else:
+    elif expt_id < 37:
       START_TIME = 0.0
       STOP_TIME = 0.3
+    else:
+      START_TIME = 0
+      STOP_TIME = 10
     # Strip vsafe system
     pos2 = re.search("Vsafe",name).end()
     stripped = name[pos2:]
@@ -76,7 +79,10 @@ if __name__ == "__main__":
     vals = vals[vals[:,0] > START_TIME]
     vals[:,0] = vals[:,0] - START_TIME
     #print(max(vals[:,0]))
-    vsafe = convert(list(cur_vsafes[expt_id])[0])
+    try:
+      vsafe = convert(list(cur_vsafes[expt_id])[0])
+    except:
+      vsafe = 3.3
     vstart = np.average(vals[0:100,1])
     vdiff = vstart - vsafe
     vdiff = vdiff/(2.5-1.6)
@@ -97,7 +103,7 @@ if __name__ == "__main__":
     xleft, xright = ax.get_xlim()
     ybottom, ytop = ax.get_ylim()
     ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
-    #plt.show()
+    plt.show()
     fig.savefig(name + '_plot.pdf',format='pdf',bbox_inches='tight')
     if DO_I:
       fig, ax = plt.subplots()

@@ -1,3 +1,66 @@
 pulses are 2.65ms apart.
 
 total is about 5ms
+
+vstart = culpeo_vstart // TODO
+diff = 100
+last_dir = null
+dir = null
+while (1)
+  discharge to vstart // done
+  run // done
+  dump min from important time frame // TODO
+  if vmin < Voff + 5 && vmin > Voff - 5:
+    // Repeat with this to keep seeing the same behavior (3 more times)
+    // add to real vsafes // TODO
+    done!
+  // Switches back and forth
+  if min > Voff:
+    dir = -1
+  else:
+    dir = +1
+  // Checks if we ended up on one side, then the other and starts to hone in
+  if last dir != dir:
+    delta = delta*.5
+  delta *= dir
+  vstart = vstart + delta
+
+---------------------------------------------------------------------------
+
+How do we capture the ADC value read by the system? Catnap only reads once. I
+think we need to do this with an extra Capybara attached-- run the code on there
+and test measuring once vs measuring a bunch of times to get an average.
+(there's an energy cost here too)
+  -We really need to repeat this with both the Catnap and Meas_min techniques
+  -Can we use a continuously powered Capybara to do the measurement for
+  synthetic? Or maybe a launchpad with the voltage dropped to 2.5V? That's the
+  major difference. Can we independently power the mcu on the power system
+  capybara? Then we could use the op-amp already in place for measurement
+
+What happens when you use a real ADC for determining the Catnap values? Does it
+matter? The energy estimates are still bad.
+
+
+TODO:
+-add meas_min and perfect energy estimate* to synthetic loads and real loads
+plots
+
+
+*How do coulomb counters work? Are they measuring on the supply side or the load
+side? If they're load side we're golden, but if they're supply side this all
+breaks down because I have no idea how to do that.
+
+That said, what do we use to calculate the safe cap voltage given the efficiency
+degradation?
+
+---------------------------------------------------------------------------
+
+
+Question: how do we correlate between measured value and read values?
+
+Easy: modified vsafe script that will slurp in adc value produced by MCU, use
+saleae calls same as always
+
+
+
+
