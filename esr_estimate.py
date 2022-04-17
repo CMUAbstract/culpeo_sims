@@ -18,18 +18,44 @@ import pickle
 R_SHUNT = 4.7
 V_RANGE = 3.3
 V_MIN = 1.6
+Voff = V_MIN
 CAP_VAL = 45e-3
 EFF_VMIN = .5
 DO_PLOT = False
 datasheet_esr = 25/6
 
+SEC_PER_SAMPLE = .001
+
 name_map = {"APDS": 37,'BLE':38,'ML':39,'FAST':40}
+
+eff = [.8,.73,.56]
+vi = [2.4,1.8,.9]
 
 # Fit polynomial, we currently assume y = A + B log(x) format
 #fits = [4.67905365, 32.95741414]
 #fits = [4.0223403,  31.35076712]
 fits =  [ 0.44363009,  7.63255919, 35.18498227]
 curve = np.poly1d(fits)
+
+def calc_vsafe_meas_min(Vs,Vmin,Vf):
+  print("Vs:",Vs,Vmin,Vf)
+  m,b= np.polyfit(vi,eff,1)
+  print("m,b:",m,b)
+  const = (m*Vs**3)/3 + (b*Vs**2)/2 - (m*Vf**3)/3 - (b*Vf**2)/2 + \
+    (m*Voff**3)/3 + (b*Voff**2)/2
+  p = [m/3,b/2,0,-1*const]
+  V_e = np.roots(p)
+  Vd = (Vf - Vmin)
+  scale = Vmin*(m*Vmin+b)/(Voff*(m*Voff + b)) 
+  Vd_new = Vd*scale
+  reals = V_e[np.isreal(V_e)][0]
+  Vsafe = reals.real + Vd_new
+  n_voff = m*Voff + b 
+  n_vs = m*Vs + b 
+  new_guess = (n_vs/n_voff)*(Vs**2 - Vf**2) + Voff**2
+  new_guess = new_guess**(1/2)+Vd_new
+  #print("\tEasy guess:",new_guess,"diff:",reals.real-new_guess)
+  return Vsafe
 
 def make_adc_file_str(expt_id, val):
   adc = np.ceil(4096*val/V_RANGE)
@@ -106,6 +132,9 @@ def append_to_dict(sys,app,vsafe):
   pickle.dump(mv,fw)
   fw.close()
 
+Vmm_min = 0;
+Vmm_final = 0
+
 def calc_vsafes(I,V,dt,esr,name):
   name = name.upper()
   # Catnap
@@ -154,6 +183,11 @@ def calc_vsafes(I,V,dt,esr,name):
   V_drop = stop_avg - V_low
   new_vsafe = catnap_Vsafe + V_drop*(V_low/V_MIN) # assumes n(V_low) = n(V_off)
   print("New vsafe estimate: ",new_vsafe)
+  # Meas min vsafe
+  meas_min_vsafe = calc_vsafe_meas_min(start_avg, Vmm_min, Vmm_final)
+  meas_min_str = make_adc_file_str(name,meas_min_vsafe)
+  print("Meas_min vsafe is:",meas_min_vsafe)
+  print("Str is:\n",meas_min_str)
 
 if __name__ == "__main__":
   if (len(sys.argv) < 2):
@@ -174,6 +208,7 @@ if __name__ == "__main__":
   filename = filename[pos:]
   app_name =  re.findall(r'[a-z]+',filename)[0]
   print(app_name)
+  step = int(np.floor(SEC_PER_SAMPLE/(vals[1,0] - vals[0,0])))
   if app_name == 'apds':
     #vals = vals[vals[:,0] < .56]
     vals = vals[vals[:,0] < .557063]
@@ -181,17 +216,35 @@ if __name__ == "__main__":
     cutoff = 2e3
   elif  app_name == 'ml':
     cutoff = 5e1
+    meas_mins = vals[vals[:,0] < 1.6]
+    meas_mins = meas_mins[meas_mins[:,0] > .0026]
+    Vmm_min = np.min(meas_mins[::step,1])
+    meas_mins = meas_mins[meas_mins[:,0]>1.101263]
+    Vmm_final = np.max(meas_mins[:,1])
+    print(len(meas_mins[meas_mins[:,0] > 1.101263]))
+    print("Vmin final:",Vmm_final,"Vmin min:",Vmm_min)
     vals = vals[vals[:,0] < 1.101263]
     #vals = vals[vals[:,0] < 1.103]
     vals = vals[vals[:,0] > .0026]
   elif app_name == 'ble':
-    cutoff = 5e2
+    cutoff = 2e2
+    #get mm
+    meas_mins = vals[vals[:,0] < 1.9]
+    meas_mins = meas_mins[meas_mins[:,0] > .417]
+    Vmm_min = np.min(meas_mins[::step,1])
+    meas_mins = meas_mins[meas_mins[:,0]>1.417]
+    Vmm_final = np.max(meas_mins[:,1])
+    print(len(meas_mins[meas_mins[:,0] > 1.4417]))
+    print("Vmin final:",Vmm_final,"Vmin min:",Vmm_min)
     vals = vals[vals[:,0] < 1.41717608]
     #vals = vals[vals[:,0] < 1.002]
     vals = vals[vals[:,0] > .417]
   elif app_name == 'fast':
     cutoff = 5e1
     vals = vals[vals[:,0] < .126]
+    step = int(np.floor(SEC_PER_SAMPLE/(vals[1,0] - vals[0,0])))
+    meas_min = np.min(meas_mins[::step,1])
+    vals = vals[vals[:,0] > .417]
     vals = vals[vals[:,0] > .0026]
   else:
     print("App name not found:",app_name)
@@ -216,12 +269,19 @@ if __name__ == "__main__":
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals_V = df.values
     if app_name == 'apds':
+      meas_mins = vals_V[vals_V[:,0] < 1.0]
+      meas_mins = meas_mins[meas_mins[:,0] > .500]
+      Vmm_min = np.min(meas_mins[::step,1])
+      meas_mins = meas_mins[meas_mins[:,0]>.557063]
+      Vmm_final = np.max(meas_mins[:,1])
+      print(len(meas_mins[meas_mins[:,0] > .557063]))
+      print("Vmin final:",Vmm_final,"Vmin min:",Vmm_min)
       vals_V = vals_V[vals_V[:,0] < .557063]
       #vals_V = vals_V[vals_V[:,0] < .56]
       # We scoot this a little further away so we don't artifically get the up
       # swing after releasing the cap... despite the fact that Catnap would end up
       # seeing that
-      vals_V = vals_V[vals_V[:,0] > .5144]
+      vals_V = vals_V[vals_V[:,0] > .500]
       V = vals_V[:,1]
       times = vals_V[:,0]
     if app_name == 'fast':

@@ -62,6 +62,12 @@ def find_nearest(array,value):
   return array[idx]
 
 def get_eff(V_in,I_out,eff):
+  m = 0.16228070175438583
+  b = 0.42078947368421055
+  new_eff = m*V_in + b
+  return new_eff
+
+
   V = find_nearest([*eff.keys()],V_in)
   I = find_nearest([*eff[V].keys()],I_out)
   return eff[V][I]
