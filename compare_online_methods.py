@@ -9,6 +9,7 @@ import pickle
 import re
 import math
 import glob
+import time
 
 eff = [.8,.73,.56]
 vi = [2.4,1.8,.9]
@@ -18,14 +19,17 @@ R_SHUNT = 4.7
 GAIN = 16
 Vdd = 2.56
 
+DO_EVENT_BUCKET = True
 BRUTE_FORCE_PATH = "brute_force_vstarts.pkl"
 # We generated the model with runs from 03-17 *after* 21:00, so use something
 # different to test
 #TODO generate the secs per sample and degree from the model name
-MEAS_MIN_MODEL = "fit_1_0.05.pkl"
+MEAS_MIN_MODEL = "fit_1_0.01.pkl"
 DEGREE = 1
-SEC_PER_SAMPLE = .05
+SEC_PER_SAMPLE = .01
 
+energy_map = {}
+avgs_map = {}
 
 def culpeo_rt_vsafe(Vs,Vmin,Vf,opt=0):
   m,b= np.polyfit(vi,eff,1)
@@ -55,26 +59,30 @@ estimates = {}
 sampling_times = [.1, .05, .01, .005, .001]
 
 # Needs to already be pruned
-def calc_energy(vals):
+def calc_energy(vals,expt):
   Is = vals[vals[:,0] > 0]
   stops = vals[:,5:7]
   stops = stops[stops[:,1] == 1]
-  print(stops)
+  #print(stops)
   stop = stops[0,0]
-  print(stop)
+  print("Stop time is:",stop)
   Is = Is[Is[:,0] < stop]
   diffs = np.subtract(Is[:,1],Is[:,2])
   if any(diff < 0 for diff in diffs):
-    print("flipping!\r\n");
+    #print("flipping!\r\n");
     diffs = np.subtract(Is[:,2],Is[:,1])
   new_I = np.divide(diffs,R_SHUNT*GAIN)
-  print(new_I)
+  curr_str = '{:.2e}'.format(np.average(new_I))
+  print("Average current is:",curr_str)
+  if not(expt in avgs_map.keys()):
+    avgs_map[expt] = []
+  avgs_map[expt].append(np.average(new_I))
+  #print(new_I)
   P = np.multiply(new_I,Vdd)
   E_deltas = np.multiply(P,vals[1,0] - vals[0,0])
   E = np.sum(E_deltas)
   return(E)
 
-  
 
 def get_vals(filename,secs_per_sample):
   pos = re.search('EXT',filename)
@@ -98,14 +106,16 @@ def get_vals(filename,secs_per_sample):
   stop_times = vals[:,9:11]
   catnap_stops = stop_times[stop_times[:,1] == 1]
   catnap_stop = stop_times[1,0]
-  energy = calc_energy(vals)
+  energy = calc_energy(vals,expt_id)
   print("Energy is: ",energy)
-  return [0,0,0,0,0,0]  #TODO take this out
-  vcaps_catnap = vals[vals[:,0] > catnap_stop]
+  #return [expt_id,0,0,0,0,0,energy]  #TODO take this out
+  #vcaps_catnap = vals[vals[:,0] > catnap_stop]
   catnap_final = np.average(vals[0:100,1])
   stop_time = stop_times[stop_times[:,1] == 0]
   stop_time = stop_time[-1,0]
+  #print(stop_time)
   vcaps_temp = vals[vals[:,0] < stop_time]
+  #print(vcaps_temp)
   vcap_min = np.min(vcaps_temp[::step,1])
   vcaps = vals[vals[:,0] > (stop_time)]
   vfinal = np.average(vcaps[0:100,1])
@@ -116,7 +126,7 @@ def get_vals(filename,secs_per_sample):
   clipped_min = np.average(clipped[0:100,4])
   meas_mins = vals[vals[:,0] < time]
   meas_min = np.min(meas_mins[::step,4])
-  return [expt_id,meas_min,vcap_min,vstart,vfinal,catnap_final]
+  return [expt_id,meas_min,vcap_min,vstart,vfinal,catnap_final,energy]
 
 def get_est_min(mm,degree,secs):
   if degree == 2:
@@ -132,7 +142,8 @@ def plot_comparison():
   # Plot bar chart(?) Comparing accuracy at different sampling levels across
   # experiments
   # grouping is estimator, bars are expts
-  plot_estimates = pickle.load(open("test.pkl","rb"))
+  real_vsafes = pickle.load(open(BRUTE_FORCE_PATH,"rb"))
+  plot_estimates = pickle.load(open("estimates_1_0.01.pkl","rb"))
   fig = plt.figure()
   fig1 = plt.figure()
   ax = fig.add_subplot(111)
@@ -155,13 +166,18 @@ def plot_comparison():
           samples = 1/secs
         if diff < 0:
           sys_count[secs] += 1
-          print("Expt: ",expt,"diff: ",diff,"freq:",samples,"sys:",sys)
-          print("\tReal:",real_vsafes[expt],"vs:",ests)
+          if sys == 'vmeas_min':
+            print("Expt: ",expt,"diff: ",diff,"freq:",samples,"sys:",sys)
+            print("\tReal:",real_vsafes[expt],"vs:",np.average(ests),np.std(ests))
         ax.scatter(expt,diff,marker=symbols[secs],c=colors[sys])
         ax1.scatter(samples,diff,c=colors[sys],marker=symbols2[secs])
     print("Total off: ",sys_count,"sys",sys)
   plt.legend()
   ax.axhline(0)
+  ax.set_ylabel("Estimate - Actual Vsafe (V)")
+  ax1.set_ylabel("Estimate - Actual Vsafe (V)")
+  ax.set_xlabel("Frequency (Hz)")
+  ax1.set_xlabel("Expt Count")
   ax1.axhline(0)
   fig.savefig('acc_scatter_plot.pdf',format='pdf',bbox_inches='tight')
   fig1.savefig('acc_by_sampling_plot.pdf',format='pdf',bbox_inches='tight')
@@ -206,16 +222,19 @@ def run_compare_online(all_files):
   results_file.close()
 
 class event:
-  def __init__(self,vstart,vsafe,vdrop,V_final_catnap=0):
+  def __init__(self,vstart,vsafe,vdrop,V_final_catnap=0,V_final_culpeo=0):
     self.Vstart = vstart
     self.Vsafe = vsafe
     self.Vdrop = vdrop
+    self.Vfinal_good = V_final_culpeo
     self.Vfc = V_final_catnap
   def transfer_vsafe(self,Vb):
-    vb_sq =  self.Vstart**2 -self.Vsafe**2 + Voff**2
+    print(self.Vstart,self.Vfinal_good)
+    vb_sq =  self.Vstart**2 + Vb**2 - (self.Vfinal_good)**2
     return vb_sq**(1/2)
   def transfer_catnap(self,Vcb):
-    vbc_sq = Vcb**2 + self.Vsafe**2 - self.Vfc**2
+    print("vfc: ",self.Vfc,Vcb,self.Vstart)
+    vbc_sq = self.Vstart**2 + Vcb**2 - self.Vfc**2
     return vbc_sq**(1/2)
 
 # Returns culpeo vbucket, then catnap vbucket
@@ -225,9 +244,12 @@ def calc_vbucket(events):
   Vcb = Voff
   events = np.flip(events)
   for i, ev in enumerate(events):
-    if (Vb - ev.Vdrop > Voff):
+    print("Vd:",ev.Vdrop)
+    if (Vb - ev.Vdrop < Voff):
       Vb = Voff + ev.Vdrop
+      print("Set Vb!",Vb)
     Vb = ev.transfer_vsafe(Vb) # tranfser with drop
+    print("Vb:",Vb)
     Vcb = ev.transfer_catnap(Vcb) # transfer w/out drop
   return [Vb,Vcb]
 
@@ -235,6 +257,7 @@ def calc_vbucket(events):
 # Assumes that you've fed in files for events that need to happen in order with
 # no incoming energy
 def process_event_bucket(files):
+  print("Processing event bucket!\r\n");
   events = []
   for filename in all_files:
     results = get_vals(filename,.001)
@@ -245,7 +268,7 @@ def process_event_bucket(files):
     vdrop = vfinal - vcap_min
     vsafe = culpeo_rt_vsafe(vstart,vcap_min,vfinal,opt=2)
     vdrop = culpeo_rt_vsafe(vstart,vcap_min,vfinal,opt=1)
-    events.append(event(vstart,vsafe,vdrop))
+    events.append(event(vstart,vsafe,vdrop,results[5],vfinal))
   Vb = calc_vbucket(events)
   print("Bucket level is: ",Vb)
 
@@ -262,15 +285,30 @@ if __name__ == "__main__":
   while i < num_files:
     all_files.append(sys.argv[i])
     i += 1
-  fit_files = glob.glob("./fit_*.pkl")
-  if num_files < 5:
-    process_event_bucket(all_files)
-    sys.exit(0)
-  if num_files < 10:
-    for filename in all_files:
-      print(filename)
-      get_vals(filename,.001)
-    sys.exit(0)
+  #fit_files = glob.glob("./fit_*.pkl")
+  fit_files = ["fits/fit_1_0.01.pkl"]
+  if DO_EVENT_BUCKET:
+    print(num_files)
+    if num_files < 5:
+      process_event_bucket(all_files)
+      sys.exit(0)
+    else:
+      for filename in all_files:
+        print(filename)
+        results = get_vals(filename,.001)
+        if results[0] in energy_map.keys():
+          energy_map[results[0]].append(results[6])
+        else:
+          energy_map[results[0]] = []
+          energy_map[results[0]].append(results[6])
+      time_str = time.strftime('%m-%d--%H-%M-%S')
+      results_file = open("energy_" + str(time_str) + ".pkl","wb")
+      pickle.dump(energy_map,results_file)
+      results_file.close()
+      results_file = open("current_" + str(time_str) + ".pkl","wb")
+      pickle.dump(avgs_map,results_file)
+      results_file.close()
+      sys.exit(0)
   for filename in fit_files:
     print(filename)
     MEAS_MIN_MODEL = filename

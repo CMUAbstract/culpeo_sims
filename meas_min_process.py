@@ -20,14 +20,27 @@ vi = [2.4,1.8,.9]
 Voff = 1.6
 Vrange = 3.3
 
-USE_REAL = 0
+USE_REAL = 1
 DEGREE = 1
-SEC_PER_SAMPLE = .05
+SEC_PER_SAMPLE = .001
+RUN_SHORT = 0
 
 mv_off = []
+# Vstart = 2.4V
+def calc_vsafe_msp430(Vmin,Vfinal):
+  Vs_const_float=6.8589815
+  n_ratio_float=1.1907954
+  Voff_sq_float=2.56
+  Vd_const_float=1.0887018
+  m_float=0.1622807
+  b_float=0.4207894
+
+
 
 def calc_vsafe(Vs,Vmin,Vf):
+  print("Vs:",Vs,Vmin,Vf)
   m,b= np.polyfit(vi,eff,1)
+  print("m,b:",m,b)
   const = (m*Vs**3)/3 + (b*Vs**2)/2 - (m*Vf**3)/3 - (b*Vf**2)/2 + \
     (m*Voff**3)/3 + (b*Voff**2)/2
   p = [m/3,b/2,0,-1*const]
@@ -37,7 +50,20 @@ def calc_vsafe(Vs,Vmin,Vf):
   Vd_new = Vd*scale
   reals = V_e[np.isreal(V_e)][0]
   Vsafe = reals.real + Vd_new
-  #print("Vsafe: ",Vsafe)
+  guess = Vs**2 + Voff**2 - Vf**2
+  guess = guess**(1/2)
+  f_guess = (m/3)*guess**3 + (b/2)*guess**2 - const
+  f_prime_guess = m*guess**2 + b*guess
+  approx = guess - f_guess/f_prime_guess
+  #print("Vsafe: ",reals.real, "approx:",approx,"Diff:",reals.real - approx)
+  n_voff = m*Voff + b
+  n_vs = m*Vs + b
+  #print("N_ratio:",n_vs/n_voff)
+  #print("Vs_const:",n_vs/n_voff*(Vs**2))
+  #print("Vd_const",Voff*(m*Voff+b))
+  new_guess = (n_vs/n_voff)*(Vs**2 - Vf**2) + Voff**2
+  new_guess = new_guess**(1/2)+Vd_new
+  #print("\tEasy guess:",new_guess,"diff:",reals.real-new_guess)
   return Vsafe
 
 
@@ -109,34 +135,36 @@ if __name__ == "__main__":
     #print(sys.argv[i])
     all_files.append(sys.argv[i])
     i += 1
-  for filename in all_files:
-    print(filename)
-    phase_process(filename)
-    continue
-    [mm, rm, vs,vf] = process_file(filename)
-    # Goofy switcheroo, not sure if we need it yet
-    real_mins.append(rm)
-    meas_mins.append(mm)
-  sys.exit(0)
+  if RUN_SHORT:
+    for filename in all_files:
+      print(filename)
+      #phase_process(filename)
+      #continue
+      [mm, rm, vs,vf] = process_file(filename)
+      # Goofy switcheroo, not sure if we need it yet
+      real_mins.append(rm)
+      meas_mins.append(mm)
+  #sys.exit(0)
   #print(real_mins)
   #print(meas_mins)
-  if DEGREE == 2:
-    fit = np.polyfit(meas_mins,real_mins,2,full=True)
-  else:
-    fit = np.polyfit(meas_mins,real_mins,1,full=True)
-  results_file = open("fit_"+ str(DEGREE) +"_"+str(SEC_PER_SAMPLE)+".pkl","wb")
-  pickle.dump(fit,results_file)
-  results_file.close()
-  sse = fit[1][0]
-  diff = np.subtract(real_mins,np.mean(real_mins))
-  diff = diff**2
-  sst = np.sum(diff)
-  r2 = 1 - sse/sst
-  if DEGREE == 2:
-    print("Fit is: ",r2,"m^2, m, b are",fit[0][0],fit[0][1],fit[0][2])
-  else:
-    print("Fit is: ",r2,"m,b are",fit[0][0],fit[0][1])
-  sys.exit(0)
+  if USE_REAL != 1:
+    if DEGREE == 2:
+      fit = np.polyfit(meas_mins,real_mins,2,full=True)
+    else:
+      fit = np.polyfit(meas_mins,real_mins,1,full=True)
+    results_file = open("fit_"+ str(DEGREE) +"_"+str(SEC_PER_SAMPLE)+".pkl","wb")
+    pickle.dump(fit,results_file)
+    results_file.close()
+    sse = fit[1][0]
+    diff = np.subtract(real_mins,np.mean(real_mins))
+    diff = diff**2
+    sst = np.sum(diff)
+    r2 = 1 - sse/sst
+    if DEGREE == 2:
+      print("Fit is: ",r2,"m^2, m, b are",fit[0][0],fit[0][1],fit[0][2])
+    else:
+      print("Fit is: ",r2,"m,b are",fit[0][0],fit[0][1])
+    sys.exit(0)
   for filename in all_files:
     print(filename)
     pos = re.search('EXT',filename).start()
@@ -145,14 +173,15 @@ if __name__ == "__main__":
     expt_id = int(numbers[0])
     #print("Expt id: ",expt_id)
     [mm, rm, vs, vf] = process_file(filename)
-    if DEGREE == 2:
-      est_m = (mm**2)*fit[0][0] + mm*fit[0][1] + fit[0][2]
-    else:
-      est_m = mm*fit[0][0] + fit[0][1]
-    expt_range = vs - rm
-    print("Range is:",expt_range,vs,rm,mm,"Min diff is: ",\
-    math.trunc(100*(est_m - rm)/expt_range),est_m,rm)
-    print("full diff: ",est_m-rm,math.trunc(100*(est_m - rm)/(2.5-1.6)))
+    if USE_REAL != 1:
+      if DEGREE == 2:
+        est_m = (mm**2)*fit[0][0] + mm*fit[0][1] + fit[0][2]
+      else:
+        est_m = mm*fit[0][0] + fit[0][1]
+      expt_range = vs - rm
+      print("Range is:",expt_range,vs,rm,mm,"Min diff is: ",\
+      math.trunc(100*(est_m - rm)/expt_range),est_m,rm)
+      print("full diff: ",est_m-rm,math.trunc(100*(est_m - rm)/(2.5-1.6)))
     #print("Vf is: ",vf,"Est m is", est_m)
     if USE_REAL:
       vsafe = calc_vsafe(vs,rm,vf)

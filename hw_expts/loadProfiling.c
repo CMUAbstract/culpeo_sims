@@ -123,7 +123,9 @@ int main(void)
       chargingRoutine();
       
       // Disable Charging and enable OP Booster
+#ifndef CONT_CHARGING
       P4OUT &= ~BIT1;
+#endif
 		  P7OUT |= BIT0;
 
 		mcu_delayms( 300 );
@@ -168,13 +170,16 @@ int main(void)
 #endif
     P4OUT |= BIT3;
     P4OUT &= ~BIT3;
-		//mcu_delayms( 50 );
-    // Put this signal down
-#ifdef MEAS_MIN
-    // Added to get reasonable Vfinal calculation
-    mcu_delayms(1000);
+#ifdef CONT_CHARGING
+    chargingRoutine();
 #endif
     P2OUT &= ~BIT6;
+		mcu_delayms( 50 );
+    // Put this signal down
+//#ifdef MEAS_MIN
+    // Added to get reasonable Vfinal calculation
+    mcu_delayms(1000);
+//#endif
 		// Disable Load and OP Booster
 		P7OUT &= ~BIT0; 
 #ifdef USE_VSAFE
@@ -241,6 +246,7 @@ void chargingRoutine(){
 	
 	uart_write("ADC Reading: ");
 	char str[100];
+  adc_reading = 0x00;
 	sprintf( str, "%d V\r\n", adc_reading );
 	uart_write( str );
 	
@@ -449,10 +455,15 @@ void dischargingRoutine(){
 		 sprintf( str, "%d V\r\n", adc_reading );
 		 uart_write( str );
     // Now drain:
+    #ifndef BUDDY_MCU
     P3OUT |= BIT3;
     P3DIR |= BIT3;
 		mcu_delayms(10);	
     P3OUT &= ~BIT3;
+    #else
+    // Just let the active mcu drain us
+		mcu_delayms(10);	
+    #endif
 		mcu_delayms(100);	
 
 	}

@@ -38,6 +38,7 @@ if __name__ == "__main__":
   total_fails = 0
   for expt_id in file_dict:
     mins = []
+    starts = []
     fail_count = 0
     for filename in file_dict[expt_id]:
       pos = re.search('EXPT',filename).start()
@@ -55,6 +56,7 @@ if __name__ == "__main__":
       vals = df.values
       start_vcap = np.average(vals[0:100,1])
       print("Expt is ",expt_id,"Start cap is: ",start_vcap)
+      starts.append(start_vcap)
       Vmin = np.amin(vals[:,1])
       mins.append(Vmin)
       #print("Vmin is ",Vmin)
@@ -63,7 +65,8 @@ if __name__ == "__main__":
     print("Expt: ",expt_id," Config: ",config)
     print("\tFailures: ",fail_count,"Average min: ",np.average(mins)," Std dev:",\
     np.std(mins))
-    results[expt_id] = {'fails':fail_count,'avg_min':np.average(mins),'std':np.std(mins)}
+    results[expt_id] = {'fails':fail_count,'avg_min':np.average(mins),\
+    'std':np.std(mins),'avg_start':np.average(starts)}
     if (start_vcap < 2.42):
       total_fails += fail_count
   print("Total failures is: ",total_fails)

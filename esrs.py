@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import re
 import glob
 import pickle
+import meas_min_process as mmmp
 
 DO_PLOT = False
 #V_RANGE = 2.485
@@ -22,7 +23,12 @@ EFF_VMIN = .5
 #Offset in seconds:
 #TIME_OFFSET = .002
 TIME_OFFSET = .000263
-datasheet_esr = 25/6
+TIME_OFFSET_lucky = 0
+TIME_OFFSET_unlucky = .1
+TIME_OFFSET_energy = 0.500
+
+DYN_SEC_PER_SAMPLE = .001
+HW_SEC_PER_SAMPLE = .00001
 
 esrs = {
 1000: 34.13,
@@ -41,58 +47,6 @@ times = {
   101: .101,
 }
 
-#1 5mA for 1s
-#2 10mA for 1s
-#3 5mA for 100ms
-#4 10mA for 100ms
-#5 25mA for 100ms
-#6 5mA for 10ms
-#7 10mA for 10ms
-#8 25mA for 10ms
-#9 50mA for 10ms
-#10 10mA for 1ms
-#11 25mA for 1ms
-#12 50mA for 1ms
-
-
-#esrs_by_id = {
-#1: 34.13,
-#2: 34.13,
-#3: 21.59,
-#4: 21.59,
-#5: 21.59,
-#6: 8.689,
-#7: 8.689,
-#8: 8.689,
-#9: 8.689,
-#10: 3.226,
-#11: 3.226,
-#12: 3.226,
-#13: 34.13,
-#14: 34.13,
-#15: 21.59,
-#16: 21.59,
-#17: 21.59,
-#18: 8.689,
-#19: 8.689,
-#20: 8.689,
-#21: 8.689,
-#22: 3.226,
-#23: 3.226,
-#24: 3.226,
-#25: 34.13,
-#26: 34.13,
-#27: 21.59,
-#28: 21.59,
-#29: 21.59,
-#30: 8.689,
-#31: 8.689,
-#32: 8.689,
-#33: 8.689,
-#34: 3.226,
-#35: 3.226,
-#36: 3.226,
-#};
 
 esrs_by_id = {
 1: esrs[1000],
@@ -185,28 +139,35 @@ def make_adc_val(val):
   return adc_val
 
 catnap_vals = {}
+lucky_vals = {}
+unlucky_vals = {}
 culpeo_vals = {}
-conservative_vals = {}
-datasheet_vals = {}
+energy_vals = {}
+dynamic_vals = {}
+hardware_vals = {}
 
 if __name__ == "__main__":
-  file_str = "vsafe_" + str(V_MIN) + "_" + str(CAP_VAL)
+#og culpeo static
+  file_str = "culpeo_" + str(V_MIN) + "_" + str(CAP_VAL)
   esr_file = open(file_str,"w")
-
+# catnap realistic
   file_str = "catnap_" + str(V_MIN) + "_" + str(CAP_VAL)
   catnap_file = open(file_str,"w")
-
-  file_str = "naive_" + str(V_MIN) + "_" + str(CAP_VAL)
-  naive_file = open(file_str,"w")
-
-  file_str = "naive_better_" + str(V_MIN) + "_" + str(CAP_VAL)
-  naive_better_file = open(file_str,"w")
-
-  file_str = "grey_hat_culpeo_" + str(V_MIN) + "_" + str(CAP_VAL)
-  conservative_file = open(file_str,"w")
-
-  file_str = "datasheet_esr_culpeo_" + str(V_MIN) + "_" + str(CAP_VAL)
-  datasheet_file = open(file_str,"w")
+# catnap lucky
+  file_str = "lucky_" + str(V_MIN) + "_" + str(CAP_VAL)
+  lucky_file = open(file_str,"w")
+# catanp unlucky
+  file_str = "unlucky_" + str(V_MIN) + "_" + str(CAP_VAL)
+  unlucky_file = open(file_str,"w")
+# energy
+  file_str = "energy_" + str(V_MIN) + "_" + str(CAP_VAL)
+  energy_file = open(file_str,"w")
+# dynamic
+  file_str = "dynamic_" + str(V_MIN) + "_" + str(CAP_VAL)
+  dynamic_file = open(file_str,"w")
+# hardware
+  file_str = "hardware_" + str(V_MIN) + "_" + str(CAP_VAL)
+  hardware_file = open(file_str,"w")
   num_files = len(sys.argv)
   i = 1
   all_files = []
@@ -236,8 +197,10 @@ if __name__ == "__main__":
     vals = df.values
     # Drop time before 1s
     # Not needed for new version
+    all_vals = vals
     if (expt_id < 13):
       vals = vals[vals[:,0]>1.2]
+      all_vals = vals
       vals = vals[vals[:,0]<1.3 + time_by_id[expt_id]+TIME_OFFSET]
       print("End = ",1.3 + time_by_id[expt_id] + TIME_OFFSET)
     else:
@@ -260,79 +223,126 @@ if __name__ == "__main__":
     # Various Vsafe calcs
     print("max I is:", max(I))
     dt = vals[1,0] - vals[0,0]
-    # Catnap
+# Catnap realistic
     catnap_E = .5*CAP_VAL*(start_avg**2 - stop_avg**2)
     catnap_Vsafe = np.sqrt(2*catnap_E/CAP_VAL + V_MIN**2)
     print("\tCatnap vsafe is: ",catnap_Vsafe)
     catnap_vals[expt_id] = {make_adc_val(catnap_Vsafe)}
     catnap_file_str = make_adc_file_str(expt_id,catnap_Vsafe)
     ##----------------------------------------------------------
-    # Estimate E with some understanding of the power system
-    E = 0
-    n = EFF_VMIN
-    for i in I:
-      E = E + i*dt*2.56/n
-    avg_i = np.average(I)/n
-    Vcaps = vals[:,1]
-    Vcap_min = min(vals[:,1])
-    Vcap_min_index = np.argmin(Vcaps)
-    print("Min at index ",Vcap_min_index," out of ",len(Vcaps))
-    print("Min is",Vcap_min)
-    max_i = np.amax(I)*2.56/(n*V_MIN)
-
-
-    naive_min = np.sqrt(2*E/CAP_VAL + V_MIN**2)
-    naive_min_str = make_adc_file_str(expt_id,naive_min)
-
-    naive_better_min = np.sqrt(2*E/CAP_VAL + (V_MIN + avg_i*minV.CAP_ESR)**2)
-    naive_better_min_str = make_adc_file_str(expt_id,naive_better_min)
-
-    # Use E from Catnap!!
-    # Use Vmin of the system
-    conservative_estimate = np.sqrt(2*catnap_E/CAP_VAL + (V_MIN + max_i*minV.CAP_ESR)**2)
-    print("Conservative2: ",conservative_estimate)
-    conservative_vals[expt_id] = {make_adc_val(conservative_estimate)}
-    conservative_str = make_adc_file_str(expt_id,conservative_estimate)
-
+#Culpeo
     Vsafe = minV.calc_min_forward(I,dt,DO_PLOT)
     culpeo_vals[expt_id] = {make_adc_val(Vsafe)}
     Vsafe_culpeo_str = make_adc_file_str(expt_id,Vsafe)
     print("Expt ",expt_id," Vsafe is ",Vsafe)
-
-    minV.CAP_ESR = datasheet_esr
-    datasheet_vsafe = minV.calc_min_forward(I,dt,DO_PLOT)
-    datasheet_vals[expt_id] = {make_adc_val(datasheet_vsafe)}
-    datasheet_str = make_adc_file_str(expt_id,datasheet_vsafe)
-    print("Datasheet ",expt_id," Vsafe is ",datasheet_vsafe)
+    ##----------------------------------------------------------
+#Lucky
+    if (expt_id < 13):
+      lucky_vals = all_vals[all_vals[:,0]<1.3 + \
+      time_by_id[expt_id]+TIME_OFFSET_lucky]
+      #print("End = ",1.3 + time_by_id[expt_id] + TIME_OFFSET)
+    else:
+      lucky_vals = all_vals[all_vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET_lucky]
+      #print("End = ",time_by_id[expt_id] + .010 + TIME_OFFSET)
+    lucky_stop = np.average(lucky_vals[-100:,1])
+    lucky = np.sqrt((start_avg**2 - lucky_stop**2) + V_MIN**2)
+    lucky_vals[expt_id] = {make_adc_val(lucky)}
+    lucky_str = make_adc_file_str(expt_id,lucky)
+    print("lucky ",expt_id," Vsafe is ",lucky_vsafe)
+    ##----------------------------------------------------------
+#UnLucky
+    if (expt_id < 13):
+      unlucky_vals = all_vals[all_vals[:,0]<1.3 + \
+      time_by_id[expt_id]+TIME_OFFSET_unlucky]
+      #print("End = ",1.3 + time_by_id[expt_id] + TIME_OFFSET)
+    else:
+      unlucky_vals = all_vals[all_vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET_unlucky]
+      #print("End = ",time_by_id[expt_id] + .010 + TIME_OFFSET)
+    unlucky_stop = np.average(unlucky_vals[-100:,1])
+    unlucky = np.sqrt((start_avg**2 - unlucky_stop**2) + V_MIN**2)
+    unlucky_str = make_adc_file_str(expt_id,unlucky)
+    unlucky_vals[expt_id] = {make_adc_val(unlucky)}
+    print("unlucky ",expt_id," Vsafe is ",unlucky_vsafe)
+    ##----------------------------------------------------------
+#Energy
+    if (expt_id < 13):
+      energy_vals = all_vals[all_vals[:,0]<1.3 + \
+      time_by_id[expt_id]+TIME_OFFSET_energy]
+      #print("End = ",1.3 + time_by_id[expt_id] + TIME_OFFSET)
+    else:
+      energy_vals = all_vals[all_vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET_energy]
+      #print("End = ",time_by_id[expt_id] + .010 + TIME_OFFSET)
+    energy_stop = np.average(energy_vals[-100:,1])
+    energy = np.sqrt((start_avg**2 - energy_stop**2) + V_MIN**2)
+    energy_vals[expt_id] = {make_adc_val(energy_estimate)}
+    energy_str = make_adc_file_str(expt_id,energy_estimate)
+    print("energy ",expt_id," Vsafe is ",energy_vsafe)
+    ##----------------------------------------------------------
+#Dynamic
+    # Re-use energy_vals defined above
+    # Start with downsampling
+    step = int(np.floor(DYN_SEC_PER_SAMPLE/(energy_vals[1,0] - energy_vals[0,0])))
+    # Grab vmin
+    Vmin = np.min(energy_vals[::step,1])
+    # Grab Vfinal (max) after end
+    temp_vals = energy_vals[energy_vals[:,0] > time_by_id[expt_id]]
+    Vfinal = np.max(temp_vals[:,0])
+    print("Dyn: start,min,final:",start_avg,Vmin,Vfinal)
+    dynamic_vsafe =  mmp.calc_vsafe(start_avg,Vmin,Vfinal)
+    dynamic_vals[expt_id] = {make_adc_val(dynamic_vsafe)}
+    dynamic_str = make_adc_file_str(expt_id,dynamic_vsafe)
+    print("dynamic ",expt_id," Vsafe is ",dynamic_vsafe)
+#Faster sampling in hardware
+    # Re-use energy_vals defined above
+    # Start with downsampling
+    step = int(np.floor(HW_SEC_PER_SAMPLE/(energy_vals[1,0] - energy_vals[0,0])))
+    # Grab vmin
+    Vmin = np.min(energy_vals[::step,1])
+    # Grab Vfinal (max) after end
+    temp_vals = energy_vals[energy_vals[:,0] > time_by_id[expt_id]]
+    Vfinal = np.max(temp_vals[:,0])
+    print("HW: start,min,final:",start_avg,Vmin,Vfinal)
+    hardware_vsafe =  mmp.calc_vsafe(start_avg,Vmin,Vfinal)
+    hardware_vals[expt_id] = {make_adc_val(hardware_vsafe)}
+    hardware_str = make_adc_file_str(expt_id,hardware_vsafe)
+    print("hardware ",expt_id," Vsafe is ",hardware_vsafe)
 
     if DO_PLOT == True:
       minV.calc_sim_starting_point(I,dt,Vsafe)
 
     esr_file.write(Vsafe_culpeo_str)
     catnap_file.write(catnap_file_str)
-    naive_file.write(naive_min_str)
-    naive_better_file.write(naive_better_min_str)
-    conservative_file.write(conservative_str)
-    datasheet_file.write(datasheet_str)
+    lucky_file.write(lucky_str)
+    unlucky_file.write(unlucky_str)
+    energy_file.write(energy_str)
+    dynamic_file.write(dynamic_str)
+    hardware_file.write(hardware_str)
   esr_file.close()
   catnap_file.close()
-  naive_file.close()
-  naive_better_file.close()
-  conservative_file.close()
-  datasheet_file.close()
- 
+  lucky_file.close()
+  unlucky_file.close()
+  energy_file.close()
+  hardware_file.close()
+
   culpeo_pickle = open('culpeo_vsafe.pkl','wb')
   pickle.dump(culpeo_vals,culpeo_pickle)
   culpeo_pickle.close()
   catnap_pickle = open('catnap_vsafe.pkl','wb')
   pickle.dump(catnap_vals,catnap_pickle)
   catnap_pickle.close()
-  conservative_pickle = open('conservative_vsafe.pkl','wb')
-  pickle.dump(conservative_vals,conservative_pickle)
-  conservative_pickle.close()
-  datasheet_pickle = open('datasheet_vsafe.pkl','wb')
-  pickle.dump(datasheet_vals,datasheet_pickle)
-  datasheet_pickle.close()
-
-
+  energy_pickle = open('energy_vsafe.pkl','wb')
+  pickle.dump(energy_vals,energy_pickle)
+  energy_pickle.close()
+  dynamic_pickle = open('dynamic_vsafe.pkl','wb')
+  pickle.dump(dynamic_vals,dynamic_pickle)
+  dynamic_pickle.close()
+  hardware_pickle = open('hardware_vsafe.pkl','wb')
+  pickle.dump(hardware_vals,hardware_pickle)
+  hardware_pickle.close()
+  lucky_pickle = open('lucky_vsafe.pkl','wb')
+  pickle.dump(lucky_vals,lucky_pickle)
+  lucky_pickle.close()
+  unlucky_pickle = open('unlucky_vsafe.pkl','wb')
+  pickle.dump(unlucky_vals,unlucky_pickle)
+  unlucky_pickle.close()
 
