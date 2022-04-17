@@ -26,8 +26,19 @@ SEC_PER_SAMPLE = .001
 RUN_SHORT = 0
 
 mv_off = []
+# Vstart = 2.4V
+def calc_vsafe_msp430(Vmin,Vfinal):
+  Vs_const_float=6.8589815
+  n_ratio_float=1.1907954
+  Voff_sq_float=2.56
+  Vd_const_float=1.0887018
+  m_float=0.1622807
+  b_float=0.4207894
+
+
 
 def calc_vsafe(Vs,Vmin,Vf):
+  print("Vs:",Vs,Vmin,Vf)
   m,b= np.polyfit(vi,eff,1)
   print("m,b:",m,b)
   const = (m*Vs**3)/3 + (b*Vs**2)/2 - (m*Vf**3)/3 - (b*Vf**2)/2 + \
@@ -44,12 +55,15 @@ def calc_vsafe(Vs,Vmin,Vf):
   f_guess = (m/3)*guess**3 + (b/2)*guess**2 - const
   f_prime_guess = m*guess**2 + b*guess
   approx = guess - f_guess/f_prime_guess
-  print("Vsafe: ",reals.real, "approx:",approx,"Diff:",reals.real - approx)
+  #print("Vsafe: ",reals.real, "approx:",approx,"Diff:",reals.real - approx)
   n_voff = m*Voff + b
   n_vs = m*Vs + b
+  #print("N_ratio:",n_vs/n_voff)
+  #print("Vs_const:",n_vs/n_voff*(Vs**2))
+  #print("Vd_const",Voff*(m*Voff+b))
   new_guess = (n_vs/n_voff)*(Vs**2 - Vf**2) + Voff**2
-  new_guess = new_guess**(1/2)
-  print("\tEasy guess:",new_guess,"diff:",reals.real-new_guess)
+  new_guess = new_guess**(1/2)+Vd_new
+  #print("\tEasy guess:",new_guess,"diff:",reals.real-new_guess)
   return Vsafe
 
 

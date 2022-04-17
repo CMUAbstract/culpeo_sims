@@ -19,7 +19,7 @@ R_SHUNT = 4.7
 GAIN = 16
 Vdd = 2.56
 
-DO_EVENT_BUCKET = False
+DO_EVENT_BUCKET = True
 BRUTE_FORCE_PATH = "brute_force_vstarts.pkl"
 # We generated the model with runs from 03-17 *after* 21:00, so use something
 # different to test
@@ -107,13 +107,15 @@ def get_vals(filename,secs_per_sample):
   catnap_stops = stop_times[stop_times[:,1] == 1]
   catnap_stop = stop_times[1,0]
   energy = calc_energy(vals,expt_id)
-  #print("Energy is: ",energy)
+  print("Energy is: ",energy)
   #return [expt_id,0,0,0,0,0,energy]  #TODO take this out
-  vcaps_catnap = vals[vals[:,0] > catnap_stop]
+  #vcaps_catnap = vals[vals[:,0] > catnap_stop]
   catnap_final = np.average(vals[0:100,1])
   stop_time = stop_times[stop_times[:,1] == 0]
   stop_time = stop_time[-1,0]
+  #print(stop_time)
   vcaps_temp = vals[vals[:,0] < stop_time]
+  #print(vcaps_temp)
   vcap_min = np.min(vcaps_temp[::step,1])
   vcaps = vals[vals[:,0] > (stop_time)]
   vfinal = np.average(vcaps[0:100,1])
@@ -220,16 +222,19 @@ def run_compare_online(all_files):
   results_file.close()
 
 class event:
-  def __init__(self,vstart,vsafe,vdrop,V_final_catnap=0):
+  def __init__(self,vstart,vsafe,vdrop,V_final_catnap=0,V_final_culpeo=0):
     self.Vstart = vstart
     self.Vsafe = vsafe
     self.Vdrop = vdrop
+    self.Vfinal_good = V_final_culpeo
     self.Vfc = V_final_catnap
   def transfer_vsafe(self,Vb):
-    vb_sq =  self.Vstart**2 -self.Vsafe**2 + Voff**2
+    print(self.Vstart,self.Vfinal_good)
+    vb_sq =  self.Vstart**2 + Vb**2 - (self.Vfinal_good)**2
     return vb_sq**(1/2)
   def transfer_catnap(self,Vcb):
-    vbc_sq = Vcb**2 + self.Vsafe**2 - self.Vfc**2
+    print("vfc: ",self.Vfc,Vcb,self.Vstart)
+    vbc_sq = self.Vstart**2 + Vcb**2 - self.Vfc**2
     return vbc_sq**(1/2)
 
 # Returns culpeo vbucket, then catnap vbucket
@@ -239,9 +244,12 @@ def calc_vbucket(events):
   Vcb = Voff
   events = np.flip(events)
   for i, ev in enumerate(events):
-    if (Vb - ev.Vdrop > Voff):
+    print("Vd:",ev.Vdrop)
+    if (Vb - ev.Vdrop < Voff):
       Vb = Voff + ev.Vdrop
+      print("Set Vb!",Vb)
     Vb = ev.transfer_vsafe(Vb) # tranfser with drop
+    print("Vb:",Vb)
     Vcb = ev.transfer_catnap(Vcb) # transfer w/out drop
   return [Vb,Vcb]
 
@@ -249,6 +257,7 @@ def calc_vbucket(events):
 # Assumes that you've fed in files for events that need to happen in order with
 # no incoming energy
 def process_event_bucket(files):
+  print("Processing event bucket!\r\n");
   events = []
   for filename in all_files:
     results = get_vals(filename,.001)
@@ -259,7 +268,7 @@ def process_event_bucket(files):
     vdrop = vfinal - vcap_min
     vsafe = culpeo_rt_vsafe(vstart,vcap_min,vfinal,opt=2)
     vdrop = culpeo_rt_vsafe(vstart,vcap_min,vfinal,opt=1)
-    events.append(event(vstart,vsafe,vdrop))
+    events.append(event(vstart,vsafe,vdrop,results[5],vfinal))
   Vb = calc_vbucket(events)
   print("Bucket level is: ",Vb)
 
@@ -277,8 +286,9 @@ if __name__ == "__main__":
     all_files.append(sys.argv[i])
     i += 1
   #fit_files = glob.glob("./fit_*.pkl")
-  fit_files = ["./fits/fit_1_0.01.pkl"]
+  fit_files = ["fits/fit_1_0.01.pkl"]
   if DO_EVENT_BUCKET:
+    print(num_files)
     if num_files < 5:
       process_event_bucket(all_files)
       sys.exit(0)
