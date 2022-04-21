@@ -11,20 +11,22 @@ import matplotlib.pyplot as plt
 import re
 import glob
 import pickle
-import meas_min_process as mmmp
+import meas_min_process as mmp
 
 DO_PLOT = False
+do_plot_loc = False
 #V_RANGE = 2.485
 V_RANGE = 3.3
 V_MIN = 1.6
 CAP_VAL = 45e-3
 EFF_VMIN = .5
+VOUT = 2.5
 #CAP_VAL = 63e-3
 #Offset in seconds:
 #TIME_OFFSET = .002
 TIME_OFFSET = .000263
 TIME_OFFSET_lucky = 0
-TIME_OFFSET_unlucky = .1
+TIME_OFFSET_unlucky = .002
 TIME_OFFSET_energy = 0.500
 
 DYN_SEC_PER_SAMPLE = .001
@@ -127,6 +129,12 @@ time_by_id = {
 36: times[101],
 }
 
+def drop_to_8(val):
+  bit =  np.floor(val*(2**8)/2.5)
+  print(bit)
+  return bit*2.5/(2**8)
+   
+
 def make_adc_file_str(expt_id, val):
   adc = np.ceil(4096*val/V_RANGE)
   adc_val = int(adc)
@@ -145,6 +153,7 @@ culpeo_vals = {}
 energy_vals = {}
 dynamic_vals = {}
 hardware_vals = {}
+expts_to_test = [3,4,6,7,8,9,10,11,12,27,28,30,31,32,33,34,35,36]
 
 if __name__ == "__main__":
 #og culpeo static
@@ -180,6 +189,11 @@ if __name__ == "__main__":
       continue
     expt_id = int(re.findall(r'[0-9]+',filename)[0])
     print("Expt id is ",expt_id)
+    if expt_id in expts_to_test:
+      print("Expt id is ",expt_id)
+    else:
+      print("Not running ",expt_id)
+      continue
     minV.CAP_ESR=esrs_by_id[expt_id];
     # Set conditions
     #minV.CAP = 23e-3
@@ -198,27 +212,26 @@ if __name__ == "__main__":
     # Drop time before 1s
     # Not needed for new version
     all_vals = vals
+    end_time = 0
     if (expt_id < 13):
       vals = vals[vals[:,0]>1.2]
       all_vals = vals
       vals = vals[vals[:,0]<1.3 + time_by_id[expt_id]+TIME_OFFSET]
       print("End = ",1.3 + time_by_id[expt_id] + TIME_OFFSET)
+      end_time = time_by_id[expt_id] + 1.3
     else:
       vals = vals[vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET]
       print("End = ",time_by_id[expt_id] + .010 + TIME_OFFSET)
+      end_time = time_by_id[expt_id] + .01
     diffs = np.subtract(vals[:,3],vals[:,2])
     if any(diff < 0 for diff in diffs):
       print("Upside down!")
       diffs = np.subtract(vals[:,2],vals[:,3])
     I = np.divide(diffs,minV.gain*minV.shunt)
+    e_from_load = np.sum(I*VOUT)*(vals[1,0] - vals[0,0])
     start_avg = np.average(vals[0:100,1])
     stop_avg = np.average(vals[-100:,1])
     print("Start stop: ",start_avg, stop_avg)
-    if DO_PLOT == True:
-      fig, ax = plt.subplots()
-      ax.plot(vals[:,0],vals[:,1])
-      plt.title("plot current")
-      plt.show()
     #I = np.add(I,500e-6)
     # Various Vsafe calcs
     print("max I is:", max(I))
@@ -238,55 +251,59 @@ if __name__ == "__main__":
     ##----------------------------------------------------------
 #Lucky
     if (expt_id < 13):
-      lucky_vals = all_vals[all_vals[:,0]<1.3 + \
+      lucky_Vs = all_vals[all_vals[:,0]<1.3 + \
       time_by_id[expt_id]+TIME_OFFSET_lucky]
       #print("End = ",1.3 + time_by_id[expt_id] + TIME_OFFSET)
     else:
-      lucky_vals = all_vals[all_vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET_lucky]
+      lucky_Vs = all_vals[all_vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET_lucky]
       #print("End = ",time_by_id[expt_id] + .010 + TIME_OFFSET)
-    lucky_stop = np.average(lucky_vals[-100:,1])
+    lucky_stop = np.average(lucky_Vs[-100:,1])
+    print("Lucky stop:",lucky_stop)
     lucky = np.sqrt((start_avg**2 - lucky_stop**2) + V_MIN**2)
+    print("Lucky ",lucky)
     lucky_vals[expt_id] = {make_adc_val(lucky)}
     lucky_str = make_adc_file_str(expt_id,lucky)
-    print("lucky ",expt_id," Vsafe is ",lucky_vsafe)
+    print("lucky ",expt_id," Vsafe is ",lucky)
     ##----------------------------------------------------------
 #UnLucky
     if (expt_id < 13):
-      unlucky_vals = all_vals[all_vals[:,0]<1.3 + \
+      unlucky_Vs = all_vals[all_vals[:,0]<1.3 + \
       time_by_id[expt_id]+TIME_OFFSET_unlucky]
       #print("End = ",1.3 + time_by_id[expt_id] + TIME_OFFSET)
     else:
-      unlucky_vals = all_vals[all_vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET_unlucky]
+      unlucky_Vs = all_vals[all_vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET_unlucky]
       #print("End = ",time_by_id[expt_id] + .010 + TIME_OFFSET)
-    unlucky_stop = np.average(unlucky_vals[-100:,1])
+    unlucky_stop = np.average(unlucky_Vs[-100:,1])
     unlucky = np.sqrt((start_avg**2 - unlucky_stop**2) + V_MIN**2)
     unlucky_str = make_adc_file_str(expt_id,unlucky)
     unlucky_vals[expt_id] = {make_adc_val(unlucky)}
-    print("unlucky ",expt_id," Vsafe is ",unlucky_vsafe)
+    print("unlucky ",expt_id," Vsafe is ",unlucky)
     ##----------------------------------------------------------
 #Energy
     if (expt_id < 13):
-      energy_vals = all_vals[all_vals[:,0]<1.3 + \
-      time_by_id[expt_id]+TIME_OFFSET_energy]
+      energy_Vs = all_vals[all_vals[:,0] < end_time+TIME_OFFSET_energy]
       #print("End = ",1.3 + time_by_id[expt_id] + TIME_OFFSET)
     else:
-      energy_vals = all_vals[all_vals[:,0]< time_by_id[expt_id]+.010+TIME_OFFSET_energy]
+      energy_Vs = all_vals[all_vals[:,0]< end_time+TIME_OFFSET_energy]
       #print("End = ",time_by_id[expt_id] + .010 + TIME_OFFSET)
-    energy_stop = np.average(energy_vals[-100:,1])
-    energy = np.sqrt((start_avg**2 - energy_stop**2) + V_MIN**2)
-    energy_vals[expt_id] = {make_adc_val(energy_estimate)}
-    energy_str = make_adc_file_str(expt_id,energy_estimate)
-    print("energy ",expt_id," Vsafe is ",energy_vsafe)
+    energy_stop = np.average(energy_Vs[-100:,1])
+    dm_energy = np.sqrt(2*e_from_load/CAP_VAL + V_MIN**2)
+    energy = dm_energy
+    #energy = np.sqrt((start_avg**2 - energy_stop**2) + V_MIN**2)
+    energy_vals[expt_id] = {make_adc_val(energy)}
+    energy_str = make_adc_file_str(expt_id,energy)
+    print("energy ",expt_id," Vsafe is ",energy)
+    #print("Diff on energy ",expt_id," Vsafe is ",energy - dm_energy)
     ##----------------------------------------------------------
 #Dynamic
     # Re-use energy_vals defined above
     # Start with downsampling
-    step = int(np.floor(DYN_SEC_PER_SAMPLE/(energy_vals[1,0] - energy_vals[0,0])))
+    step = int(np.floor(DYN_SEC_PER_SAMPLE/(energy_Vs[1,0] - energy_Vs[0,0])))
     # Grab vmin
-    Vmin = np.min(energy_vals[::step,1])
+    Vmin = np.min(energy_Vs[::step,1])
     # Grab Vfinal (max) after end
-    temp_vals = energy_vals[energy_vals[:,0] > time_by_id[expt_id]]
-    Vfinal = np.max(temp_vals[:,0])
+    temp_vals = energy_Vs[energy_Vs[:,0] > end_time]
+    Vfinal = np.max(temp_vals[:,1])
     print("Dyn: start,min,final:",start_avg,Vmin,Vfinal)
     dynamic_vsafe =  mmp.calc_vsafe(start_avg,Vmin,Vfinal)
     dynamic_vals[expt_id] = {make_adc_val(dynamic_vsafe)}
@@ -295,17 +312,27 @@ if __name__ == "__main__":
 #Faster sampling in hardware
     # Re-use energy_vals defined above
     # Start with downsampling
-    step = int(np.floor(HW_SEC_PER_SAMPLE/(energy_vals[1,0] - energy_vals[0,0])))
+    step = int(np.floor(HW_SEC_PER_SAMPLE/(energy_Vs[1,0] - energy_Vs[0,0])))
     # Grab vmin
-    Vmin = np.min(energy_vals[::step,1])
+    Vmin = np.min(energy_Vs[::step,1])
     # Grab Vfinal (max) after end
-    temp_vals = energy_vals[energy_vals[:,0] > time_by_id[expt_id]]
-    Vfinal = np.max(temp_vals[:,0])
+    temp_vals = energy_Vs[energy_Vs[:,0] > end_time]
+    Vfinal = np.max(temp_vals[:,1])
     print("HW: start,min,final:",start_avg,Vmin,Vfinal)
-    hardware_vsafe =  mmp.calc_vsafe(start_avg,Vmin,Vfinal)
+    start_avg_8 = drop_to_8(start_avg)
+    Vmin8 = drop_to_8(Vmin)
+    Vfinal8 = drop_to_8(Vfinal)
+    hardware_vsafe = mmp.calc_vsafe(start_avg_8,Vmin8,Vfinal8)
+    #hardware_vsafe =  mmp.calc_vsafe(start_avg,Vmin,Vfinal)
     hardware_vals[expt_id] = {make_adc_val(hardware_vsafe)}
     hardware_str = make_adc_file_str(expt_id,hardware_vsafe)
     print("hardware ",expt_id," Vsafe is ",hardware_vsafe)
+
+    if do_plot_loc == True:
+      fig, ax = plt.subplots()
+      ax.plot(vals[:,0],vals[:,1])
+      plt.title("plot current")
+      plt.show()
 
     if DO_PLOT == True:
       minV.calc_sim_starting_point(I,dt,Vsafe)
@@ -333,7 +360,7 @@ if __name__ == "__main__":
   energy_pickle = open('energy_vsafe.pkl','wb')
   pickle.dump(energy_vals,energy_pickle)
   energy_pickle.close()
-  dynamic_pickle = open('dynamic_vsafe.pkl','wb')
+  dynamic_pickle = open('dynamic_vsafe_recalc.pkl','wb')
   pickle.dump(dynamic_vals,dynamic_pickle)
   dynamic_pickle.close()
   hardware_pickle = open('hardware_vsafe.pkl','wb')
