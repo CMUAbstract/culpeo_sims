@@ -26,7 +26,7 @@ LW = 10
 CS = 14 # Maps to 0.1V so don't change this!!!
 CS_diff = 0.1
 MS = 6
-FS = 28
+FS = 34
 alphas=[1,.6,.4,.2]
 
 def convert(adc):
@@ -133,7 +133,7 @@ if __name__ == "__main__":
   energy_delta = np.subtract(energy_vsafes,energy_diffs) - CS_diff
   plt.errorbar(energy_xs,energy_vsafes,energy_delta,elinewidth=LW,fmt='.',
   ecolor=colors[1],color=colors[1],\
-  marker='_',mfc=colors[1],uplims=True,capsize=CS,label='Energy',alpha=1)
+  marker='_',mfc=colors[1],uplims=True,capsize=CS,label='Energy-Direct',alpha=1)
 
   catnap_xs = Xs - .5*bar_width
   #catnap_vsafes = np.divide(np.multiply(catnap_vsafes_used,VRANGE),4096)
@@ -149,7 +149,7 @@ if __name__ == "__main__":
   culpeo_vsafes = culpeo_vsafes_used
   culpeo_delta = np.subtract(culpeo_vsafes,culpeo_diffs) - CS_diff
   plt.errorbar(culpeo_xs,culpeo_vsafes,culpeo_delta,elinewidth=LW,fmt='.', ecolor=colors[3],\
-  marker='_',color=colors[3],mfc=colors[3],uplims=True,capsize=CS,label='Culpeo-Static',alpha=1)
+  marker='_',color=colors[3],mfc=colors[3],uplims=True,capsize=CS,label='Culpeo-PG',alpha=1)
 
   dynamic_xs = Xs + 1.5*bar_width
   #dynamic_vsafes = np.divide(np.multiply(dynamic_vsafes_used,VRANGE),4096)
@@ -157,15 +157,15 @@ if __name__ == "__main__":
   dynamic_delta = np.subtract(dynamic_vsafes,dynamic_diffs) - CS_diff
   plt.errorbar(dynamic_xs,dynamic_vsafes,dynamic_delta,fmt='.',elinewidth=LW,
   ecolor=colors[4],\
-  marker='_',color=colors[4],mfc=colors[4],uplims=True,capsize=CS,label='Culpeo-Dyn',alpha=1)
+  marker='_',color=colors[4],mfc=colors[4],uplims=True,capsize=CS,label='Culpeo-R',alpha=1)
 
   #ax.xaxis.set_label_coords(.75, -.12)
   plt.xticks(Xs,rotation=0,ha='center',fontsize=FS,fontweight=300)
   #ax.annotate('', xy=(.5,-.11), xycoords='axes fraction', xytext=(1, -0.11),
 #arrowprops=dict(arrowstyle="-", color='k',lw=1))
 
-  plt.axhline(VMIN,color="black",linestyle='dashed',lw=2)
-  plt.axhline(VMAX,color="#91cf60",linestyle='dashed',lw=2)
+  plt.axhline(VMIN,color="black",linestyle='dashed',lw=5)
+  plt.axhline(VMAX,color="#91cf60",linestyle='dashed',lw=5)
   for x in Xs:
     plt.axvline(x+2.5*bar_width,color='black',alpha=.5,lw=.5)
   boldness = 300
@@ -182,7 +182,8 @@ if __name__ == "__main__":
   ax.annotate("$V_{high}$",(2+1.75*bar_width,VMAX + .02),fontsize=FS,fontweight=boldness)
   ax.annotate("$V_{off}$",(2+1.75*bar_width,VMIN + .02),fontsize=FS,fontweight=boldness)
   ax.set_xticklabels(labels,fontsize=FS)
-  ax.legend(ncol=1,fontsize=FS-2,loc='lower right')#,bbox_to_anchor=[0.4, 0])
+  ax.legend(ncol=1,fontsize=FS-4,loc='lower right',\
+  bbox_to_anchor=[1.02,0])#,bbox_to_anchor=[0.4, 0])
   ax.tick_params(labelsize=FS)
   # Plot vsafe
   #ax2 = ax.twinx()

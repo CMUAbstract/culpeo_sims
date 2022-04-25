@@ -21,7 +21,7 @@ bar_width = .25
 LW = 1
 FS = 24
 Y_FS = 28
-
+BAR_DROP = .2
 BRUTE_FORCE_PATH = "../brute_force_vstarts03-20--13-30-06.pkl"
 alphas=[1,.6,.4,.2]
 
@@ -51,7 +51,7 @@ def convert_back(adc_val):
 
 label_map = {
 "unlucky_vsafe":"Catnap-Slow",
-"energy_vsafe":"Energy-Only",
+"energy_vsafe":"Energy-Direct",
 "lucky_vsafe": "Catnap-Optimistic",
 "catnap_vsafe": "Catnap-Measured",
 }
@@ -116,12 +116,12 @@ if __name__ == "__main__":
       if elem > 0:
         ax.annotate(u'\u2713',(xs[count2]-.5*bar_width,1),fontsize=FS+5,fontweight=300,color='g')
 
-  ax.legend(ncol=3,fontsize=FS+2,loc="lower center",bbox_to_anchor=[.5,1.0])
+  ax.legend(ncol=3,fontsize=FS+2,loc="lower center",bbox_to_anchor=[.5,1])
   ax.set_xlabel('Pulse + 100ms low power compute',fontsize=FS,fontweight=200)
-  ax.xaxis.set_label_coords(.75, -.11)
+  ax.xaxis.set_label_coords(.75, -BAR_DROP-.05)
   plt.xticks(Xs - bar_width,rotation=0,ha='center',fontsize=FS)
-  ax.annotate('', xy=(.5,-.1), xycoords='axes fraction', xytext=(1, -0.105),
-arrowprops=dict(arrowstyle="-", color='k',lw=1))
+  ax.annotate('', xy=(.5,-BAR_DROP), xycoords='axes fraction', \
+  xytext=(1, -BAR_DROP), arrowprops=dict(arrowstyle="-", color='k',lw=1))
   #for x in Xs:
   #  plt.axvline(x+3*bar_width,color='black',alpha=.5,lw=.5)
   boldness = 300
@@ -133,7 +133,7 @@ arrowprops=dict(arrowstyle="-", color='k',lw=1))
   ratio = 1/3
   xleft, xright = ax.get_xlim()
   ybottom, ytop = ax.get_ylim()
-  #ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
+  ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
   plt.show()
   fig.savefig('vsafes_bg.pdf',format='pdf',bbox_inches='tight')
 

@@ -8,12 +8,13 @@ import numpy as np
 import sys
 import re
 import glob
-import pickle
+import pickle as pkl
 
 ESTIMATES_PATH = "./estimates_1_0.01.pkl"
-SECS = .001
+SECS = .00001
 V_RANGE = 3.3
 NEW_FILE_NAME="vcap_min_vsafe.h"
+EXTRACT_FILE_NAME="hardware_vsafe.pkl"
 
 def make_adc_file_str(expt_id, val):
   adc = np.ceil(4096*val/V_RANGE)
@@ -21,9 +22,19 @@ def make_adc_file_str(expt_id, val):
   file_str = "#define VSAFE_ID" + str(expt_id) + " " + str(adc_val) + "\n"
   return file_str
 
+def estimates_extract(filename):
+  ests = pkl.load(open(filename,'rb'))
+  ests = ests['vcap']
+  new_est = {}
+  for expt in ests.keys():
+    new_est[expt] = np.average(ests[expt][.00001])
+    print(expt,":",new_est[expt])
+  new_file = open(EXTRACT_FILE_NAME,"wb")
+  pkl.dump(new_est,new_file)
+
 if __name__ == "__main__":
   Vsafe_file = open(NEW_FILE_NAME,"w")
-  estimates = pickle.load(open(ESTIMATES_PATH,"rb"))
+  estimates = pkl.load(open(ESTIMATES_PATH,"rb"))
   estimates = estimates["vcap"]
   for expt in estimates.keys():
     print(expt)

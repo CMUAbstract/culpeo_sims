@@ -23,7 +23,7 @@ FS = 14
 Y_FS = 24
 YLIM_LOWER = -25
 YLIM_UPPER = 15
-
+BAR_DROP = .15
 BRUTE_FORCE_PATH = "../brute_force_vstarts03-20--13-30-06.pkl"
 alphas=[1,.6,.4,.2]
 
@@ -56,7 +56,7 @@ label_map = {"energy_vsafe":"Energy",
 "unlucky_vsafe": "Catnap-Realistic",
 "lucky_vsafe": "Catnap-Optimistic",
 "catnap_vsafe": "Catnap",
-"culpeo_vsafe": "Culpeo-Static",
+"culpeo_vsafe": "Culpeo-PG",
 "dynamic_vsafe": "Culpeo-ISR",
 "hardware_vsafe": "Culpeo-$\mu$arch"
 }
@@ -122,10 +122,10 @@ if __name__ == "__main__":
         fontsize=FS+5,fontweight=300,color='k')
   ax.legend(ncol=1,fontsize=FS+4,loc="lower left")
   ax.set_xlabel('Pulse + 100ms low power compute',fontsize=FS,fontweight=200)
-  ax.xaxis.set_label_coords(.75, -.09)
+  ax.xaxis.set_label_coords(.75, -BAR_DROP-.01)
   plt.xticks(Xs - bar_width,rotation=0,ha='center',fontsize=FS)
-  ax.annotate('', xy=(.5,-.08), xycoords='axes fraction', xytext=(1, -0.08),
-arrowprops=dict(arrowstyle="-", color='k',lw=1))
+  ax.annotate('', xy=(.5,-BAR_DROP), xycoords='axes fraction', \
+  xytext=(1, -BAR_DROP), arrowprops=dict(arrowstyle="-", color='k',lw=1))
   for x in Xs:
     plt.axvline(x+3*bar_width,color='black',alpha=.5,lw=.5)
   boldness = 300
@@ -138,12 +138,12 @@ arrowprops=dict(arrowstyle="-", color='k',lw=1))
   ax.set_xticklabels(labels,fontsize=FS)
   ax.tick_params(axis='x', which='minor', bottom=False)
   ax.set_ylim(YLIM_LOWER,YLIM_UPPER)
-  ax.set_ylabel('$V_{safe}$ Error (% Operating Range)',fontsize=Y_FS,fontweight=boldness)
+  ax.set_ylabel('$V_{safe}$ Error (%)',fontsize=Y_FS-2,fontweight=boldness)
   ax.tick_params(axis='y',labelsize=FS)
-  ratio = 1/3
+  ratio = 1/4
   xleft, xright = ax.get_xlim()
   ybottom, ytop = ax.get_ylim()
-  #ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
+  ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
   plt.show()
   fig.savefig('synthetic_loads_vsafe.pdf',format='pdf',bbox_inches='tight')
 

@@ -209,6 +209,14 @@ if __name__ == "__main__":
   app_name =  re.findall(r'[a-z]+',filename)[0]
   print(app_name)
   step = int(np.floor(SEC_PER_SAMPLE/(vals[1,0] - vals[0,0])))
+  diffs_all = np.subtract(vals[:,3],vals[:,2])
+  numbers = re.findall(r'[0-9]+',filename)
+  gain = int(numbers[-1])
+  print(gain)
+  I_all = np.divide(diffs_all,R_SHUNT*gain)
+  e_from_load = np.sum(I_all*2.5)*(vals[1,0] - vals[0,0])
+  e_est = np.sqrt(2*e_from_load/CAP_VAL + V_MIN**2)
+  print("Energy est is Early: ",e_est)
   if app_name == 'apds':
     #vals = vals[vals[:,0] < .56]
     vals = vals[vals[:,0] < .557063]
@@ -268,6 +276,14 @@ if __name__ == "__main__":
       df = pd.read_csv(filename, mangle_dupe_cols=True,
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals_V = df.values
+    diffs_all = np.subtract(vals_V[:,3],vals_V[:,2])
+    numbers = re.findall(r'[0-9]+',filename)
+    gain = int(numbers[-1])
+    print(gain)
+    I_all = np.divide(diffs_all,R_SHUNT*gain)
+    e_from_load = np.sum(I_all*2.5)*(vals_V[1,0] - vals_V[0,0])
+    e_est = np.sqrt(2*e_from_load/CAP_VAL + V_MIN**2)
+    print("Energy est is Early: ",e_est)
     if app_name == 'apds':
       meas_mins = vals_V[vals_V[:,0] < 1.0]
       meas_mins = meas_mins[meas_mins[:,0] > .500]
