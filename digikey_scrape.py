@@ -6,15 +6,28 @@ import re
 MIN_VOLTAGE = 1.2
 #MAX_VOLUME = 1570 # CR2032 sized cap
 #MAX_VOLUME = 27023 # Size of Arty cap
+MAX_VOLUME = 2702300 # no limit
 CR2032 = 1570 # 20mm diameter, 5mm height
 D_CELL = 52574 # 33mm diameter, 61.5mm height
 MOUSE_HAT = 900  # 4mmx15mmx15mm square
 
+RICE = 5
+AAA = 3894
+GOLF = 40684
+PINT = 473176
+PENNY = 349
+#MAX_VOLUME = D_CELL
+FS= 28
+boldness = 300
+MS = 24
 volumes = [D_CELL, CR2032, MOUSE_HAT]
+CAP_LIM = 45e-3
+SET_VOLTAGE = 3.3
 
-MAX_VOLUME = D_CELL
-MAX_VOLTAGE = 5.5
-
+limit_volume = 0
+#MAX_VOLTAGE = 5.5
+MAX_VOLTAGE = 400
+colors = ['r','g','b','c']
 good_markers = [".","v",">","*","x","+","d","<","^","p"]
 def CleanTempRange(temps):
   temp_range = re.findall(r'[0-9-]+',temps)
@@ -47,6 +60,8 @@ def CleanArea(dims):
     width = dims[1]
     return float(length) * float(width)
 
+
+
 def CleanScientificUnit(item, unit):
   # Scrub out the F, if there's a m change it to e-3
   if re.search(unit,item):
@@ -55,6 +70,9 @@ def CleanScientificUnit(item, unit):
     if re.search('m',new_item):
       pos2 = re.search('\s*m',new_item).start()
       new_item = new_item[:pos2] + "e-3"
+    elif re.search('u',new_item):
+      pos2 = re.search('\s*u',new_item).start()
+      new_item = new_item[:pos2] + "e-6"
     return float(new_item)
   else:
     return float(item)
@@ -67,6 +85,16 @@ def PlotAgainstESR(esr, var, var_name, var_unit):
   ax.set_title('ESR vs ' + var_name)
   ax.axvline(.6,color='k',lw=2,ls='--')
   plt.savefig(var_name + "_vs_esr.png")
+  return ax
+
+def PlotSemilog(yvar, esr, var_name, var_unit,ax=None,color='r',label='Test'):
+  if ax == None:
+    fig, ax = plt.subplots()
+  ax.loglog(esr,yvar,'.',color=color,label =label,markersize=MS)
+  ax.set_ylabel(var_name + " (" + var_unit + ")",fontsize=FS,fontweight=boldness)
+  ax.set_xlabel('ESR ($\Omega$)',fontsize=FS,fontweight=boldness)
+  #ax.set_title('ESR vs ' + var_name)
+  #plt.savefig(var_name + "_vs_esr_semilog.pdf")
   return ax
 
 def PlotMultivariate(x, group_by, group_name, var, var_name, var_unit):
@@ -85,7 +113,7 @@ def PlotMultivariate(x, group_by, group_name, var, var_name, var_unit):
   ax.set_ylabel(var_name + " (" + var_unit + ")")
   ax.set_xlabel('ESR ($\Omega$)')
   ax.set_title('ESR vs ' + var_name + " Grouped by " + group_name)
-  ax.legend()
+  ax.legend(fontsize=FS,fontweight=boldness)
   plt.savefig(var_name + "_vs_esr_multi_.png")
 
 def PlotCorrelation(xs, group_by, group_name, var, var_name):
@@ -106,14 +134,16 @@ def PlotCorrelation(xs, group_by, group_name, var, var_name):
   group_name)
 
 
-if __name__ == "__main__":
-  df = pd.read_csv('digikey_supercapacitors.csv')
-  # Restrictions:
-  # ---------------------------------------------------------------------------
+def CleanDfs(df):
   # Drop caps without listed ESR
+  if 'ESR (Equivalent Series Resistance)' in df.columns:
+    print("Got it!")
+  else:
+    df['ESR (Equivalent Series Resistance)'] = '.01'
   df = df[df['ESR (Equivalent Series Resistance)'] != '-']
+  df['Test'] = 133
   # Drop caps > $100... that's kinda crazy
-  df = df[df['Price'] < 100]
+  df = df[df['Price'] < 500]
   # ---------------------------------------------------------------------------
   # Clean up capacitance
   df['Capacitance'] = df['Capacitance'].apply(CleanScientificUnit,args='F')
@@ -130,7 +160,7 @@ if __name__ == "__main__":
   # Calculate Energy
   print(MAX_VOLTAGE)
   df.loc[df['Voltage - Rated'] > MAX_VOLTAGE, 'Voltage - Rated'] = MAX_VOLTAGE
-  print(df.loc[df['Voltage - Rated'] > MAX_VOLTAGE])
+  #print(df.loc[df['Voltage - Rated'] > MAX_VOLTAGE])
   print(df['Voltage - Rated'])
   df['Energy'] = .5*(df['Voltage - Rated']**2 - MIN_VOLTAGE**2)*df['Capacitance']
   # Translate dimensions into area
@@ -140,22 +170,47 @@ if __name__ == "__main__":
   # Calculate energy density
   df['Energy Density'] = df['Energy']/df['Volume']
   # Next restriction-- Drop caps larger than the Kemet on Arty and > 6V -----
-  df = df[df['Height - Seated (Max)'] < 10]
+  df = df[df['Height - Seated (Max)'] < 10000]
   #df =df[df['Volume'] < 27023] # Only look at caps smaller than the kemet
   df =df[df['Volume'] < MAX_VOLUME] # Only look at caps smaller than a CR2032
   #df = df[df['Voltage - Rated'] < 6]
-  df = df[df['Capacitance'] < 5] # New
+  df = df[df['Capacitance'] < CAP_LIM] # New
   # ---------------------------------------------------------------------------
   df['Operating Temperature'] = df['Operating Temperature'].apply(CleanTempRange)
+  return df
+
+
+def AddCapLimit(df):
+  num_caps = np.floor(CAP_LIM/df['Capacitance'])
+  print("num caps are:",num_caps)
+  df['Combined Energy'] =  .5*(SET_VOLTAGE**2 - MIN_VOLTAGE**2)*\
+    df['Capacitance']*num_caps
+  df['Combined Volume'] = df['Volume']*num_caps
+  df['Combined ESR'] = df['ESR (Equivalent Series Resistance)']/num_caps
+  return df
+
+if __name__ == "__main__":
+  df3 = pd.read_csv('digikey_supercapacitors.csv')
+  df2 = pd.read_csv('tantalum_capacitors.csv')
+  #df = pd.read_csv('highest_capacity_ceramic_capacitors.csv')
+  df1 = pd.read_csv('smallest_ceramics.csv')
+  df0 = pd.read_csv('aluminum_electrolytic_capacitors.csv')
+  dfs = [df0,df1,df2,df3]
+  labels = ['Electrolytic','Ceramic','Tantalum','Supercapacitors']
+  for count,df in enumerate(dfs):
+    dfs[count] = CleanDfs(df)
+  # Restrictions:
+  # ---------------------------------------------------------------------------
   # Plotting!
-  ESRs = df['ESR (Equivalent Series Resistance)']
+  #ESRs = df['ESR (Equivalent Series Resistance)']
   # ESR vs Cap
-  ax = PlotAgainstESR(ESRs,df['Capacitance'], "Capacitance", "F") 
-  greater = df[df['ESR (Equivalent Series Resistance)'] > .6]['ESR (Equivalent Series Resistance)'].size
-  total = df['ESR (Equivalent Series Resistance)'].size
-  percent = 100*greater/total
-  ax.text(10,.4,"{:.2f}".format(percent)+'% > 600 $m\Omega$')
-  plt.savefig('Capacitance_vs_esr.png')
+  #ax = PlotAgainstESR(ESRs,df['Capacitance'], "Capacitance", "F") 
+  #greater = df[df['ESR (Equivalent Series Resistance)'] > .6]['ESR (Equivalent Series Resistance)'].size
+  #total = df['ESR (Equivalent Series Resistance)'].size
+  #percent = 100*greater/total
+  #ax.text(10,.4,"{:.2f}".format(percent)+'% > 600 $m\Omega$')
+  #plt.savefig('Capacitance_vs_esr.png')
+
   #PlotAgainstESR(ESRs, df['Price'],"Price","$")
   #PlotAgainstESR(ESRs, df['Voltage - Rated'],"Voltage", "V")
   #PlotAgainstESR(ESRs, df['Volume'],"Volume", "mm^3")
@@ -172,28 +227,51 @@ if __name__ == "__main__":
   #  "Energy Density") 
   #PlotCorrelation(ESRs,df['Volume'], "Volume", df['Energy Density'],\
   #  "Energy Density") 
-  for limit in volumes:
-    # Calculate max energy within volume restriction
-    num_caps = np.floor(limit/df['Volume'])
-    df['Combined Energy'] =  .5*(df['Voltage - Rated']**2 - MIN_VOLTAGE**2)*\
-      df['Capacitance']*num_caps
-    df['MobileNetRuns'] = df['Combined Energy']/5 # 1 MobileNet run on a TPU
-    df['Combined ESR'] = df['ESR (Equivalent Series Resistance)']/num_caps
-    PlotAgainstESR(df['Combined ESR'], df['MobileNetRuns'], "Runs in volume: " +
-    str(limit) + " mm^3", "MobileNet Iterations")
-    max_ind = df['MobileNetRuns'].idxmax()
-    print("Max for " + str(limit) + " " + str(max_ind))
-    print("\tBest volume is: " + str(df['Volume'][max_ind]) + " Part number is "
-    + df['Mfr Part #'][max_ind])
-  
+  if limit_volume:
+    df  = df0
+    for limit in volumes:
+      # Calculate max energy within volume restriction
+      num_caps = np.floor(limit/df['Volume'])
+      df['Combined Energy'] =  .5*(df['Voltage - Rated']**2 - MIN_VOLTAGE**2)*\
+        df['Capacitance']*num_caps
+      df['MobileNetRuns'] = df['Combined Energy']/5 # 1 MobileNet run on a TPU
+      df['Combined ESR'] = df['ESR (Equivalent Series Resistance)']/num_caps
+      PlotAgainstESR(df['Combined ESR'], df['MobileNetRuns'], "Runs in volume: " +
+      str(limit) + " mm^3", "MobileNet Iterations")
+      max_ind = df['MobileNetRuns'].idxmax()
+      print("Max for " + str(limit) + " " + str(max_ind))
+      print("\tBest volume is: " + str(df['Volume'][max_ind]) + " Part number is "
+      + df['Mfr Part #'][max_ind])
+  else: # Limit cap 
+    fig, ax = plt.subplots()
+    for count, df in enumerate(dfs):
+      if 'Test' in df.columns:
+        print("Updating!")
+      dfs[count] = AddCapLimit(df)
+      PlotSemilog(df['Combined Volume'],df['Combined ESR'], "Volume",
+      "$mm^3$",ax,colors[count],labels[count])
+    LabelX = 1e-5
+    ax.axhline(PINT,color='k',lw=2,ls='--')
+    ax.text(LabelX, PINT, 'Pint Glass',fontsize=FS)
+    ax.axhline(GOLF,color='k',lw=2,ls='--')
+    ax.text(LabelX, GOLF, 'Golf Ball',fontsize=FS)
+    ax.axhline(AAA,color='k',lw=2,ls='--')
+    ax.text(LabelX, AAA, 'AAA Battery',fontsize=FS)
+    ax.axhline(PENNY,color='k',lw=2,ls='--')
+    ax.text(LabelX, PENNY, 'US Penny',fontsize=FS)
+    ax.legend(fontsize=FS)
+    plt.savefig("Vol_vs_esr_loglog.pdf",format='pdf',bbox_inches='tight')
+    #PlotAgainstESR(df['Combined ESR'], df['Combined Volume'], "Runs in : " +
+    #str(CAP_LIM) + " F", "Volume")
+    #print(df.nsmallest(3,'Combined Volume'))
   plt.show()
-
-  print("Correlation with Temperature is: ",np.corrcoef(ESRs,\
-  df['Operating Temperature'])[0,1])
-  print("Correlation with Volume is: ",np.corrcoef(ESRs,df['Volume'])[0,1])
-  print("Correlation with Capacitance is: ",np.corrcoef(ESRs,df['Capacitance'])[0,1])
-  print("Correlation with Energy Density is: ",np.corrcoef(ESRs,df['Energy Density'])[0,1])
-  print("Correlation with Price is: ",np.corrcoef(ESRs,df['Price'])[0,1])
+  #print("Volume vs Capacitance correlation:",np.corrcoef(df['Capacitance'],df['Volume'])[0,1])
+  #print("Correlation with Temperature is: ",np.corrcoef(ESRs,\
+  #df['Operating Temperature'])[0,1])
+  #print("Correlation with Volume is: ",np.corrcoef(ESRs,df['Volume'])[0,1])
+  #print("Correlation with Capacitance is: ",np.corrcoef(ESRs,df['Capacitance'])[0,1])
+  #print("Correlation with Energy Density is: ",np.corrcoef(ESRs,df['Energy Density'])[0,1])
+  #print("Correlation with Price is: ",np.corrcoef(ESRs,df['Price'])[0,1])
   #PlotMultivariate(ESRs,df['Price'], "Price",df['Capacitance'],"Capacitance","F")
   #PlotMultivariate(ESRs,df['Capacitance'],"Capacitance",df['Price'], "Price","$")
   #plt.show()
