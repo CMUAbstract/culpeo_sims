@@ -16,6 +16,8 @@ AAA = 3894
 GOLF = 40684
 PINT = 473176
 PENNY = 349
+RICE = 22
+
 #MAX_VOLUME = D_CELL
 FS= 28
 boldness = 300
@@ -90,9 +92,13 @@ def PlotAgainstESR(esr, var, var_name, var_unit):
 def PlotSemilog(yvar, esr, var_name, var_unit,ax=None,color='r',label='Test'):
   if ax == None:
     fig, ax = plt.subplots()
-  ax.loglog(esr,yvar,'.',color=color,label =label,markersize=MS)
-  ax.set_ylabel(var_name + " (" + var_unit + ")",fontsize=FS,fontweight=boldness)
-  ax.set_xlabel('ESR ($\Omega$)',fontsize=FS,fontweight=boldness)
+  #ax.loglog(esr,yvar,'.',color=color,label =label,markersize=MS)
+  #ax.set_ylabel(var_name + " (" + var_unit + ")",fontsize=FS,fontweight=boldness)
+  #ax.set_xlabel('ESR ($\Omega$)',fontsize=FS,fontweight=boldness)
+  ax.loglog(yvar,esr,'.',color=color,label =label,markersize=MS)
+  ax.set_xlabel(var_name + " (" + var_unit + ")",fontsize=FS,fontweight=boldness)
+  ax.set_ylabel('ESR ($\Omega$)',fontsize=FS,fontweight=boldness)
+  ax.set_xlim([9,10e6])
   #ax.set_title('ESR vs ' + var_name)
   #plt.savefig(var_name + "_vs_esr_semilog.pdf")
   return ax
@@ -248,18 +254,40 @@ if __name__ == "__main__":
       if 'Test' in df.columns:
         print("Updating!")
       dfs[count] = AddCapLimit(df)
+      print(dfs[count].nsmallest(3,'Combined Volume'))
       PlotSemilog(df['Combined Volume'],df['Combined ESR'], "Volume",
       "$mm^3$",ax,colors[count],labels[count])
-    LabelX = 1e-5
-    ax.axhline(PINT,color='k',lw=2,ls='--')
-    ax.text(LabelX, PINT, 'Pint Glass',fontsize=FS)
-    ax.axhline(GOLF,color='k',lw=2,ls='--')
-    ax.text(LabelX, GOLF, 'Golf Ball',fontsize=FS)
-    ax.axhline(AAA,color='k',lw=2,ls='--')
-    ax.text(LabelX, AAA, 'AAA Battery',fontsize=FS)
-    ax.axhline(PENNY,color='k',lw=2,ls='--')
-    ax.text(LabelX, PENNY, 'US Penny',fontsize=FS)
-    ax.legend(fontsize=FS)
+    LabelX = 1e-6
+    ax.tick_params(axis='x',labelsize=FS)
+    ax.tick_params(axis='y',labelsize=FS)
+    ax.axvline(PINT,color='k',lw=2,ls='--')
+    ax.text(PINT, LabelX, 'Pint Glass',fontsize=FS,rotation=-90,ha='left')
+    ax.axvline(GOLF,color='k',lw=2,ls='--')
+    ax.text(GOLF,LabelX,  'Golf Ball',fontsize=FS,rotation=-90,ha='left')
+    ax.axvline(AAA,color='k',lw=2,ls='--')
+    ax.text(AAA,LabelX*4,  'AAA',fontsize=FS,rotation=-90,ha='left')
+    ax.axvline(PENNY,color='k',lw=2,ls='--')
+    ax.text(PENNY,LabelX,  'US Penny',fontsize=FS,rotation=-90,ha='left')
+    ax.axvline(RICE,color='k',lw=2,ls='--')
+    ax.text( RICE,LabelX/2, 'Rice Grain',fontsize=FS,rotation=-90,ha='left')
+    ax.legend(fontsize=FS,framealpha=1)
+
+    ax.annotate("RA Cap1",xy=(158802,10e-3), xytext=(2e4,1e-1), fontsize=FS,
+    arrowprops=dict(arrowstyle="-", color='k',lw=1))
+    ax.annotate("RA Cap2",xy=(3776949,2.6e-3), xytext=(2e6,1e-5), fontsize=FS,
+    arrowprops=dict(arrowstyle="-", color='k',lw=1))
+    ax.annotate("This Work:\n6 parts\n20nA DCL",xy=(43.2, 4.16),
+    xytext=(43.2,3e-2), color='c',fontsize=FS, arrowprops=dict(arrowstyle="-",
+    color='c',lw=2))
+    # More arrows!
+    smallest_ceramic =  (572,5e-6)
+    smallest_tantalum = (459,0.0245)
+    ax.annotate("2,045\nparts",xy=smallest_ceramic,
+    xytext=(1e3,5e-5), fontsize=FS, color='g',arrowprops=dict(arrowstyle="-",
+    color='g',lw=2))
+    ax.annotate("26mA\nDCL",xy=smallest_tantalum,
+    xytext=(1e2,1e-3), fontsize=FS,color='b',arrowprops=dict(arrowstyle="-",
+    color='b',lw=2))
     plt.savefig("Vol_vs_esr_loglog.pdf",format='pdf',bbox_inches='tight')
     #PlotAgainstESR(df['Combined ESR'], df['Combined Volume'], "Runs in : " +
     #str(CAP_LIM) + " F", "Volume")
@@ -275,3 +303,7 @@ if __name__ == "__main__":
   #PlotMultivariate(ESRs,df['Price'], "Price",df['Capacitance'],"Capacitance","F")
   #PlotMultivariate(ESRs,df['Capacitance'],"Capacitance",df['Price'], "Price","$")
   #plt.show()
+# Best:
+# F980G227MSA (220uF) -- 26mA of leakage
+# 04024D226MAT2A (22uF) 0.21*2045 = total cost $430
+# 10TPV1000M8X10.5

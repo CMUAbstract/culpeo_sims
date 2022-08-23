@@ -36,6 +36,8 @@ int main(void)
     WDTCTL = WDTPW | WDTHOLD;               // Stop WDT
 	  PM5CTL0 &= ~LOCKLPM5;                   // Disable the GPIO power-on default high-impedance mode
 	  clockSetup();
+    while(1) {
+      P1OU
     
     // Switches as inputs
     P5DIR &= ~(BIT5 + BIT6);

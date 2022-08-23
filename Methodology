@@ -167,7 +167,8 @@ it with the Makefile in that directory.
 pacarana_mezzo_tests (it'll need to get ported somewhere real) you build it by just
 compiling with USE_SENSORS=1
 * The apds test is in main_apds_alone.c in pacarana_mezzo_tests and uses the version
-of libapds in that repo. Build it by setting USE_SENSORS=0 RUN_APDS_SOLO=1 The
+of libapds in that repo. Build it by setting USE_SENSORS=0 RUN_APDS_SOLO=1 and
+CONSOLE=  (that's console = <nothing> so we don't turn on print statements)The
 apds needs to be run twice to get the Vcap and current curves because you can't
 put the anmeter setup in there with harvested energy and still maintain a high
 enough voltage for the apds i2c to work.  So run it once on harvested energy and

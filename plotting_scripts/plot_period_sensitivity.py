@@ -111,7 +111,9 @@ if __name__ == "__main__":
   #plt.minorticks_on()
   ax.grid(which="both",axis="y")
   for count,arr in enumerate(arr_diffs):#app
+    print("Count0",count)
     for count2,arr2 in enumerate(arr):#system
+      print("Count2",count2)
       xs = count + Xs*bar_width \
       + count2*bar_width*len(labels)+count2*spacer # for 2nd grp
       print(xs,arr2)
@@ -120,6 +122,7 @@ if __name__ == "__main__":
         cur_label = sys_labels[count2]
       else:
         cur_label = None
+      print(vals_plot)
       ax.bar(xs,vals_plot,bar_width ,label=labels, \
       color=colors[count2],\
       alpha=1,edgecolor="k")
@@ -154,6 +157,7 @@ arrowprops=dict(arrowstyle="-", color='k',lw=1))
   xleft, xright = ax.get_xlim()
   ybottom, ytop = ax.get_ylim()
   ax.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
+  plt.tight_layout()
   for count,speed in enumerate(labels):
     legs.append(mpatches.Patch(fc=colors[0][count],lw=6,alpha=1,ec=colors[1][count],label=speed))
   lgd =fig.legend(handles=legs,loc='center',bbox_to_anchor=[.6,.65],\

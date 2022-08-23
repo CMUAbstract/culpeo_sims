@@ -74,6 +74,8 @@ if __name__ == "__main__":
   arrs = [energy_expts,catnap_expts,culpeo_expts,dynamic_expts]
   print("Culpeo outputs:")
   print(culpeo_expts)
+  print("Dynamic outputs:")
+  print(dynamic_expts)
   for expt_count,expt_id in enumerate(expts_to_use):
     # check if culpeo's vsafe is above Vhigh, if it is, check if we finished
     # anyway
@@ -131,14 +133,20 @@ if __name__ == "__main__":
   #energy_vsafes = np.divide(np.multiply(energy_vsafes_used,VRANGE),4096)
   energy_vsafes = energy_vsafes_used
   energy_delta = np.subtract(energy_vsafes,energy_diffs) - CS_diff
+  print("Energy:")
+  print(energy_vsafes)
+  print(energy_delta)
   plt.errorbar(energy_xs,energy_vsafes,energy_delta,elinewidth=LW,fmt='.',
   ecolor=colors[1],color=colors[1],\
-  marker='_',mfc=colors[1],uplims=True,capsize=CS,label='Energy-Direct',alpha=1)
+  marker='_',mfc=colors[1],uplims=True,capsize=CS,label='Energy-V',alpha=1)
 
   catnap_xs = Xs - .5*bar_width
   #catnap_vsafes = np.divide(np.multiply(catnap_vsafes_used,VRANGE),4096)
   catnap_vsafes = catnap_vsafes_used
   catnap_delta = np.subtract(catnap_vsafes,catnap_diffs) - CS_diff
+  print("Catnap")
+  print(catnap_vsafes)
+  print(catnap_delta)
   plt.errorbar(catnap_xs,catnap_vsafes,catnap_delta,fmt='.', markersize=MS,
   linewidth=10,ecolor=colors[2],barsabove=False,\
   marker='_',color = colors[2],mfc=colors[2],elinewidth=LW,uplims=True,capsize=CS,label='Catnap',alpha=1)
@@ -148,6 +156,9 @@ if __name__ == "__main__":
   #culpeo_vsafes = np.divide(np.multiply(culpeo_vsafes_used,VRANGE),4096)
   culpeo_vsafes = culpeo_vsafes_used
   culpeo_delta = np.subtract(culpeo_vsafes,culpeo_diffs) - CS_diff
+  print("Culpeo")
+  print(culpeo_vsafes)
+  print(culpeo_delta)
   plt.errorbar(culpeo_xs,culpeo_vsafes,culpeo_delta,elinewidth=LW,fmt='.', ecolor=colors[3],\
   marker='_',color=colors[3],mfc=colors[3],uplims=True,capsize=CS,label='Culpeo-PG',alpha=1)
 
@@ -155,6 +166,9 @@ if __name__ == "__main__":
   #dynamic_vsafes = np.divide(np.multiply(dynamic_vsafes_used,VRANGE),4096)
   dynamic_vsafes = dynamic_vsafes_used
   dynamic_delta = np.subtract(dynamic_vsafes,dynamic_diffs) - CS_diff
+  print("Dyn")
+  print(dynamic_vsafes)
+  print(dynamic_delta)
   plt.errorbar(dynamic_xs,dynamic_vsafes,dynamic_delta,fmt='.',elinewidth=LW,
   ecolor=colors[4],\
   marker='_',color=colors[4],mfc=colors[4],uplims=True,capsize=CS,label='Culpeo-R',alpha=1)
@@ -169,15 +183,15 @@ if __name__ == "__main__":
   for x in Xs:
     plt.axvline(x+2.5*bar_width,color='black',alpha=.5,lw=.5)
   boldness = 300
-  vsafe_pos = (0-1.75*bar_width,VMAX - .1)
+  vsafe_pos = (0-.6*bar_width,VMAX - .15)
   ax.annotate("$V_{safe}$", vsafe_pos, \
   fontsize=FS,fontweight=boldness)
-  ax.arrow(vsafe_pos[0],vsafe_pos[1],.5*bar_width-vsafe_pos[0],2.15-vsafe_pos[1])
+  ax.arrow(vsafe_pos[0],vsafe_pos[1],.5*bar_width-vsafe_pos[0],2.2-vsafe_pos[1])
 
-  vmin_pos = (0-1.75*bar_width,VMIN + .4)
+  vmin_pos = (0-.6*bar_width,VMIN + .5)
   ax.annotate("$V_{min}$", vmin_pos, \
   fontsize=FS,fontweight=boldness)
-  ax.arrow(vmin_pos[0],vmin_pos[1],.5*bar_width-vmin_pos[0],1.9-vmin_pos[1])
+  ax.arrow(vmin_pos[0],vmin_pos[1],.5*bar_width-vmin_pos[0],1.8-vmin_pos[1])
 
   ax.annotate("$V_{high}$",(2+1.75*bar_width,VMAX + .02),fontsize=FS,fontweight=boldness)
   ax.annotate("$V_{off}$",(2+1.75*bar_width,VMIN + .02),fontsize=FS,fontweight=boldness)

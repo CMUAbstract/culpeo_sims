@@ -219,8 +219,8 @@ if __name__ == "__main__":
   print("Energy est is Early: ",e_est)
   if app_name == 'apds':
     #vals = vals[vals[:,0] < .56]
-    vals = vals[vals[:,0] < .557063]
-    vals = vals[vals[:,0] > .5144]
+    vals = vals[vals[:,0] < .043834] # For catnap
+    vals = vals[vals[:,0] > 0]
     cutoff = 2e3
   elif  app_name == 'ml':
     cutoff = 5e1
@@ -258,7 +258,7 @@ if __name__ == "__main__":
     print("App name not found:",app_name)
     sys.exit(1)
 
-  diffs = np.subtract(vals[:,3],vals[:,2])
+  diffs = np.subtract(vals[:,2],vals[:,3])
   numbers = re.findall(r'[0-9]+',filename)
   gain = int(numbers[-1])
   print(gain)
@@ -276,28 +276,28 @@ if __name__ == "__main__":
       df = pd.read_csv(filename, mangle_dupe_cols=True,
            dtype=np.float64, skipinitialspace=True,skiprows=[0])
     vals_V = df.values
-    diffs_all = np.subtract(vals_V[:,3],vals_V[:,2])
+    diffs_all = np.subtract(vals_V[:,2],vals_V[:,3])
     numbers = re.findall(r'[0-9]+',filename)
     gain = int(numbers[-1])
     print(gain)
     I_all = np.divide(diffs_all,R_SHUNT*gain)
-    e_from_load = np.sum(I_all*2.5)*(vals_V[1,0] - vals_V[0,0])
+    e_from_load = np.sum(I_all*2.56)*(vals_V[1,0] - vals_V[0,0])
     e_est = np.sqrt(2*e_from_load/CAP_VAL + V_MIN**2)
     print("Energy est is Early: ",e_est)
     if app_name == 'apds':
       meas_mins = vals_V[vals_V[:,0] < 1.0]
-      meas_mins = meas_mins[meas_mins[:,0] > .500]
+      meas_mins = meas_mins[meas_mins[:,0] > 0]
       Vmm_min = np.min(meas_mins[::step,1])
-      meas_mins = meas_mins[meas_mins[:,0]>.557063]
+      meas_mins = meas_mins[meas_mins[:,0]>.43834]
       Vmm_final = np.max(meas_mins[:,1])
-      print(len(meas_mins[meas_mins[:,0] > .557063]))
+      print(len(meas_mins[meas_mins[:,0] > .43834]))
       print("Vmin final:",Vmm_final,"Vmin min:",Vmm_min)
-      vals_V = vals_V[vals_V[:,0] < .557063]
+      vals_V = vals_V[vals_V[:,0] < .038139]
       #vals_V = vals_V[vals_V[:,0] < .56]
       # We scoot this a little further away so we don't artifically get the up
       # swing after releasing the cap... despite the fact that Catnap would end up
       # seeing that
-      vals_V = vals_V[vals_V[:,0] > .500]
+      vals_V = vals_V[vals_V[:,0] > 0]
       V = vals_V[:,1]
       times = vals_V[:,0]
     if app_name == 'fast':

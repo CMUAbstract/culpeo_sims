@@ -98,6 +98,7 @@ if __name__ == "__main__":
   #plt.minorticks_on()
   ax.grid(which="both",axis="y")
   for count,arr in enumerate(arr_diffs):
+    print("Count is:")
     print(arr)
     xs = Xs + f_space(count,len(sys_labels))*bar_width
     ax.bar(xs,arr, bar_width,label=sys_labels[count], \

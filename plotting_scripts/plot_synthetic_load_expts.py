@@ -19,6 +19,7 @@ VRANGE = 3.1
 V_HARD_FAIL = 1.6
 bar_width = .2
 LW = 1
+YLIM_LOWER = -25
 
 alphas=[1,.6,.4,.2]
 
