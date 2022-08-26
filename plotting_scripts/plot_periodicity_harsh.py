@@ -104,7 +104,7 @@ if __name__ == "__main__":
     ax.bar(xs,arr, bar_width,label=sys_labels[count], \
     color=colors[count], alpha=1, \
     edgecolor="k",yerr=arr_stds[count], error_kw={'lw':4, 'capthick':1}, capsize=8)
-  ax.legend(ncol=2,fontsize=FS,loc="upper center", bbox_to_anchor=[0.72,0.3], framealpha=0.9)
+  ax.legend(ncol=2,fontsize=FS,loc="upper center", bbox_to_anchor=[0.5,1.35], framealpha=0.9)
   boldness = 300
   ax.set_xticks(Xs)
   ax.set_xticklabels(labels,fontsize=FS)
