@@ -5,4 +5,4 @@ esr_sim.py has a mismash of simulation scripts and figure generating functions.
 device_sim.py tries to move towards a more manageable object-oriented simulation
 strategy
 
-
+See the Methodlogy.md page for information on how to actually work with what's in this repo. 
